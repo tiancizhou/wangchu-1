@@ -4,5 +4,7 @@ dist/
 *.log
 server/prisma/dev.db
 server/prisma/dev.db-*
+server/data/*
+!server/data/.gitkeep
 server/uploads/*
 !server/uploads/.gitkeep
