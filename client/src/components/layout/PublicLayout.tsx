@@ -60,7 +60,7 @@ export function PublicLayout() {
   }, [location.pathname, location.hash]);
 
   return (
-    <>
+    <div className="public-site">
       <header className={isHome ? 'site-header site-header-home' : 'site-header'}>
         <Link to="/" className="brand">
           {profile.logoUrl
@@ -103,6 +103,6 @@ export function PublicLayout() {
           </p>
         </section>
       </footer>
-    </>
+    </div>
   );
 }
