@@ -4,6 +4,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
+RUN_SEED=false
+if [[ "${1:-}" == "--seed" ]]; then
+  RUN_SEED=true
+fi
+
 echo "正在安装依赖..."
 npm install
 
@@ -13,8 +18,12 @@ npm run db:generate
 echo "正在执行数据库迁移..."
 npm run db:migrate
 
-echo "正在初始化默认数据..."
-npm run db:seed
+if [[ "$RUN_SEED" == "true" ]]; then
+  echo "正在初始化默认数据..."
+  npm run db:seed
+else
+  echo "已跳过默认数据初始化。如需首次初始化，请执行：./deploy-mac.sh --seed"
+fi
 
 echo "正在构建前后端..."
 npm run build
