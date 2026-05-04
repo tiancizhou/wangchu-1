@@ -51,21 +51,8 @@ export function HomePage() {
 }
 
 export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect }: { banners: Banner[]; banner?: Banner; activeBannerIndex: number; onSelect: (index: number) => void }) {
-  const firstImageUrl = banners.find((item) => item.imageUrl && !isVideoMedia(item.imageUrl))?.imageUrl;
-  const [firstImageRatio, setFirstImageRatio] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!firstImageUrl) {
-      setFirstImageRatio(null);
-      return;
-    }
-    const image = new Image();
-    image.onload = () => setFirstImageRatio(image.naturalHeight / image.naturalWidth);
-    image.src = firstImageUrl;
-  }, [firstImageUrl]);
-
   const heroStyle = {
-    ...(firstImageRatio ? { aspectRatio: `${1 / firstImageRatio}` } : {}),
+    aspectRatio: '1920 / 750',
     ...(banner?.imageUrl && !isVideoMedia(banner.imageUrl) ? { backgroundImage: `url(${banner.imageUrl})` } : {})
   };
 
