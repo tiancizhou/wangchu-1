@@ -14,6 +14,17 @@ function isVideoMedia(url?: string) {
   return Boolean(url && videoPattern.test(url));
 }
 
+function FactoryMenuIcon({ index }: { index: number }) {
+  const icons = [
+    <path d="M4 18V8l5 3V6l5 3V4h4v14H4Zm4-2h2v-4H8v4Zm4 0h2v-4h-2v4Z" />,
+    <path d="M6 4h12M6 20h12M8 4v16h8V4M10 14c0-2 2-4 2-4s2 2 2 4a2 2 0 1 1-4 0Z" />,
+    <path d="M8 17a6 6 0 0 1 0-10M16 7a6 6 0 0 1 0 10M5 20a10 10 0 0 1 0-16M19 4a10 10 0 0 1 0 16M12 9a3 3 0 1 0 0 6a3 3 0 0 0 0-6Z" />,
+    <path d="M3 11l9-7l9 7M5 10v10h14V10M9 20v-6h6v6M16 16h1M16 18h1M7 16h1M7 18h1" />
+  ];
+
+  return <svg className="factory-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icons[index] || icons[0]}</svg>;
+}
+
 export function HomePage() {
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
@@ -168,7 +179,7 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
     <section className="factory-section" style={data?.backgroundImageUrl ? { backgroundImage: `linear-gradient(rgba(15,43,78,.78),rgba(15,43,78,.84)),url(${data.backgroundImageUrl})` } : undefined}>
       <SectionTitle title={section?.title || '先进的制作工艺'} subtitle={section?.subtitle} light />
       <div className="factory-card">
-        <aside>{items.map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={item.title}>{index === 0 ? '▥' : index === 1 ? '▣' : index === 2 ? '◉' : '⌂'}<span>{item.title}</span></button>)}</aside>
+        <aside>{items.map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={item.title}><FactoryMenuIcon index={index} /><span>{item.title}</span></button>)}</aside>
         <div className="factory-content">
           <div className="factory-photo" style={active?.imageUrl ? { backgroundImage: `url(${active.imageUrl})` } : undefined} />
           <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p><span>”</span></article>
