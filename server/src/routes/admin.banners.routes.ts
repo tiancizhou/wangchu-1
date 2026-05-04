@@ -14,19 +14,19 @@ router.get('/', async (_req, res) => {
 
 router.post('/', async (req, res) => {
   const body = req.body;
-  if (!body.title) {
-    res.status(400).json({ message: '轮播图标题不能为空' });
+  if (!body.imageUrl) {
+    res.status(400).json({ message: '请先上传轮播图媒体文件' });
     return;
   }
 
   const banner = await prisma.carouselBanner.create({
     data: {
-      title: body.title,
-      subtitle: body.subtitle || '',
-      imageUrl: body.imageUrl || '',
-      linkUrl: body.linkUrl || '',
+      title: body.title || '轮播图',
+      subtitle: '',
+      imageUrl: body.imageUrl,
+      linkUrl: '',
       sortOrder: Number(body.sortOrder || 0),
-      isActive: Boolean(body.isActive)
+      isActive: body.isActive === undefined ? true : Boolean(body.isActive)
     }
   });
   res.status(201).json(banner);
@@ -34,15 +34,20 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   const body = req.body;
+  if (!body.imageUrl) {
+    res.status(400).json({ message: '请先上传轮播图媒体文件' });
+    return;
+  }
+
   const banner = await prisma.carouselBanner.update({
     where: { id: req.params.id },
     data: {
-      title: body.title,
-      subtitle: body.subtitle || '',
-      imageUrl: body.imageUrl || '',
-      linkUrl: body.linkUrl || '',
+      title: body.title || '轮播图',
+      subtitle: '',
+      imageUrl: body.imageUrl,
+      linkUrl: '',
       sortOrder: Number(body.sortOrder || 0),
-      isActive: Boolean(body.isActive)
+      isActive: body.isActive === undefined ? true : Boolean(body.isActive)
     }
   });
   res.json(banner);

@@ -1,20 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { adminBanners, deleteBanner, saveBanner } from '../../api/adminApi';
 import type { Banner } from '../../api/publicApi';
-import { ImageUploader } from '../../components/admin/ImageUploader';
+import { MediaUploader } from '../../components/admin/MediaUploader';
 
-const emptyBanner: Partial<Banner> = {
-  title: '',
-  subtitle: '',
-  imageUrl: '',
-  linkUrl: '/',
-  sortOrder: 0,
-  isActive: true
-};
+const videoPattern = /\.(mp4|webm|mov)$/i;
 
 export function BannersAdminPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [editing, setEditing] = useState<Partial<Banner>>(emptyBanner);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,29 +18,38 @@ export function BannersAdminPage() {
     load().catch((err) => setError(err instanceof Error ? err.message : '轮播图加载失败'));
   }, []);
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function onImagesUploaded(urls: string[]) {
+    if (urls.length === 0) return;
+
     setError('');
-
-    if (!editing.title?.trim()) {
-      setError('请填写轮播图标题');
-      return;
+    setSaving(true);
+    try {
+      await Promise.all(urls.map((url, index) => saveBanner({
+        title: '轮播图',
+        subtitle: '',
+        imageUrl: url,
+        linkUrl: '',
+        sortOrder: banners.length + index,
+        isActive: true
+      })));
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '轮播图保存失败');
+    } finally {
+      setSaving(false);
     }
+  }
 
-    if (!editing.imageUrl?.trim()) {
-      setError('请先上传轮播图图片');
-      return;
-    }
-
+  async function updateBanner(banner: Banner) {
+    setError('');
     setSaving(true);
     try {
       await saveBanner({
-        ...editing,
-        title: editing.title.trim(),
-        imageUrl: editing.imageUrl.trim(),
-        linkUrl: editing.linkUrl?.trim() || '/'
+        ...banner,
+        title: banner.title || '轮播图',
+        subtitle: '',
+        linkUrl: ''
       });
-      setEditing({ ...emptyBanner });
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : '轮播图保存失败');
@@ -69,43 +70,62 @@ export function BannersAdminPage() {
   }
 
   return (
-    <section className="admin-panel">
-      <h1>轮播图管理</h1>
-      <form className="admin-form" onSubmit={onSubmit}>
+    <section className="admin-panel banners-admin-page">
+      <div className="admin-title-block banner-admin-title">
+        <span className="page-editor-label">首页媒体</span>
+        <h1>首页轮播图</h1>
+        <p>上传首页顶部展示的图片、动图或视频。建议使用清晰横版素材，视频文件控制在 80MB 以内。</p>
+      </div>
+
+      <div className="banner-upload-panel">
+        <div>
+          <h2>上传轮播素材</h2>
+          <p>支持 jpg、png、webp、gif 动图，以及 mp4、webm、mov 视频。上传后会自动加入轮播列表。</p>
+        </div>
         {error && <p className="error">{error}</p>}
-        <label>
-          标题
-          <input value={editing.title || ''} onChange={(e) => setEditing({ ...editing, title: e.target.value })} />
-        </label>
-        <label>
-          副标题
-          <input value={editing.subtitle || ''} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} />
-        </label>
-        <label>
-          链接
-          <input value={editing.linkUrl || ''} onChange={(e) => setEditing({ ...editing, linkUrl: e.target.value })} />
-        </label>
-        <label>
-          排序
-          <input type="number" value={editing.sortOrder || 0} onChange={(e) => setEditing({ ...editing, sortOrder: Number(e.target.value) })} />
-        </label>
-        <label className="checkbox">
-          <input type="checkbox" checked={Boolean(editing.isActive)} onChange={(e) => setEditing({ ...editing, isActive: e.target.checked })} />
-          启用
-        </label>
-        <ImageUploader value={editing.imageUrl} onChange={(url) => setEditing({ ...editing, imageUrl: url })} />
-        <button disabled={saving}>{saving ? '保存中...' : '保存轮播图'}</button>
-      </form>
+        <MediaUploader value="" multiple onChange={() => {}} onMultipleChange={onImagesUploaded} />
+        {saving && <span className="banner-saving">保存中...</span>}
+      </div>
+
+      <div className="banner-list-header">
+        <div><h2>轮播素材列表</h2><p>调整显示顺序和启用状态后，点击对应卡片的保存按钮。</p></div>
+        <span>{banners.length} 个素材</span>
+      </div>
+
       <div className="banner-list">
-        {banners.map((banner) => (
-          <article key={banner.id}>
-            {banner.imageUrl && <img src={banner.imageUrl} alt="" />}
-            <h3>{banner.title}</h3>
-            <p>{banner.subtitle}</p>
-            <button onClick={() => setEditing(banner)}>编辑</button>
-            <button onClick={() => onDelete(banner.id)}>删除</button>
+        {banners.map((banner, index) => (
+          <article className="banner-card" key={banner.id}>
+            <div className="banner-media-frame">
+              <span className="banner-index">#{index + 1}</span>
+              {banner.imageUrl && (videoPattern.test(banner.imageUrl) ? <video src={banner.imageUrl} controls muted playsInline /> : <img src={banner.imageUrl} alt="轮播图" />)}
+              <span className={banner.isActive ? 'banner-status active' : 'banner-status'}>{banner.isActive ? '正在显示' : '已隐藏'}</span>
+            </div>
+            <div className="banner-card-controls">
+              <label>
+                显示顺序
+                <input
+                  type="number"
+                  value={banner.sortOrder}
+                  onChange={(event) => setBanners((items) => items.map((item) => item.id === banner.id ? { ...item, sortOrder: Number(event.target.value) } : item))}
+                />
+              </label>
+              <label className="banner-switch">
+                <input
+                  type="checkbox"
+                  checked={banner.isActive}
+                  onChange={(event) => setBanners((items) => items.map((item) => item.id === banner.id ? { ...item, isActive: event.target.checked } : item))}
+                />
+                <span />
+                在首页显示
+              </label>
+            </div>
+            <div className="banner-card-actions">
+              <button className="banner-save-button" disabled={saving} onClick={() => updateBanner(banner)}>保存修改</button>
+              <button className="banner-delete-button" onClick={() => onDelete(banner.id)}>删除素材</button>
+            </div>
           </article>
         ))}
+        {banners.length === 0 && <p className="empty-state">还没有轮播素材，请先上传图片、动图或视频。</p>}
       </div>
     </section>
   );

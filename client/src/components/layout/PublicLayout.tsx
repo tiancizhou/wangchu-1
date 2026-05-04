@@ -1,27 +1,107 @@
-import { Link, Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { getNavigation, getSiteProfile, type NavigationItem, type SiteProfile } from '../../api/publicApi';
+
+const fallbackProfile: SiteProfile = {
+  id: '',
+  companyName: '桔尔润（北京）润滑油有限公司',
+  logoUrl: '',
+  phone: '0519-68288220',
+  hotline: '0519-68288220',
+  address: '北京市大兴区科创五街38号院',
+  email: '',
+  footerText: '专注润滑油产品研发、生产与渠道服务',
+  footerLinksJson: '[]',
+  footerLinks: [
+    { label: '链接名称', url: '#' },
+    { label: '链接名称', url: '#' },
+    { label: '链接名称', url: '#' },
+    { label: '链接名称', url: '#' },
+    { label: '链接名称', url: '#' },
+    { label: '链接名称', url: '#' }
+  ],
+  footerLinkTitle: '友情链接：',
+  legalLabel: '法律声明',
+  legalUrl: '#',
+  contactLabel: '联系我们',
+  contactUrl: '#',
+  copyrightText: '© 2003--现在 Taobao.com 版权所有',
+  policeFilingText: '浙公网安备 33011002017548号',
+  policeFilingUrl: '#',
+  icpText: '浙ICP备2024141841号--1',
+  icpUrl: '#',
+  seoTitle: '王储润滑油官网',
+  seoDescription: ''
+};
+
+const fallbackNavigation: NavigationItem[] = [
+  { id: 'home', label: '首页', url: '/', sortOrder: 1, isVisible: true, openInNewTab: false },
+  { id: 'products', label: '产品中心', url: '/products', sortOrder: 2, isVisible: true, openInNewTab: false },
+  { id: 'support', label: '技术支持', url: '/#support', sortOrder: 3, isVisible: true, openInNewTab: false },
+  { id: 'consult', label: '渠道合作', url: '/consult', sortOrder: 4, isVisible: true, openInNewTab: false },
+  { id: 'about', label: '关于我们', url: '/#about', sortOrder: 5, isVisible: true, openInNewTab: false }
+];
 
 export function PublicLayout() {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  const [profile, setProfile] = useState<SiteProfile>(fallbackProfile);
+  const [navigation, setNavigation] = useState<NavigationItem[]>(fallbackNavigation);
+  const visibleFooterLinks = (profile.footerLinks?.length ? profile.footerLinks : fallbackProfile.footerLinks || []).filter((link) => link.label);
+
+  useEffect(() => {
+    getSiteProfile().then((data) => data && setProfile(data)).catch(() => {});
+    getNavigation().then((items) => items.length > 0 && setNavigation(items)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!location.hash) return;
+    window.requestAnimationFrame(() => document.querySelector(location.hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }, [location.pathname, location.hash]);
+
   return (
     <>
-      <header className="site-header">
+      <header className={isHome ? 'site-header site-header-home' : 'site-header'}>
         <Link to="/" className="brand">
-          <span className="brand-mark">K</span>
-          <span><b>Kronprins</b><small>王储</small></span>
+          {profile.logoUrl
+            ? <span className="brand-logo-frame"><img className="brand-logo brand-logo-full" src={profile.logoUrl} alt={profile.companyName} /></span>
+            : <><span className="brand-mark">K</span><span><b>Kronprins</b><small>王储</small></span></>}
         </Link>
         <nav>
-          <Link to="/">首页</Link>
-          <Link to="/products">产品中心</Link>
-          <a href="/#support">技术支持</a>
-          <Link to="/consult">渠道合作</Link>
-          <a href="/#about">关于我们</a>
+          {navigation.map((item) => item.url.startsWith('/') && !item.openInNewTab
+            ? <Link to={item.url} key={item.id}>{item.label}</Link>
+            : <a href={item.url} target={item.openInNewTab ? '_blank' : undefined} rel={item.openInNewTab ? 'noreferrer' : undefined} key={item.id}>{item.label}</a>)}
         </nav>
-        <div className="phone">☎ 0519-68288220</div>
+        <div className="phone">☎ {profile.phone || profile.hotline || fallbackProfile.phone}</div>
       </header>
       <Outlet />
       <footer className="site-footer">
-        <div className="brand footer-brand"><span className="brand-mark">K</span><span><b>Kronprins</b><small>王储</small></span></div>
-        <p>稼尔润（北京）润滑油有限公司　全国服务热线：0519-68288220</p>
-        <p>首页 | 产品中心 | 技术支持 | 渠道合作 | 关于我们</p>
+        <section className="footer-profile">
+          <div className="footer-profile-inner">
+            <div className="brand footer-brand">
+              {profile.logoUrl
+                ? <span className="footer-logo-frame"><img className="brand-logo brand-logo-full" src={profile.logoUrl} alt={profile.companyName} /></span>
+                : <><span className="brand-mark">K</span><span><b>Kronprins</b><small>王储</small></span></>}
+            </div>
+            <div className="footer-company">
+              <strong>{profile.companyName || fallbackProfile.companyName}</strong>
+              <span>{profile.address || fallbackProfile.address}</span>
+            </div>
+          </div>
+        </section>
+        <section className="footer-legal">
+          <div className="footer-links">
+            <span>{profile.footerLinkTitle || fallbackProfile.footerLinkTitle}</span>
+            {visibleFooterLinks.map((link, index) => <a href={link.url || '#'} key={index}>{link.label}</a>)}
+            <a href={profile.legalUrl || '#'}>{profile.legalLabel || fallbackProfile.legalLabel}</a>
+            <a href={profile.contactUrl || '#'}>{profile.contactLabel || fallbackProfile.contactLabel}</a>
+          </div>
+          <p>
+            {profile.copyrightText || fallbackProfile.copyrightText}
+            {(profile.policeFilingText || fallbackProfile.policeFilingText) && <>　<a href={profile.policeFilingUrl || '#'}>{profile.policeFilingText || fallbackProfile.policeFilingText}</a></>}
+            {(profile.icpText || fallbackProfile.icpText) && <>　<a href={profile.icpUrl || '#'}>{profile.icpText || fallbackProfile.icpText}</a></>}
+          </p>
+        </section>
       </footer>
     </>
   );

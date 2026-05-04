@@ -17,11 +17,24 @@ export const imageUpload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, callback) => {
-    if (['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+    if (['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.mimetype)) {
       callback(null, true);
       return;
     }
 
-    callback(new Error('只支持 jpg、png、webp 图片'));
+    callback(new Error('只支持 jpg、png、webp、gif 图片'));
+  }
+});
+
+export const mediaUpload = multer({
+  storage,
+  limits: { fileSize: 80 * 1024 * 1024 },
+  fileFilter: (_req, file, callback) => {
+    if (['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime'].includes(file.mimetype)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('只支持 jpg、png、webp、gif 图片或 mp4、webm、mov 视频'));
   }
 });

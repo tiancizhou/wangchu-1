@@ -1,97 +1,260 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getBanners, getProducts, type Banner, type Product } from '../api/publicApi';
+import { getHomeData, type Banner, type Certificate, type ContentSection, type HomeData, type Product, type ProductCategory } from '../api/publicApi';
 
-const categories = ['汽油机油', '柴油机油', '工业油品', '导热油', '润滑油', '特种油品研发'];
+const fallbackCategories = ['汽油机油', '柴油机油', '工业油品', '导热油', '润滑油', '特种油品研发'];
+
+type FeatureCard = { title?: string; description?: string; icon?: string; linkUrl?: string };
+type SupportTab = { title?: string; imageUrl?: string; heading?: string; description?: string; thumbnails?: string[] };
+type ProcessItem = { title?: string; description?: string; imageUrl?: string };
+
+const videoPattern = /\.(mp4|webm|mov)$/i;
+
+function isVideoMedia(url?: string) {
+  return Boolean(url && videoPattern.test(url));
+}
 
 export function HomePage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [banners, setBanners] = useState<Banner[]>([]);
+  const [homeData, setHomeData] = useState<HomeData | null>(null);
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const [activeSupportIndex, setActiveSupportIndex] = useState(1);
 
   useEffect(() => {
-    getProducts('?pageSize=6').then((data) => setProducts(data.items));
-    getBanners().then(setBanners);
+    getHomeData().then(setHomeData).catch(() => {});
   }, []);
 
-  const banner = banners[0];
+  const banners = homeData?.banners || [];
+  const bannerImages = banners.filter((banner) => banner.imageUrl);
+  const banner = bannerImages[activeBannerIndex % Math.max(bannerImages.length, 1)];
+
+  useEffect(() => {
+    setActiveBannerIndex(0);
+  }, [bannerImages.length]);
+
+  useEffect(() => {
+    if (bannerImages.length <= 1) return;
+    const timer = window.setInterval(() => setActiveBannerIndex((index) => (index + 1) % bannerImages.length), 5000);
+    return () => window.clearInterval(timer);
+  }, [bannerImages.length]);
 
   return (
     <main>
-      <section className="hero" style={banner?.imageUrl ? { backgroundImage: `url(${banner.imageUrl})` } : undefined}>
-        <div className="hero-copy">
-          <p>Shell HELIX · Kronprins</p>
-          <h1>{banner?.title || '极摩动力 超凡表现'}</h1>
-          <span>{banner?.subtitle || '专注润滑油产品研发与技术支持'}</span>
-        </div>
-      </section>
-
-      <section className="feature-row container">
-        {['品牌定制', '附加服务', '天然保障', '工厂直供'].map((item) => (
-          <article className="feature-card" key={item}>
-            <div className="red-icon">✦</div>
-            <h3>{item}</h3>
-            <p>提供成熟的产品服务体系，满足不同渠道客户的展示、销售与售后需求。</p>
-            <button>了解更多</button>
-          </article>
-        ))}
-      </section>
-
-      <section className="section container" id="support">
-        <SectionTitle title="生产设计与制作" />
-        <div className="support-panel">
-          <aside>{categories.slice(0, 4).map((item, index) => <div className={index === 1 ? 'active' : ''} key={item}>{item}</div>)}</aside>
-          <div className="support-image" />
-          <article><h3>研发团队</h3><p>依托成熟生产线和技术团队，为客户提供产品设计、生产、包装与渠道支持。</p><button>查看更多</button></article>
-        </div>
-      </section>
-
-      <section className="section container">
-        <SectionTitle title="产品细项分类" />
-        <div className="product-grid">
-          {products.map((product) => <ProductCard product={product} key={product.id} />)}
-          {products.length === 0 && categories.map((item) => <PlaceholderProduct name={item} key={item} />)}
-        </div>
-      </section>
-
-      <section className="factory-section">
-        <SectionTitle title="先进的制作工艺" light />
-        <div className="factory-card">
-          <aside>{['巡检工艺', '资料', '设备', '仓储'].map((item, index) => <span className={index === 0 ? 'active' : ''} key={item}>{item}</span>)}</aside>
-          <div className="factory-photo" />
-          <p>标准化生产流程与检测体系保障稳定品质，满足客户对产品性能与供应周期的要求。</p>
-        </div>
-      </section>
-
-      <section className="section container" id="about">
-        <SectionTitle title="关于我们" />
-        <div className="about-block">
-          <div className="about-photo">Kronprins<br />王储</div>
-          <p>稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。</p>
-        </div>
-      </section>
-
-      <section className="section container">
-        <SectionTitle title="荣誉资质" />
-        <div className="cert-row"><Link to="/certificates">查看荣誉资质</Link><span>营业执照</span><span>信用证书</span><span>认证证书</span></div>
-      </section>
+      <HeroCarousel banners={bannerImages} banner={banner} activeBannerIndex={activeBannerIndex} onSelect={setActiveBannerIndex} />
+      <FeatureCards section={homeData?.sections.featureCards} />
+      <SupportModule section={homeData?.sections.supportModule} activeIndex={activeSupportIndex} onSelect={setActiveSupportIndex} />
+      <ProductCategoryGrid categories={homeData?.categories || []} products={homeData?.products || []} />
+      <ProcessModule section={homeData?.sections.processModule} />
+      <AboutPreview section={homeData?.sections.aboutPreview} />
+      <CertificatePreview certificates={homeData?.certificates || []} />
     </main>
   );
 }
 
-function SectionTitle({ title, light }: { title: string; light?: boolean }) {
-  return <div className={light ? 'section-title light' : 'section-title'}><h2>{title}</h2><p>稼尔润（北京）润滑油有限公司</p></div>;
-}
+export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect }: { banners: Banner[]; banner?: Banner; activeBannerIndex: number; onSelect: (index: number) => void }) {
+  const firstImageUrl = banners.find((item) => item.imageUrl && !isVideoMedia(item.imageUrl))?.imageUrl;
+  const [firstImageRatio, setFirstImageRatio] = useState<number | null>(null);
 
-function ProductCard({ product }: { product: Product }) {
+  useEffect(() => {
+    if (!firstImageUrl) {
+      setFirstImageRatio(null);
+      return;
+    }
+    const image = new Image();
+    image.onload = () => setFirstImageRatio(image.naturalHeight / image.naturalWidth);
+    image.src = firstImageUrl;
+  }, [firstImageUrl]);
+
+  const heroStyle = {
+    ...(firstImageRatio ? { aspectRatio: `${1 / firstImageRatio}` } : {}),
+    ...(banner?.imageUrl && !isVideoMedia(banner.imageUrl) ? { backgroundImage: `url(${banner.imageUrl})` } : {})
+  };
+
   return (
-    <Link to={`/products/${product.slug}`} className="product-card">
-      {product.coverImageUrl ? <img src={product.coverImageUrl} alt={product.name} /> : <div className="product-fallback">K</div>}
-      <h3>{product.name}</h3>
-      <p>{product.summary || product.category}</p>
-    </Link>
+    <section className={isVideoMedia(banner?.imageUrl) ? 'hero hero-video' : 'hero'} style={heroStyle}>
+      {banner?.imageUrl && isVideoMedia(banner.imageUrl) && <video className="hero-video-media" src={banner.imageUrl} autoPlay muted loop playsInline />}
+      {!banner?.imageUrl && (
+        <div className="hero-copy">
+          <p>Shell HELIX · Kronprins</p>
+          <h1>极摩动力 超凡表现</h1>
+          <span>专注润滑油产品研发与技术支持</span>
+        </div>
+      )}
+      {banners.length > 1 && <div className="hero-dots">{banners.map((item, index) => <button className={index === activeBannerIndex ? 'hero-dot active' : 'hero-dot'} key={item.id} aria-label={`切换到第 ${index + 1} 张轮播图`} onClick={() => onSelect(index)} />)}</div>}
+    </section>
   );
 }
 
-function PlaceholderProduct({ name }: { name: string }) {
-  return <div className="product-card"><div className="product-fallback">K</div><h3>{name}</h3><p>点击后台上传真实商品图片与详情</p></div>;
+export function FeatureCards({ section }: { section?: ContentSection }) {
+  const items = (section?.data.items as FeatureCard[] | undefined) || [
+    { title: '品牌定制', description: '提供成熟的品牌定制与产品包装方案。', icon: '✥', linkUrl: '/consult' },
+    { title: '附加服务', description: '从设计、打样到生产交付，提供一站式服务支持。', icon: '✥', linkUrl: '/consult' },
+    { title: '天然保障', description: '严格检测流程和生产管理体系。', icon: '✥', linkUrl: '/certificates' },
+    { title: '工厂直供', description: '依托成熟供应链与生产体系。', icon: '✥', linkUrl: '/products' }
+  ];
+
+  return (
+    <section className="feature-row container">
+      {items.map((item) => (
+        <article className="feature-card" key={item.title}>
+          <div className="red-icon">{item.icon || '✥'}</div>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+          <Link to={item.linkUrl || '/consult'}>了解更多</Link>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+export function SupportModule({ section, activeIndex, onSelect }: { section?: ContentSection; activeIndex: number; onSelect: (index: number) => void }) {
+  const tabs = (section?.data.tabs as SupportTab[] | undefined) || [
+    { title: '调和', heading: '生产调和', description: '标准化调和流程，为客户提供稳定可靠的产品生产支持。', thumbnails: [] },
+    { title: '检测', heading: '锅炉百科', description: '围绕润滑油研发、生产检测与品质管理，建立标准化实验流程和技术服务体系。', thumbnails: [] },
+    { title: '检验', heading: '品质检验', description: '通过规范化检测标准，对产品性能、稳定性和适用性进行持续检验。', thumbnails: [] }
+  ];
+  const active = tabs[activeIndex] || tabs[0];
+  const [galleryPage, setGalleryPage] = useState(0);
+  const thumbnails = active?.thumbnails?.length ? active.thumbnails : [];
+  const fallbackThumbClasses = ['thumb-one', 'thumb-two', 'thumb-three', 'thumb-four', 'thumb-five'];
+  const visibleThumbs = thumbnails.length > 0 ? thumbnails.slice(galleryPage, galleryPage + 5) : fallbackThumbClasses;
+
+  useEffect(() => {
+    setGalleryPage(0);
+  }, [activeIndex]);
+
+  function previousGallery() {
+    if (thumbnails.length === 0) return;
+    setGalleryPage((page) => Math.max(0, page - 1));
+  }
+
+  function nextGallery() {
+    if (thumbnails.length === 0) return;
+    setGalleryPage((page) => Math.min(Math.max(thumbnails.length - 5, 0), page + 1));
+  }
+
+  return (
+    <section className="section support-section" id="support">
+      <div className="container">
+        <SectionTitle title={section?.title || '生产设计与制作'} subtitle={section?.subtitle} />
+        <div className="support-showcase">
+          <aside className="support-menu">
+            <div className="support-menu-title"><span>contents</span><strong>{section?.title || '生产设计与制作'}</strong></div>
+            {tabs.map((tab, index) => <button className={index === activeIndex ? 'active' : ''} onClick={() => onSelect(index)} key={tab.title}>{index === 0 ? '⚙' : index === 1 ? '🧪' : '▲'} {tab.title}</button>)}
+          </aside>
+          <div className="support-main-photo" style={active?.imageUrl ? { backgroundImage: `url(${active.imageUrl})` } : undefined} />
+          <article className="support-copy"><h3>{active?.heading}</h3><p>{active?.description}</p><Link to="/consult">立即查看</Link></article>
+        </div>
+        <div className="support-gallery"><button aria-label="上一组" onClick={previousGallery}>‹</button>{visibleThumbs.map((image, index) => <div className={thumbnails.length > 0 ? 'support-thumb' : `support-thumb ${image}`} style={thumbnails.length > 0 ? { backgroundImage: `url(${image})` } : undefined} key={`${image}-${galleryPage}-${index}`} />)}<button aria-label="下一组" onClick={nextGallery}>›</button></div>
+      </div>
+    </section>
+  );
+}
+
+export function ProductCategoryGrid({ categories }: { categories: ProductCategory[]; products: Product[] }) {
+  const items = categories.length > 0 ? categories : fallbackCategories.map((name, index) => ({ id: name, name, slug: encodeURIComponent(name), description: '菜单文案菜单文案', coverImageUrl: '', iconImageUrl: '', sortOrder: index, isPublished: true, seoTitle: '', seoDescription: '' } as ProductCategory));
+  return (
+    <section className="section container product-category-section">
+      <SectionTitle title="产品细项目分类" />
+      <div className="product-category-grid">
+        {items.map((category) => <ProductCategoryCard category={category} key={category.id} />)}
+      </div>
+    </section>
+  );
+}
+
+export function ProcessModule({ section }: { section?: ContentSection }) {
+  const data = section?.data as { items?: ProcessItem[]; backgroundImageUrl?: string } | undefined;
+  const items = data?.items || [
+    { title: '巡检工艺', description: '标准化巡检流程保障生产连续性与品质稳定。' },
+    { title: '资料', description: '完善资料体系支撑产品研发、检测和交付。' },
+    { title: '设备', description: '成熟设备体系满足多类油品生产需求。' },
+    { title: '仓储', description: '规范仓储管理保障产品交付效率。' }
+  ];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const active = items[activeIndex] || items[0];
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [items.length]);
+
+  return (
+    <section className="factory-section" style={data?.backgroundImageUrl ? { backgroundImage: `linear-gradient(rgba(15,43,78,.78),rgba(15,43,78,.84)),url(${data.backgroundImageUrl})` } : undefined}>
+      <SectionTitle title={section?.title || '先进的制作工艺'} subtitle={section?.subtitle} light />
+      <div className="factory-card">
+        <aside>{items.map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={item.title}>{index === 0 ? '▥' : index === 1 ? '▣' : index === 2 ? '◉' : '⌂'}<span>{item.title}</span></button>)}</aside>
+        <div className="factory-content">
+          <div className="factory-photo" style={active?.imageUrl ? { backgroundImage: `url(${active.imageUrl})` } : undefined} />
+          <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p><span>”</span></article>
+          <div className="factory-thumb-grid">
+            {items.slice(0, 4).map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={`${item.title}-thumb`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title} /> : <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />}<span>{item.title}</span></button>)}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function AboutPreview({ section }: { section?: ContentSection }) {
+  const data = section?.data as { imageUrl?: string; body?: string } | undefined;
+  return (
+    <section className="section container" id="about">
+      <SectionTitle title={section?.title || '关于我们'} subtitle={section?.subtitle} />
+      <div className="about-block">
+        {data?.imageUrl ? <img className="about-image" src={data.imageUrl} alt={section?.title || '关于我们'} /> : <div className="about-photo">Kronprins<br />王储</div>}
+        <p>{data?.body || '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。'}</p>
+      </div>
+    </section>
+  );
+}
+
+export function CertificatePreview({ certificates }: { certificates: Certificate[] }) {
+  const allItems = certificates.length > 0 ? certificates : ['诚信经营示范单位证书', '检测报告', '营业执照', '商标注册证'].map((title, index) => ({ id: title, title, imageUrl: '', category: '', description: '', issuer: '', issueDate: '', sortOrder: index, isPublished: true } as Certificate));
+  const [startIndex, setStartIndex] = useState(0);
+  const visibleItems = Array.from({ length: Math.min(4, allItems.length) }, (_, index) => allItems[(startIndex + index) % allItems.length]);
+
+  useEffect(() => {
+    setStartIndex(0);
+  }, [certificates.length]);
+
+  function previousCertificates() {
+    setStartIndex((index) => (index - 1 + allItems.length) % allItems.length);
+  }
+
+  function nextCertificates() {
+    setStartIndex((index) => (index + 1) % allItems.length);
+  }
+
+  return (
+    <section className="section certificate-showcase-section">
+      <SectionTitle title="荣誉资质" />
+      <div className="certificate-stage">
+        <button className="certificate-arrow" type="button" aria-label="切换上一组荣誉资质" onClick={previousCertificates}>‹</button>
+        <div className="certificate-display">
+          {visibleItems.map((certificate, index) => (
+            <Link to="/certificates" className={`certificate-display-card certificate-display-card-${index + 1}`} key={`${certificate.id}-${startIndex}-${index}`}>
+              {certificate.imageUrl ? <img src={certificate.imageUrl} alt={certificate.title} /> : <div className="certificate-paper-placeholder">{certificate.title}</div>}
+            </Link>
+          ))}
+          <div className="certificate-shelf" />
+        </div>
+        <button className="certificate-arrow" type="button" aria-label="切换下一组荣誉资质" onClick={nextCertificates}>›</button>
+      </div>
+    </section>
+  );
+}
+
+function SectionTitle({ title, subtitle, light }: { title: string; subtitle?: string; light?: boolean }) {
+  return <div className={light ? 'section-title light' : 'section-title'}><h2>{title}</h2><p>{subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>;
+}
+
+function ProductCategoryCard({ category }: { category: ProductCategory }) {
+  return (
+    <Link to={`/products?category=${category.slug}`} className="product-category-card">
+      <div className="product-category-image">
+        {category.coverImageUrl ? <img src={category.coverImageUrl} alt={category.name} /> : <div className="product-fallback">K</div>}
+      </div>
+      <h3>{category.name}</h3>
+      <p>{category.description || '菜单文案菜单文案'}</p>
+    </Link>
+  );
 }

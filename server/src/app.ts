@@ -11,6 +11,11 @@ import authRoutes from './routes/auth.routes.js';
 import adminProductsRoutes from './routes/admin.products.routes.js';
 import adminBannersRoutes from './routes/admin.banners.routes.js';
 import adminUploadsRoutes from './routes/admin.uploads.routes.js';
+import adminSiteRoutes from './routes/admin.site.routes.js';
+import adminCategoriesRoutes from './routes/admin.categories.routes.js';
+import adminContentRoutes from './routes/admin.content.routes.js';
+import adminCertificatesRoutes from './routes/admin.certificates.routes.js';
+import adminConsultationsRoutes from './routes/admin.consultations.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,6 +38,11 @@ export async function createApp() {
   app.use('/api/admin/products', adminProductsRoutes);
   app.use('/api/admin/banners', adminBannersRoutes);
   app.use('/api/admin/uploads', adminUploadsRoutes);
+  app.use('/api/admin', adminSiteRoutes);
+  app.use('/api/admin/categories', adminCategoriesRoutes);
+  app.use('/api/admin/content-sections', adminContentRoutes);
+  app.use('/api/admin/certificates', adminCertificatesRoutes);
+  app.use('/api/admin/consultations', adminConsultationsRoutes);
 
   app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     res.status(400).json({ message: error.message || '请求处理失败' });

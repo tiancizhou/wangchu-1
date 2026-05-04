@@ -1,0 +1,11 @@
+ALTER TABLE "SiteProfile" ADD COLUMN "footerLinksJson" TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE "SiteProfile" ADD COLUMN "footerLinkTitle" TEXT NOT NULL DEFAULT '友情链接：';
+ALTER TABLE "SiteProfile" ADD COLUMN "legalLabel" TEXT NOT NULL DEFAULT '法律声明';
+ALTER TABLE "SiteProfile" ADD COLUMN "legalUrl" TEXT NOT NULL DEFAULT '#';
+ALTER TABLE "SiteProfile" ADD COLUMN "contactLabel" TEXT NOT NULL DEFAULT '联系我们';
+ALTER TABLE "SiteProfile" ADD COLUMN "contactUrl" TEXT NOT NULL DEFAULT '#';
+ALTER TABLE "SiteProfile" ADD COLUMN "copyrightText" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "SiteProfile" ADD COLUMN "policeFilingText" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "SiteProfile" ADD COLUMN "policeFilingUrl" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "SiteProfile" ADD COLUMN "icpText" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "SiteProfile" ADD COLUMN "icpUrl" TEXT NOT NULL DEFAULT '';

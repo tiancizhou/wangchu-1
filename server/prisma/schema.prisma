@@ -16,19 +16,79 @@ model AdminUser {
   updatedAt    DateTime @updatedAt
 }
 
+model SiteProfile {
+  id             String   @id @default(cuid())
+  companyName    String
+  logoUrl        String   @default("")
+  phone          String   @default("")
+  hotline        String   @default("")
+  address        String   @default("")
+  email          String   @default("")
+  footerText       String   @default("")
+  footerLinksJson  String   @default("[]")
+  footerLinkTitle  String   @default("友情链接：")
+  legalLabel       String   @default("法律声明")
+  legalUrl         String   @default("#")
+  contactLabel     String   @default("联系我们")
+  contactUrl       String   @default("#")
+  copyrightText    String   @default("")
+  policeFilingText String   @default("")
+  policeFilingUrl  String   @default("")
+  icpText          String   @default("")
+  icpUrl           String   @default("")
+  seoTitle         String   @default("")
+  seoDescription   String   @default("")
+  updatedAt      DateTime @updatedAt
+}
+
+model NavigationItem {
+  id           String   @id @default(cuid())
+  label        String
+  url          String
+  sortOrder    Int      @default(0)
+  isVisible    Boolean  @default(true)
+  openInNewTab Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ProductCategory {
+  id             String    @id @default(cuid())
+  name           String
+  slug           String    @unique
+  description    String    @default("")
+  coverImageUrl  String    @default("")
+  iconImageUrl   String    @default("")
+  sortOrder      Int       @default(0)
+  isPublished    Boolean   @default(true)
+  seoTitle       String    @default("")
+  seoDescription String    @default("")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  products       Product[]
+}
+
 model Product {
-  id               String   @id @default(cuid())
-  name             String
-  slug             String   @unique
-  category         String   @default("工业油品")
-  summary          String   @default("")
-  description      String   @default("")
-  coverImageUrl    String   @default("")
-  galleryImageUrls String   @default("[]")
-  sortOrder        Int      @default(0)
-  isPublished      Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                 String           @id @default(cuid())
+  name               String
+  slug               String           @unique
+  category           String           @default("工业油品")
+  categoryId         String?
+  subtitle           String           @default("")
+  summary            String           @default("")
+  description        String           @default("")
+  coverImageUrl      String           @default("")
+  galleryImageUrls   String           @default("[]")
+  specificationsJson String           @default("[]")
+  detailSectionsJson String           @default("[]")
+  featureCardsJson   String           @default("[]")
+  sortOrder          Int              @default(0)
+  isPublished        Boolean          @default(true)
+  seoTitle           String           @default("")
+  seoDescription     String           @default("")
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  categoryRef        ProductCategory? @relation(fields: [categoryId], references: [id])
 }
 
 model CarouselBanner {
@@ -41,6 +101,48 @@ model CarouselBanner {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   @default("")
+  imageUrl    String
+  description String   @default("")
+  issuer      String   @default("")
+  issueDate   String   @default("")
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ConsultationSubmission {
+  id         String   @id @default(cuid())
+  name       String
+  phone      String
+  industry   String   @default("")
+  message    String   @default("")
+  sourcePage String   @default("")
+  status     String   @default("new")
+  adminNote  String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ContentSection {
+  id          String   @id @default(cuid())
+  pageKey     String
+  sectionKey  String
+  title       String   @default("")
+  subtitle    String   @default("")
+  dataJson    String   @default("{}")
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([pageKey, sectionKey])
 }
 
 model UploadedFile {
