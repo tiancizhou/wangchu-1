@@ -52,7 +52,7 @@ export function ConsultationsAdminPage() {
   return (
     <div>
       <PageHeader title="咨询记录" description="查看客户提交的合作咨询，并记录跟进状态。" />
-      <SearchableTable columns={columns} data={items} rowKey="id" searchableKeys={['name', 'phone', 'industry', 'message']} searchPlaceholder="搜索姓名、电话、行业或说明" mobileRender={(item) => <div><strong>{item.name}</strong><p>{item.phone} · {item.industry}</p><Tag>{statusLabels[item.status] || item.status}</Tag><Button size="small" onClick={() => setEditing(item)}>处理</Button></div>} />
+      <SearchableTable columns={columns} data={items} rowKey="id" searchableKeys={['name', 'phone', 'industry', 'message']} searchPlaceholder="搜索姓名、电话、行业或说明" />
       <Drawer title="处理咨询记录" open={Boolean(editing)} onClose={() => setEditing(null)} width={420}>
         {editing && <p>{editing.name}　{editing.phone}</p>}
         <Form form={form} layout="vertical" onFinish={save}>

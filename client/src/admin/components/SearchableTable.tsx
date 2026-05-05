@@ -1,4 +1,4 @@
-import { Table, Input, Space, Empty, Grid, List, Typography } from 'antd';
+import { Table, Input, Space, Empty, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useMemo, useState, type ReactNode } from 'react';
@@ -10,16 +10,12 @@ type Props<T> = {
   searchableKeys?: (keyof T)[];
   searchPlaceholder?: string;
   toolbar?: ReactNode;
-  mobileRender?: (record: T) => ReactNode;
   pagination?: TableProps<T>['pagination'];
   empty?: ReactNode;
 };
 
-const { useBreakpoint } = Grid;
-
-export function SearchableTable<T extends object>({ columns, data, rowKey, searchableKeys, searchPlaceholder = '搜索', toolbar, mobileRender, pagination, empty }: Props<T>) {
+export function SearchableTable<T extends object>({ columns, data, rowKey, searchableKeys, searchPlaceholder = '搜索', toolbar, pagination, empty }: Props<T>) {
   const [keyword, setKeyword] = useState('');
-  const screens = useBreakpoint();
 
   const filtered = useMemo(() => {
     if (!keyword || !searchableKeys || searchableKeys.length === 0) return data;
@@ -31,8 +27,6 @@ export function SearchableTable<T extends object>({ columns, data, rowKey, searc
     if (typeof rowKey === 'function') return rowKey(record);
     return String(record[rowKey]);
   }
-
-  const showMobile = screens.md === false && mobileRender;
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
@@ -51,8 +45,6 @@ export function SearchableTable<T extends object>({ columns, data, rowKey, searc
       </Space>
       {filtered.length === 0 ? (
         empty || <Empty description="暂无数据" />
-      ) : showMobile ? (
-        <List dataSource={filtered} rowKey={(record) => getKey(record)} renderItem={(record) => <List.Item>{mobileRender!(record)}</List.Item>} />
       ) : (
         <Table<T>
           columns={columns}

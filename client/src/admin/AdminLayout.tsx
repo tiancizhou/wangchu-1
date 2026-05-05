@@ -101,7 +101,7 @@ export function AdminLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: adminPageBackground }}>
-      <Sider collapsible collapsed={collapsed} trigger={null} width={240} collapsedWidth={72} breakpoint="lg" onBreakpoint={(broken) => setCollapsed(broken)} style={{ borderRight: '1px solid #eef2f8' }}>
+      <Sider collapsible collapsed={collapsed} trigger={null} width={240} collapsedWidth={72} style={{ borderRight: '1px solid #eef2f8' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '20px 20px 16px', color: '#0f172a' }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #1677ff 0%, #4096ff 100%)', color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 700 }}>W</div>
           {!collapsed && (
