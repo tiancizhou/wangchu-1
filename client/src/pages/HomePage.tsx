@@ -147,7 +147,7 @@ export function SupportModule({ section, activeIndex, onSelect, onPreview }: { s
           </div>
           <article className="support-copy"><h3>{active?.heading}</h3><p>{active?.description}</p><Link to="/consult">立即查看</Link></article>
         </div>
-        <div className="support-gallery"><button aria-label="上一组" onClick={previousGallery}>‹</button>{visibleThumbs.map((image, index) => thumbnails.length > 0 ? <button className="support-thumb home-preview-image-button square" type="button" onClick={() => onPreview({ url: image, title: active?.heading || active?.title || '生产设计与制作' })} key={`${image}-${galleryPage}-${index}`}><img src={image} alt={active?.heading || active?.title || '生产设计与制作'} /></button> : <div className={`support-thumb ${image}`} key={`${image}-${galleryPage}-${index}`} />)}<button aria-label="下一组" onClick={nextGallery}>›</button></div>
+        <div className="support-gallery"><button className="support-gallery-arrow" aria-label="上一组" onClick={previousGallery}>‹</button>{visibleThumbs.map((image, index) => thumbnails.length > 0 ? <button className="support-thumb home-preview-image-button square" type="button" onClick={() => onPreview({ url: image, title: active?.heading || active?.title || '生产设计与制作' })} key={`${image}-${galleryPage}-${index}`}><img src={image} alt={active?.heading || active?.title || '生产设计与制作'} /></button> : <div className={`support-thumb ${image}`} key={`${image}-${galleryPage}-${index}`} />)}<button className="support-gallery-arrow" aria-label="下一组" onClick={nextGallery}>›</button></div>
       </div>
     </section>
   );
