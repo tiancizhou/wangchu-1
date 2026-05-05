@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getContentSections, getSiteProfile, submitConsultation, type ContentSection, type SiteProfile } from '../api/publicApi';
 
@@ -10,6 +10,7 @@ export function ConsultPage() {
   const [form, setForm] = useState(emptyForm);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export function ConsultPage() {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (submitting) return;
+    if (submittingRef.current) return;
     setError('');
 
     const payload = {
@@ -40,6 +41,7 @@ export function ConsultPage() {
       return;
     }
 
+    submittingRef.current = true;
     setSubmitting(true);
     try {
       await submitConsultation(payload);
@@ -48,6 +50,7 @@ export function ConsultPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : '提交失败，请稍后再试');
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
