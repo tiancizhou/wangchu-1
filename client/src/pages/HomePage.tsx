@@ -163,10 +163,10 @@ export function ProductCategoryGrid({ categories }: { categories: ProductCategor
 export function ProcessModule({ section }: { section?: ContentSection }) {
   const data = section?.data as { items?: ProcessItem[]; backgroundImageUrl?: string } | undefined;
   const items = data?.items || [
-    { title: '巡检工艺', description: '标准化巡检流程保障生产连续性与品质稳定。' },
-    { title: '资料', description: '完善资料体系支撑产品研发、检测和交付。' },
-    { title: '设备', description: '成熟设备体系满足多类油品生产需求。' },
-    { title: '仓储', description: '规范仓储管理保障产品交付效率。' }
+    { title: '菜单文案', description: '稼尔润（北京）润滑油有限公司专注润滑油研发、生产与技术服务，围绕调和、灌装、检测和仓储建立标准化流程，为客户提供稳定可靠的产品交付能力。' },
+    { title: '灌装', description: '自动化灌装流程提升生产效率，保障产品包装规格统一、出厂品质稳定。' },
+    { title: '设备', description: '成熟设备体系满足多类润滑油产品生产、调和与检测需求。' },
+    { title: '仓储', description: '规范仓储管理保障产品存放安全和订单交付效率。' }
   ];
   const [activeIndex, setActiveIndex] = useState(0);
   const active = items[activeIndex] || items[0];
@@ -179,13 +179,14 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
     <section className="factory-section" style={data?.backgroundImageUrl ? { backgroundImage: `linear-gradient(rgba(15,43,78,.78),rgba(15,43,78,.84)),url(${data.backgroundImageUrl})` } : undefined}>
       <SectionTitle title={section?.title || '先进的制作工艺'} subtitle={section?.subtitle} light />
       <div className="factory-card">
-        <aside>{items.map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={item.title}><FactoryMenuIcon index={index} /><span>{item.title}</span></button>)}</aside>
-        <div className="factory-content">
+        <div className="factory-showcase">
+          <aside>{items.map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={item.title}><FactoryMenuIcon index={index} /><span>{item.title}</span></button>)}</aside>
           <div className="factory-photo" style={active?.imageUrl ? { backgroundImage: `url(${active.imageUrl})` } : undefined} />
-          <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p><span>”</span></article>
-          <div className="factory-thumb-grid">
-            {items.slice(0, 4).map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={`${item.title}-thumb`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title} /> : <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />}<span>{item.title}</span></button>)}
-          </div>
+        </div>
+        <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p><span>”</span></article>
+        <div className="factory-gallery-title"><span>{active?.title}</span></div>
+        <div className="factory-thumb-grid">
+          {items.slice(0, 4).map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={`${item.title}-thumb`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title} /> : <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />}<span>{item.title}</span></button>)}
         </div>
       </div>
     </section>

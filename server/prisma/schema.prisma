@@ -69,26 +69,26 @@ model ProductCategory {
 }
 
 model Product {
-  id                 String           @id @default(cuid())
-  name               String
-  slug               String           @unique
-  category           String           @default("工业油品")
-  categoryId         String?
-  subtitle           String           @default("")
-  summary            String           @default("")
-  description        String           @default("")
-  coverImageUrl      String           @default("")
-  galleryImageUrls   String           @default("[]")
-  specificationsJson String           @default("[]")
-  detailSectionsJson String           @default("[]")
-  featureCardsJson   String           @default("[]")
-  sortOrder          Int              @default(0)
-  isPublished        Boolean          @default(true)
-  seoTitle           String           @default("")
-  seoDescription     String           @default("")
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  categoryRef        ProductCategory? @relation(fields: [categoryId], references: [id])
+  id                   String           @id @default(cuid())
+  name                 String
+  slug                 String           @unique
+  categoryName         String           @default("工业油品")
+  categoryId           String?
+  coverImageUrl        String           @default("")
+  topSubtitle          String           @default("")
+  detailTitle          String           @default("产品详情")
+  detailDescription    String           @default("")
+  detailImageUrl       String           @default("")
+  productSpecsImageUrl String           @default("")
+  detailGalleryJson    String           @default("[]")
+  performanceTitle     String           @default("稳定的生产表现")
+  performanceText      String           @default("公司围绕润滑产品建立研发、生产和服务体系，为客户提供可靠产品和持续支持。")
+  performanceItemsJson String           @default("[]")
+  sortOrder            Int              @default(0)
+  isPublished          Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  categoryRef          ProductCategory? @relation(fields: [categoryId], references: [id])
 }
 
 model CarouselBanner {

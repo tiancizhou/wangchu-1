@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { adminCertificates, deleteCertificate, saveCertificate } from '../../api/adminApi';
-import type { Certificate } from '../../api/publicApi';
+import { adminCertificates, adminContentSection, deleteCertificate, saveCertificate, saveContentSection } from '../../api/adminApi';
+import type { Certificate, ContentSection } from '../../api/publicApi';
 import { ImageUploader } from '../../components/admin/ImageUploader';
 
 const defaultTitle = '荣誉资质';
+type CertificateSidebarData = { imageUrl?: string };
 
 export function CertificatesAdminPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [sidebar, setSidebar] = useState<ContentSection<CertificateSidebarData> | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingIds, setSavingIds] = useState<string[]>([]);
   const [dirtyIds, setDirtyIds] = useState<string[]>([]);
@@ -17,7 +19,12 @@ export function CertificatesAdminPage() {
     setLoading(true);
     setError('');
     try {
-      setCertificates(await adminCertificates());
+      const [certificateRows, sidebarSection] = await Promise.all([
+        adminCertificates(),
+        adminContentSection('certificates', 'sidebar').catch(() => null)
+      ]);
+      setCertificates(certificateRows);
+      setSidebar(sidebarSection as ContentSection<CertificateSidebarData> | null);
     } catch (err) {
       setError(err instanceof Error ? err.message : '荣誉资质加载失败');
     } finally {
@@ -37,6 +44,30 @@ export function CertificatesAdminPage() {
     setCertificates((items) => items.map((item) => item.id === id ? { ...item, ...patch } : item));
     setDirtyIds((ids) => ids.includes(id) ? ids : [...ids, id]);
     setMessage('');
+  }
+
+  async function saveSidebarImage(imageUrl: string) {
+    setError('');
+    setMessage('');
+    markSaving('sidebar', true);
+    try {
+      const saved = await saveContentSection({
+        ...(sidebar || {}),
+        pageKey: 'certificates',
+        sectionKey: 'sidebar',
+        title: '荣誉资质左侧图片',
+        subtitle: '',
+        data: { imageUrl },
+        sortOrder: 0,
+        isPublished: true
+      });
+      setSidebar(saved as ContentSection<CertificateSidebarData>);
+      setMessage('荣誉资质左侧图片已保存');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '左侧图片保存失败');
+    } finally {
+      markSaving('sidebar', false);
+    }
   }
 
   async function onImagesUploaded(urls: string[]) {
@@ -113,6 +144,14 @@ export function CertificatesAdminPage() {
 
       {error && <p className="error">{error}</p>}
       {message && <p className="success">{message}</p>}
+
+      <div className="certificate-upload-panel certificate-sidebar-upload">
+        <div>
+          <h2>左侧展示图片</h2>
+          <p>显示在前台荣誉资质页面左侧，参考图中的客服中心图片区域。</p>
+        </div>
+        <ImageUploader value={sidebar?.data.imageUrl} onChange={saveSidebarImage} />
+      </div>
 
       <div className="certificate-upload-panel certificate-upload-simple">
         <div>

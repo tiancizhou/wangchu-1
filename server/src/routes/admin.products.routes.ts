@@ -6,43 +6,43 @@ import { parseJsonArray, stringifyJson } from '../utils/jsonFields.js';
 const router = Router();
 router.use(requireAdmin);
 
-function parseStringArray(value: unknown) {
-  return Array.isArray(value) ? stringifyJson(value.filter((item) => typeof item === 'string'), []) : '[]';
+type ProductGalleryItem = { imageUrl: string; caption: string };
+type ProductPerformanceItem = { icon: string; title: string; description: string };
+
+function parseArray<T>(value: unknown, limit?: number) {
+  const items = Array.isArray(value) ? value : [];
+  return limit ? items.slice(0, limit) as T[] : items as T[];
 }
 
 function mapProduct(product: {
-  galleryImageUrls: string;
-  specificationsJson: string;
-  detailSectionsJson: string;
-  featureCardsJson: string;
+  detailGalleryJson: string;
+  performanceItemsJson: string;
 }) {
   return {
     ...product,
-    galleryImageUrls: parseJsonArray<string>(product.galleryImageUrls),
-    specifications: parseJsonArray<Record<string, unknown>>(product.specificationsJson),
-    detailSections: parseJsonArray<Record<string, unknown>>(product.detailSectionsJson),
-    featureCards: parseJsonArray<Record<string, unknown>>(product.featureCardsJson)
+    detailGallery: parseJsonArray<ProductGalleryItem>(product.detailGalleryJson),
+    performanceItems: parseJsonArray<ProductPerformanceItem>(product.performanceItemsJson)
   };
 }
 
 function productData(body: Record<string, unknown>) {
   return {
-    name: String(body.name || ''),
-    slug: String(body.slug || ''),
-    category: String(body.category || '工业油品'),
+    name: String(body.name || '').trim(),
+    slug: String(body.slug || '').trim(),
+    categoryName: String(body.categoryName || '工业油品'),
     categoryId: body.categoryId ? String(body.categoryId) : null,
-    subtitle: String(body.subtitle || ''),
-    summary: String(body.summary || ''),
-    description: String(body.description || ''),
     coverImageUrl: String(body.coverImageUrl || ''),
-    galleryImageUrls: parseStringArray(body.galleryImageUrls),
-    specificationsJson: stringifyJson(body.specifications || [], []),
-    detailSectionsJson: stringifyJson(body.detailSections || [], []),
-    featureCardsJson: stringifyJson(body.featureCards || [], []),
+    topSubtitle: String(body.topSubtitle || ''),
+    detailTitle: String(body.detailTitle || '产品详情'),
+    detailDescription: String(body.detailDescription || ''),
+    detailImageUrl: String(body.detailImageUrl || ''),
+    productSpecsImageUrl: String(body.productSpecsImageUrl || ''),
+    detailGalleryJson: stringifyJson(parseArray<ProductGalleryItem>(body.detailGallery, 6), []),
+    performanceTitle: String(body.performanceTitle || '稳定的生产表现'),
+    performanceText: String(body.performanceText || '公司围绕润滑产品建立研发、生产和服务体系，为客户提供可靠产品和持续支持。'),
+    performanceItemsJson: stringifyJson(parseArray<ProductPerformanceItem>(body.performanceItems, 4), []),
     sortOrder: Number(body.sortOrder || 0),
-    isPublished: body.isPublished === undefined ? true : Boolean(body.isPublished),
-    seoTitle: String(body.seoTitle || ''),
-    seoDescription: String(body.seoDescription || '')
+    isPublished: body.isPublished === undefined ? true : Boolean(body.isPublished)
   };
 }
 

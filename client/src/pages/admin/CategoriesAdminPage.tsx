@@ -74,11 +74,11 @@ export function CategoriesAdminPage() {
   return (
     <section className="admin-panel categories-admin-page category-workspace-page">
       <div className="admin-title-block category-admin-title">
-        <span className="page-editor-label">产品中心</span>
+        <span className="page-editor-label">产品细项分类</span>
         <div className="category-title-row">
           <div>
-            <h1>分类管理</h1>
-            <p>维护产品中心的分类入口、排序、封面图和发布状态。客户会通过这些分类浏览对应产品。</p>
+            <h1>产品细项分类</h1>
+            <p>维护产品中心的细项分类入口、排序、封面图和发布状态。客户会通过这些分类浏览对应产品。</p>
           </div>
           <button className="product-primary-action" type="button" onClick={startCreate}>新建分类</button>
         </div>

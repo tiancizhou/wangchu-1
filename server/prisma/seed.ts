@@ -199,43 +199,49 @@ async function main() {
   const categoryRows = await prisma.productCategory.findMany();
   const categoryByName = new Map(categoryRows.map((category) => [category.name, category]));
 
-  const productCount = await prisma.product.count();
-  if (productCount === 0) {
-    await prisma.product.createMany({
-      data: [
-        {
-          name: '全合成S88 0W-40',
-          slug: 's88-0w-40',
-          category: '汽油机油',
-          categoryId: categoryByName.get('汽油机油')?.id,
-          subtitle: '高性能全合成汽油机油',
-          summary: '高性能全合成汽油机油',
-          description: '适用于多种汽油发动机，提供稳定润滑表现。',
-          specificationsJson: JSON.stringify([{ name: '粘度级别', value: '0W-40' }, { name: '适用类型', value: '汽油发动机' }]),
-          featureCardsJson: JSON.stringify([{ title: '稳定润滑', description: '持续提供稳定油膜保护。' }, { title: '清洁保护', description: '帮助减少发动机沉积物。' }]),
-          sortOrder: 1
-        },
-        {
-          name: '半合成S86',
-          slug: 's86',
-          category: '柴油机油',
-          categoryId: categoryByName.get('柴油机油')?.id,
-          subtitle: '兼顾保护与经济性的半合成机油',
-          summary: '兼顾保护与经济性的半合成机油',
-          description: '满足日常车辆润滑保护需求。',
-          sortOrder: 2
-        },
-        {
-          name: 'API CI-4',
-          slug: 'api-ci-4',
-          category: '工业油品',
-          categoryId: categoryByName.get('工业油品')?.id,
-          subtitle: '工业与商用设备润滑产品',
-          summary: '工业与商用设备润滑产品',
-          description: '适用于重载工况和工业设备维护。',
-          sortOrder: 3
-        }
-      ]
+  const products = [
+    {
+      name: '全合成S88 0W-40',
+      slug: 's88-0w-40',
+      categoryName: '汽油机油',
+      categoryId: categoryByName.get('汽油机油')?.id,
+      topSubtitle: '高性能全合成汽油机油',
+      detailTitle: 'OMAJIC-UV2030',
+      detailDescription: '适用于多种汽油发动机，提供稳定润滑表现。',
+      productSpecsImageUrl: '',
+      detailGalleryJson: JSON.stringify([{ imageUrl: '', caption: '细节' }, { imageUrl: '', caption: '细节' }]),
+      performanceTitle: '稳定的生产表现',
+      performanceText: '稳定油膜保护，适配多种驾驶场景。',
+      performanceItemsJson: JSON.stringify([{ icon: '⚙', title: '稳定润滑', description: '持续提供稳定油膜保护。' }, { icon: '▣', title: '品质检测', description: '严格检测后出厂。' }, { icon: '●', title: '应用支持', description: '覆盖多种使用场景。' }, { icon: '▰', title: '快速交付', description: '成熟供应链保障交付。' }]),
+      sortOrder: 1
+    },
+    {
+      name: '半合成S86',
+      slug: 's86',
+      categoryName: '柴油机油',
+      categoryId: categoryByName.get('柴油机油')?.id,
+      topSubtitle: '兼顾保护与经济性的半合成机油',
+      detailTitle: '半合成S86',
+      detailDescription: '满足日常车辆润滑保护需求。',
+      sortOrder: 2
+    },
+    {
+      name: 'API CI-4',
+      slug: 'api-ci-4',
+      categoryName: '工业油品',
+      categoryId: categoryByName.get('工业油品')?.id,
+      topSubtitle: '工业与商用设备润滑产品',
+      detailTitle: 'API CI-4',
+      detailDescription: '适用于重载工况和工业设备维护。',
+      sortOrder: 3
+    }
+  ];
+
+  for (const product of products) {
+    await prisma.product.upsert({
+      where: { slug: product.slug },
+      update: product,
+      create: product
     });
   }
 

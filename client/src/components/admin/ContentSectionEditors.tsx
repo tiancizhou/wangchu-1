@@ -20,17 +20,17 @@ export type SectionData = {
 };
 
 export const sectionNames: Record<string, string> = {
-  featureCards: '服务优势卡片',
+  featureCards: '企业管理模块',
   supportModule: '生产设计与制作',
   processModule: '先进的制作工艺',
-  aboutPreview: '关于我们预览',
+  aboutPreview: '关于我们',
   advantages: '加盟优势',
   benefits: '加盟福利',
   contactPanel: '咨询页顾问信息'
 };
 
 export function FeatureCardsEditor({ items, onUpdate, onChange }: { items: FeatureItem[]; onUpdate: (index: number, patch: Partial<FeatureItem>) => void; onChange: (items: FeatureItem[]) => void }) {
-  return <div className="admin-subsection"><h2>服务优势卡片</h2><p className="field-help">建议保持 4 个卡片，标题尽量简短，说明控制在一两句话。</p>{items.map((item, index) => <div className="content-item-editor" key={index}><h3>卡片 {index + 1}</h3><div className="inline-editor inline-editor-four"><label>图标符号<input placeholder="例如 ✥、●" value={item.icon || ''} onChange={(e) => onUpdate(index, { icon: e.target.value })} /></label><label>卡片标题<input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></label><label>点击后打开的页面<input placeholder="例如 /consult" value={item.linkUrl || ''} onChange={(e) => onUpdate(index, { linkUrl: e.target.value })} /></label><button type="button" onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>删除卡片</button></div><label>卡片说明<textarea value={item.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} /></label></div>)}<button type="button" onClick={() => onChange([...items, { title: '', description: '', icon: '✥', linkUrl: '/consult' }])}>新增服务卡片</button></div>;
+  return <div className="admin-subsection"><h2>企业管理模块</h2><p className="field-help">建议保持 4 个卡片，标题尽量简短，说明控制在一两句话。</p>{items.map((item, index) => <div className="content-item-editor" key={index}><h3>卡片 {index + 1}</h3><div className="inline-editor inline-editor-four"><label>图标符号<input placeholder="例如 ✥、●" value={item.icon || ''} onChange={(e) => onUpdate(index, { icon: e.target.value })} /></label><label>卡片标题<input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></label><label>点击后打开的页面<input placeholder="例如 /consult" value={item.linkUrl || ''} onChange={(e) => onUpdate(index, { linkUrl: e.target.value })} /></label><button type="button" onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>删除卡片</button></div><label>卡片说明<textarea value={item.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} /></label></div>)}<button type="button" onClick={() => onChange([...items, { title: '', description: '', icon: '✥', linkUrl: '/consult' }])}>新增模块卡片</button></div>;
 }
 
 export function SupportModuleEditor({ tabs, onUpdate, onChange }: { tabs: SupportTab[]; onUpdate: (index: number, patch: Partial<SupportTab>) => void; onChange: (tabs: SupportTab[]) => void }) {
@@ -120,6 +120,28 @@ export function GenericItemsEditor({ title, help, items, onUpdate, onChange }: {
 }
 
 export function ContactPanelEditor({ data, onChange }: { data: ContactPanelData; onChange: (patch: Partial<SectionData>) => void }) {
-  const industryOptionsText = (data.industryOptions || []).join('\n');
-  return <div className="admin-subsection"><h2>渠道合作顾问信息</h2><p className="field-help">这段内容显示在渠道合作咨询页，用于引导客户提交咨询。</p><div className="inline-editor"><label>顾问姓名<input value={data.consultantName || ''} onChange={(e) => onChange({ consultantName: e.target.value })} /></label><label>顾问职位<input value={data.consultantTitle || ''} onChange={(e) => onChange({ consultantTitle: e.target.value })} /></label></div><label>顾问介绍<textarea value={data.description || ''} onChange={(e) => onChange({ description: e.target.value })} /></label><label>按钮文字<input value={data.buttonText || ''} onChange={(e) => onChange({ buttonText: e.target.value })} /></label><label>所处行业选项<textarea value={industryOptionsText} placeholder="汽车后市场\n工业设备\n渠道代理\n其他" onChange={(e) => onChange({ industryOptions: e.target.value.split('\n').map((item) => item.trim()).filter(Boolean) })} /></label><p className="field-help">每行一个选项，将显示在咨询页“所处行业”下拉框中。</p></div>;
+  const industryOptions = data.industryOptions || [];
+  const updateIndustryOption = (index: number, value: string) => onChange({ industryOptions: industryOptions.map((item, itemIndex) => itemIndex === index ? value : item) });
+  const removeIndustryOption = (index: number) => onChange({ industryOptions: industryOptions.filter((_, itemIndex) => itemIndex !== index) });
+  const addIndustryOption = () => onChange({ industryOptions: [...industryOptions, ''] });
+
+  return (
+    <div className="admin-subsection contact-panel-editor">
+      <h2>渠道合作顾问信息</h2>
+      <p className="field-help">这段内容显示在渠道合作咨询页，用于引导客户提交咨询。</p>
+      <div className="inline-editor">
+        <label>顾问姓名<input value={data.consultantName || ''} onChange={(e) => onChange({ consultantName: e.target.value })} /></label>
+        <label>顾问职位<input value={data.consultantTitle || ''} onChange={(e) => onChange({ consultantTitle: e.target.value })} /></label>
+      </div>
+      <label>顾问介绍<textarea value={data.description || ''} onChange={(e) => onChange({ description: e.target.value })} /></label>
+      <label>按钮文字<input value={data.buttonText || ''} onChange={(e) => onChange({ buttonText: e.target.value })} /></label>
+      <div className="industry-option-editor">
+        <div className="industry-option-title"><div><h3>所处行业选项</h3><p>客户在渠道合作咨询页下拉框中会看到这些选项。</p></div><button type="button" onClick={addIndustryOption}>新增行业</button></div>
+        <div className="industry-option-list">
+          {industryOptions.map((option, index) => <div className="industry-option-row" key={index}><span>{index + 1}</span><input value={option} placeholder="例如：汽车后市场" onChange={(e) => updateIndustryOption(index, e.target.value)} /><button type="button" onClick={() => removeIndustryOption(index)}>删除</button></div>)}
+        </div>
+        {industryOptions.length === 0 && <p className="empty-state">还没有行业选项，请点击“新增行业”。</p>}
+      </div>
+    </div>
+  );
 }

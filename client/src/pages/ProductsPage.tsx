@@ -29,14 +29,19 @@ export function ProductsPage() {
   }
 
   return (
-    <main className="gray-page">
+    <main className="gray-page product-center-page product-list-page">
       <div className="breadcrumb container">当前位置：首页 › 产品分类</div>
-      <div className="content-card container two-column">
+      <div className="product-center-shell container">
         <CategorySide title="产品分类" categories={categories} active={active} hotline={profile?.hotline || profile?.phone} onSelect={selectCategory} />
-        <section className="list-section">
-          <h1>产品列表</h1>
+        <section className="list-section product-panel">
+          <div className="product-panel-title"><h1>产品列表</h1></div>
           <div className="list-grid">
-            {products.map((product) => <Link className="list-product" to={`/products/${product.slug}`} key={product.id}>{product.coverImageUrl ? <img src={product.coverImageUrl} alt={product.name} /> : <div className="product-fallback">K</div>}<span>{product.name}</span></Link>)}
+            {products.map((product) => (
+              <Link className="list-product" to={`/products/${product.slug}`} key={product.id}>
+                <figure>{product.coverImageUrl ? <img src={product.coverImageUrl} alt={product.name} /> : <div className="product-fallback">K</div>}</figure>
+                <span>{product.name}</span>
+              </Link>
+            ))}
             {products.length === 0 && <div className="empty-state">暂无产品，请在后台添加。</div>}
           </div>
           <Pager total={total} page={page} pageSize={12} active={active} />
@@ -51,9 +56,11 @@ export function CategorySide({ title, categories, active, hotline, onSelect }: {
   return (
     <aside className="category-side">
       <h2>{title}</h2>
-      <button className={!active ? 'active' : ''} onClick={() => onSelect?.('')}>全部产品<span>›</span></button>
-      {categories.map((category) => <button className={category.slug === active || category.name === active ? 'active' : ''} onClick={() => onSelect?.(category.slug)} key={category.id}>{category.name}<span>›</span></button>)}
-      <div className="hotline">资讯热线<b>{hotline || '0519-68288220'}</b></div>
+      <div className="category-list">
+        <button type="button" className={!active ? 'active' : ''} onClick={() => onSelect?.('')}>全部产品<span>›</span></button>
+        {categories.map((category) => <button type="button" className={category.slug === active || category.name === active ? 'active' : ''} onClick={() => onSelect?.(category.slug)} key={category.id}>{category.name}<span>›</span></button>)}
+      </div>
+      <div className="hotline"><small>资讯热线</small><b>{hotline || '0519-68288220'}</b></div>
     </aside>
   );
 }
@@ -75,18 +82,52 @@ function Pager({ total, page, pageSize, active }: { total: number; page: number;
   );
 }
 
-type ProductPageItem = { title?: string; description?: string; icon?: string };
+type ProductPageItem = { title?: string; description?: string; icon?: string; iconKey?: SupportIconName };
+
+type SupportIconName = 'thumb' | 'tag' | 'shield' | 'diamond' | 'user' | 'truck' | 'tools' | 'document' | 'link';
+
+const advantageDefaults: ProductPageItem[] = [
+  { title: '产品优势', description: '烟台恒基金属制品有限公司成立于2004年，位于山东省烟台市福山区魏山路55号，公司现有员工50多名包括大专以上学历10名，', iconKey: 'thumb' },
+  { title: '价格优势', description: '烟台恒基金属制品有限公司成立于2004年，位于山东省烟台市福山区魏山路55号，公司现有员工50多名包括大专以上学历10名，', iconKey: 'tag' },
+  { title: '品质保障', description: '烟台恒基金属制品有限公司成立于2004年，位于山东省烟台市福山区魏山路55号，公司现有员工50多名包括大专以上学历10名，', iconKey: 'shield' },
+  { title: '技术优势', description: '选用最适合生产润滑油的进口基础油，采用二次加氢技术、国际上先进的三段异构脱蜡工序，选用添加了USA最新研制的液相单分子高科技添加剂精制而成', iconKey: 'diamond' }
+];
+
+const benefitDefaults: ProductPageItem[] = [
+  { title: '专属经理对接', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'user' },
+  { title: '按需邮寄样品', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'truck' },
+  { title: '免费设计培训', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'tools' },
+  { title: '免费设计培训', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'tools' },
+  { title: '共建实施方案', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'document' },
+  { title: '建立长效机制', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'link' }
+];
+
+function normalizeSupportItems(items: ProductPageItem[] | undefined, defaults: ProductPageItem[]) {
+  return defaults.map((fallback, index) => ({ ...fallback, ...(items?.[index]?.title ? { title: items[index].title } : {}) }));
+}
 
 function AdvantageSections({ advantages, benefits }: { advantages?: ContentSection; benefits?: ContentSection }) {
-  const advantageItems = (advantages?.data.items as ProductPageItem[] | undefined) || ['产品优势', '价格优势', '品质保障', '技术优势'].map((title) => ({ title, description: '成熟的产品体系和服务流程，为渠道伙伴提供长期稳定的合作支持。', icon: '♢' }));
-  const benefitItems = (benefits?.data.items as ProductPageItem[] | undefined) || ['专属经理对接', '按需邮寄样品', '免费设计培训', '共建实施方案', '建立长效机制', '售后支持'].map((title) => ({ title, description: '根据客户需求配置产品、资料和渠道支持。', icon: '▧' }));
+  const advantageItems = normalizeSupportItems(advantages?.data.items as ProductPageItem[] | undefined, advantageDefaults);
+  const benefitItems = normalizeSupportItems(benefits?.data.items as ProductPageItem[] | undefined, benefitDefaults);
 
   return (
-    <section className="section container">
+    <section className="section container product-center-support">
       <div className="section-title"><h2>{advantages?.title || '加盟优势'}</h2><p>{advantages?.subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>
-      <div className="advantage-row">{advantageItems.map((item, index) => <article key={`${item.title}-${index}`}><div className={index === 1 ? 'circle red' : 'circle'}>{item.icon || '♢'}</div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
+      <div className="advantage-row">{advantageItems.map((item, index) => <article key={`${item.title}-${index}`}><div className={index === 1 ? 'circle red' : 'circle'}><SupportIcon name={item.iconKey || 'diamond'} /></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
       <div className="section-title"><h2>{benefits?.title || '加盟福利'}</h2><p>{benefits?.subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>
-      <div className="benefit-grid">{benefitItems.map((item, index) => <article className={index === 1 ? 'active' : ''} key={`${item.title}-${index}`}><b>{item.icon || '▧'}</b><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
+      <div className="benefit-grid">{benefitItems.map((item, index) => <article className={index === 1 ? 'active' : ''} key={`${item.title}-${index}`}><b><SupportIcon name={item.iconKey || 'document'} /></b><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
     </section>
   );
+}
+
+function SupportIcon({ name }: { name: SupportIconName }) {
+  if (name === 'thumb') return <svg viewBox="0 0 64 64"><path d="M24 28h-9v25h9zM24 51h23c3 0 5-2 6-5l4-14c1-4-1-7-5-7H39l2-10c1-4-2-7-5-7h-2L24 27z" /></svg>;
+  if (name === 'tag') return <svg viewBox="0 0 64 64"><path d="M13 30 35 8h16v16L29 46z" /><circle cx="43" cy="16" r="3" /></svg>;
+  if (name === 'shield') return <svg viewBox="0 0 64 64"><path d="M32 7 51 17v15c0 12-8 21-19 25-11-4-19-13-19-25V17z" /><path d="M32 23v18M23 32h18" /></svg>;
+  if (name === 'diamond') return <svg viewBox="0 0 64 64"><path d="M16 18h32l8 13-24 25L8 31z" /><path d="M22 30h20" /></svg>;
+  if (name === 'user') return <svg viewBox="0 0 64 64"><circle cx="32" cy="19" r="9" /><path d="M13 53c2-12 9-20 19-20s17 8 19 20z" /><path d="M32 41v6" /></svg>;
+  if (name === 'truck') return <svg viewBox="0 0 64 64"><path d="M10 20h29v24H10zM39 28h9l6 7v9H39z" /><path d="M16 49h1M47 49h1M17 34h13M17 41h8" /></svg>;
+  if (name === 'tools') return <svg viewBox="0 0 64 64"><path d="M13 51 49 15M42 9l13 13M11 22l31 31M16 13l10 10M39 40l10 10" /></svg>;
+  if (name === 'document') return <svg viewBox="0 0 64 64"><path d="M18 10h26l8 8v36H18z" /><path d="M43 10v10h9M26 34h14M26 43h8" /></svg>;
+  return <svg viewBox="0 0 64 64"><path d="M25 20h-5c-8 0-14 6-14 14s6 14 14 14h10" /><path d="M39 44h5c8 0 14-6 14-14s-6-14-14-14H34" /><path d="M23 34h18" /></svg>;
 }

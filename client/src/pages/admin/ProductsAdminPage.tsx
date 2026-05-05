@@ -69,10 +69,10 @@ export function ProductsAdminPage() {
                   <td>
                     <div className="product-cell">
                       {product.coverImageUrl ? <img src={product.coverImageUrl} alt={product.name} /> : <span className="product-image-empty">无图</span>}
-                      <div><strong>{product.name}</strong><small>{product.subtitle || product.summary || '暂无简介'}</small></div>
+                      <div><strong>{product.name}</strong><small>{product.topSubtitle || product.detailDescription || '暂无简介'}</small></div>
                     </div>
                   </td>
-                  <td>{product.categoryRef?.name || product.category || '未分类'}</td>
+                  <td>{product.categoryRef?.name || product.categoryName || '未分类'}</td>
                   <td>{product.sortOrder}</td>
                   <td><span className={product.isPublished ? 'status-pill active' : 'status-pill'}>{product.isPublished ? '已发布' : '未发布'}</span></td>
                   <td><div className="table-actions"><Link to={`/admin/products/${product.id}/edit`}>编辑</Link><button type="button" onClick={() => onDelete(product.id)}>删除</button></div></td>

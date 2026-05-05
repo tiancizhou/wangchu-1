@@ -47,10 +47,10 @@ if not exist "node_modules" (
   )
 )
 
-echo [INFO] Running database migration...
-call npm run db:migrate
+echo [INFO] Syncing database schema...
+call npm --workspace server exec prisma -- db push --accept-data-loss
 if errorlevel 1 (
-  echo [ERROR] Database migration failed.
+  echo [ERROR] Database schema sync failed.
   pause
   exit /b 1
 )

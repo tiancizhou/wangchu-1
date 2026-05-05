@@ -99,11 +99,11 @@ export function SiteSettingsPage() {
   return (
     <section className="admin-panel site-settings-page">
       <div className="admin-title-block site-settings-title">
-        <span className="page-editor-label">站点资料</span>
-        <h1>基础信息</h1>
-        <p>维护网站顶部、页脚、联系方式和搜索展示信息。建议先填写公司资料，再补充搜索设置。</p>
+        <span className="page-editor-label">页脚</span>
+        <h1>页脚</h1>
+        <p>维护页脚中展示的公司信息、联系方式、友情链接、备案信息和搜索展示信息。</p>
       </div>
-      {loading && <p className="page-loading">基础信息加载中...</p>}
+      {loading && <p className="page-loading">页脚信息加载中...</p>}
       {error && <p className="error">{error}</p>}
       {message && <p className="success">{message}</p>}
       {!loading && (

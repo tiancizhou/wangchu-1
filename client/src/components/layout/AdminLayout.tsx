@@ -1,11 +1,17 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { logout } from '../../api/adminApi';
 
-const links = [
-  { to: '/admin', label: '控制台', end: true },
-  { to: '/admin/page/home', label: '首页' },
-  { to: '/admin/page/products', label: '产品中心' },
-  { to: '/admin/page/consult', label: '渠道合作' }
+const links: { to: string; label: string; end?: boolean }[] = [
+  { to: '/admin/navigation', label: '页面导航' },
+  { to: '/admin/banners', label: '轮播图管理' },
+  { to: '/admin/page/enterprise', label: '企业管理模块' },
+  { to: '/admin/page/support', label: '生产设计与制作' },
+  { to: '/admin/categories', label: '产品细项分类' },
+  { to: '/admin/page/process', label: '先进的制作工艺' },
+  { to: '/admin/page/about', label: '关于我们' },
+  { to: '/admin/certificates', label: '荣誉资质' },
+  { to: '/admin/site', label: '页脚' },
+  { to: '/admin/products', label: '产品编辑' }
 ];
 
 export function AdminLayout() {

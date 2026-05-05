@@ -36,6 +36,24 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       saveButtonText: '保存首页内容'
     }
   },
+  enterprise: {
+    title: '企业管理模块',
+    publicLocation: '/',
+    description: '编辑首页企业管理模块中的卡片内容、说明和跳转入口。',
+    tools: [],
+    contentConfig: {
+      pageKey: 'home',
+      title: '企业管理模块',
+      description: '编辑首页企业管理模块的卡片、图标、说明和跳转链接。',
+      editableKeys: ['featureCards'],
+      moduleHelp: {
+        featureCards: '显示在首页企业管理模块区域，建议保持 4 个卡片。'
+      },
+      loadingText: '企业管理模块加载中...',
+      saveSuccessText: '企业管理模块已保存',
+      saveButtonText: '保存企业管理模块'
+    }
+  },
   products: {
     title: '产品中心',
     publicLocation: '/products',
@@ -60,21 +78,39 @@ const pageConfigs: Record<string, PageEditorConfig> = {
     }
   },
   support: {
-    title: '技术支持',
+    title: '生产设计与制作',
     publicLocation: '/#support',
-    description: '当前技术支持内容显示在首页“生产设计与制作”模块中。',
+    description: '编辑首页“生产设计与制作”模块中的栏目、主图、说明和底部轮播图片。',
     tools: [],
     contentConfig: {
       pageKey: 'home',
-      title: '技术支持内容',
+      title: '生产设计与制作',
       description: '编辑首页“生产设计与制作”模块中的栏目、主图、说明和底部轮播图片。',
       editableKeys: ['supportModule'],
       moduleHelp: {
         supportModule: '显示在“生产设计与制作”区域，用于介绍生产、检测、检验能力。'
       },
-      loadingText: '技术支持内容加载中...',
-      saveSuccessText: '技术支持内容已保存',
-      saveButtonText: '保存技术支持内容'
+      loadingText: '生产设计与制作加载中...',
+      saveSuccessText: '生产设计与制作已保存',
+      saveButtonText: '保存生产设计与制作'
+    }
+  },
+  process: {
+    title: '先进的制作工艺',
+    publicLocation: '/#process',
+    description: '编辑首页先进的制作工艺区域的背景图、工艺项目和说明文字。',
+    tools: [],
+    contentConfig: {
+      pageKey: 'home',
+      title: '先进的制作工艺',
+      description: '编辑首页先进的制作工艺模块中的背景图、项目图片、标题和说明。',
+      editableKeys: ['processModule'],
+      moduleHelp: {
+        processModule: '显示在首页“先进的制作工艺”区域，用于介绍制作工艺和设备能力。'
+      },
+      loadingText: '先进的制作工艺加载中...',
+      saveSuccessText: '先进的制作工艺已保存',
+      saveButtonText: '保存先进的制作工艺'
     }
   },
   consult: {
@@ -108,7 +144,7 @@ const pageConfigs: Record<string, PageEditorConfig> = {
     ],
     contentConfig: {
       pageKey: 'home',
-      title: '关于我们页面内容',
+      title: '关于我们',
       description: '编辑首页“关于我们”区域的公司简介和展示图片。',
       editableKeys: ['aboutPreview'],
       moduleHelp: {

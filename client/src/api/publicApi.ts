@@ -52,25 +52,36 @@ export type ProductCategory = {
   seoDescription: string;
 };
 
+export type ProductGalleryItem = {
+  imageUrl: string;
+  caption: string;
+};
+
+export type ProductPerformanceItem = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
 export type Product = {
   id: string;
   name: string;
   slug: string;
-  category: string;
+  categoryName: string;
   categoryId?: string | null;
   categoryRef?: ProductCategory | null;
-  subtitle: string;
-  summary: string;
-  description: string;
   coverImageUrl: string;
-  galleryImageUrls: string[];
-  specifications?: Record<string, unknown>[];
-  detailSections?: Record<string, unknown>[];
-  featureCards?: Record<string, unknown>[];
+  topSubtitle: string;
+  detailTitle: string;
+  detailDescription: string;
+  detailImageUrl: string;
+  productSpecsImageUrl: string;
+  detailGallery: ProductGalleryItem[];
+  performanceTitle: string;
+  performanceText: string;
+  performanceItems: ProductPerformanceItem[];
   sortOrder: number;
   isPublished: boolean;
-  seoTitle?: string;
-  seoDescription?: string;
 };
 
 export type Banner = {

@@ -72,8 +72,8 @@ export function BannersAdminPage() {
   return (
     <section className="admin-panel banners-admin-page">
       <div className="admin-title-block banner-admin-title">
-        <span className="page-editor-label">首页媒体</span>
-        <h1>首页轮播图</h1>
+        <span className="page-editor-label">轮播图管理</span>
+        <h1>轮播图管理</h1>
         <p>上传首页顶部展示的图片、动图或视频。建议使用清晰横版素材，视频文件控制在 80MB 以内。</p>
       </div>
 

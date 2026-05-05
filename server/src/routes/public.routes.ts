@@ -13,17 +13,13 @@ function mapSiteProfile(profile: Awaited<ReturnType<typeof getSiteProfile>>) {
 }
 
 function mapProduct(product: {
-  galleryImageUrls: string;
-  specificationsJson: string;
-  detailSectionsJson: string;
-  featureCardsJson: string;
+  detailGalleryJson: string;
+  performanceItemsJson: string;
 }) {
   return {
     ...product,
-    galleryImageUrls: parseJsonArray<string>(product.galleryImageUrls),
-    specifications: parseJsonArray<JsonRecord>(product.specificationsJson),
-    detailSections: parseJsonArray<JsonRecord>(product.detailSectionsJson),
-    featureCards: parseJsonArray<JsonRecord>(product.featureCardsJson)
+    detailGallery: parseJsonArray<JsonRecord>(product.detailGalleryJson),
+    performanceItems: parseJsonArray<JsonRecord>(product.performanceItemsJson)
   };
 }
 
@@ -126,7 +122,7 @@ router.get('/products', async (req, res) => {
   const where = {
     isPublished: true,
     ...(keyword ? { name: { contains: keyword } } : {}),
-    ...(category ? categoryRow ? { categoryId: categoryRow.id } : { category } : {})
+    ...(category ? categoryRow ? { categoryId: categoryRow.id } : { categoryName: category } : {})
   };
 
   const [items, total] = await Promise.all([
