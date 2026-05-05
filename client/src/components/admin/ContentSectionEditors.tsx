@@ -5,7 +5,7 @@ export type FeatureItem = { title?: string; description?: string; icon?: string;
 export type SupportTab = { title?: string; heading?: string; description?: string; imageUrl?: string; thumbnails?: string[] };
 export type ProcessItem = { title?: string; description?: string; imageUrl?: string };
 export type AboutData = { imageUrl?: string; body?: string; linkUrl?: string };
-export type ContactPanelData = { consultantName?: string; consultantTitle?: string; description?: string; buttonText?: string; industryOptions?: string[] };
+export type ContactPanelData = { consultantName?: string; consultantTitle?: string; consultantAvatarUrl?: string; description?: string; buttonText?: string; industryOptions?: string[] };
 export type SectionData = {
   items?: FeatureItem[] | ProcessItem[];
   tabs?: SupportTab[];
@@ -15,6 +15,7 @@ export type SectionData = {
   linkUrl?: string;
   consultantName?: string;
   consultantTitle?: string;
+  consultantAvatarUrl?: string;
   description?: string;
   buttonText?: string;
   industryOptions?: string[];
@@ -146,6 +147,7 @@ export function ContactPanelEditor({ data, onChange }: { data: ContactPanelData;
               <Col xs={24} md={12}><Form.Item label="顾问姓名"><Input value={data.consultantName || ''} placeholder="例如：王经理" onChange={(e) => onChange({ consultantName: e.target.value })} /></Form.Item></Col>
               <Col xs={24} md={12}><Form.Item label="顾问职位"><Input value={data.consultantTitle || ''} placeholder="例如：渠道合作顾问" onChange={(e) => onChange({ consultantTitle: e.target.value })} /></Form.Item></Col>
             </Row>
+            <Form.Item label="顾问头像"><Dropzone value={data.consultantAvatarUrl} onChange={(consultantAvatarUrl) => onChange({ consultantAvatarUrl })} hint="建议上传正方形头像，前台会裁切为圆形展示。" /></Form.Item>
             <Form.Item label="顾问介绍"><Input.TextArea rows={6} value={data.description || ''} placeholder="请输入展示在渠道合作页面的顾问介绍" onChange={(e) => onChange({ description: e.target.value })} /></Form.Item>
             <Form.Item label="按钮文字"><Input value={data.buttonText || ''} placeholder="例如：提交合作咨询" onChange={(e) => onChange({ buttonText: e.target.value })} /></Form.Item>
           </Form>

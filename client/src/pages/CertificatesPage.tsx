@@ -8,6 +8,7 @@ export function CertificatesPage() {
   const [profile, setProfile] = useState<SiteProfile | null>(null);
   const [sidebar, setSidebar] = useState<ContentSection<{ imageUrl?: string }> | null>(null);
   const [page, setPage] = useState(1);
+  const [previewCertificate, setPreviewCertificate] = useState<Certificate | null>(null);
 
   useEffect(() => {
     getCertificates().then(setCertificates).catch(() => {});
@@ -36,7 +37,16 @@ export function CertificatesPage() {
         <section className="list-section certificates-list-section">
           <div className="cert-list-title"><h1>荣誉资质</h1></div>
           <div className="cert-grid">
-            {visibleCertificates.map((certificate) => <figure key={certificate.id}>{certificate.imageUrl ? <img src={certificate.imageUrl} alt={certificate.title} /> : <div className="cert-placeholder">证书</div>}<figcaption>{certificate.title}</figcaption></figure>)}
+            {visibleCertificates.map((certificate) => (
+              <figure className="cert-card" key={certificate.id}>
+                {certificate.imageUrl ? (
+                  <button className="cert-image-button" type="button" onClick={() => setPreviewCertificate(certificate)} aria-label={`查看${certificate.title}原图`}>
+                    <img src={certificate.imageUrl} alt={certificate.title} />
+                  </button>
+                ) : <div className="cert-placeholder">证书</div>}
+                <figcaption>{certificate.title}</figcaption>
+              </figure>
+            ))}
             {certificates.length === 0 && <div className="empty-state">暂无资质证书，请在后台添加。</div>}
           </div>
           {certificates.length > 0 && (
@@ -48,6 +58,15 @@ export function CertificatesPage() {
           )}
         </section>
       </div>
+      {previewCertificate?.imageUrl && (
+        <button className="cert-preview-overlay" type="button" onClick={() => setPreviewCertificate(null)} aria-label="关闭证书原图预览">
+          <span className="cert-preview-dialog">
+            <img src={previewCertificate.imageUrl} alt={previewCertificate.title} />
+            <strong>{previewCertificate.title}</strong>
+            <em>点击任意位置关闭</em>
+          </span>
+        </button>
+      )}
     </main>
   );
 }

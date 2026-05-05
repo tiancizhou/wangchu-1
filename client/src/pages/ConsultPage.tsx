@@ -15,7 +15,7 @@ export function ConsultPage() {
     getContentSections('consult').then((sections) => setContactPanel(sections.contactPanel || null)).catch(() => {});
   }, []);
 
-  const panelData = contactPanel?.data as { consultantName?: string; consultantTitle?: string; description?: string; buttonText?: string; industryOptions?: string[] } | undefined;
+  const panelData = contactPanel?.data as { consultantName?: string; consultantTitle?: string; consultantAvatarUrl?: string; description?: string; buttonText?: string; industryOptions?: string[] } | undefined;
   const defaultIndustryOptions = ['汽车后市场', '工业设备', '渠道代理', '其他'];
   const industryOptions = (panelData?.industryOptions || []).map((item) => item.trim()).filter(Boolean);
   const visibleIndustryOptions = industryOptions.length > 0 ? industryOptions : defaultIndustryOptions;
@@ -43,7 +43,7 @@ export function ConsultPage() {
     <main className="gray-page consult-page">
       <div className="container"><h1 className="form-heading">填写需求信息，免费获取产品设计方案</h1></div>
       <div className="container consult-card">
-        <aside><h3>{contactPanel?.title || '还有更多疑问?'}</h3><p>在线咨询或者直接拨打电话</p><div className="avatar">工程师</div><b>{panelData?.consultantTitle || '总工程师'}/{panelData?.consultantName || '王作高'}</b><p>{panelData?.description || '这里是学历简介和工作经验'}</p><button>{panelData?.buttonText || '在线咨询'}</button><div className="consult-phone">资讯热线<br /><strong>{profile?.hotline || profile?.phone || '0519-68288220'}</strong></div></aside>
+        <aside><h3>{contactPanel?.title || '还有更多疑问?'}</h3><p>在线咨询或者直接拨打电话</p><div className="avatar">{panelData?.consultantAvatarUrl ? <img src={panelData.consultantAvatarUrl} alt={panelData?.consultantName || '渠道合作顾问'} /> : '工程师'}</div><b>{panelData?.consultantTitle || '总工程师'}/{panelData?.consultantName || '王作高'}</b><p>{panelData?.description || '这里是学历简介和工作经验'}</p><button>{panelData?.buttonText || '在线咨询'}</button><div className="consult-phone">资讯热线<br /><strong>{profile?.hotline || profile?.phone || '0519-68288220'}</strong></div></aside>
         <section>
           <div className="steps"><span>01填写需求</span><span>02电话对接</span><span>03方案定制</span></div>
           <p>我们将尽快与您取得联系（严格保护您的信息不会泄露，请放心填写）</p>
