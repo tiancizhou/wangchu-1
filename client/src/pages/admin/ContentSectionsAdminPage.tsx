@@ -13,6 +13,10 @@ export type ContentSectionEditorConfig = {
   emptyText?: string;
   saveSuccessText?: string;
   saveButtonText?: string;
+  hideModuleSelector?: boolean;
+  hidePublishSwitch?: boolean;
+  hideBaseSettings?: boolean;
+  featureCardsEditorMode?: 'default' | 'simpleEnterprise';
 };
 
 export const homeContentConfig: ContentSectionEditorConfig = {
@@ -136,35 +140,39 @@ export function ContentSectionsAdminPage({ config = homeContentConfig }: { confi
       {!loading && visibleSections.length === 0 && <p className="empty-state">{config.emptyText || '还没有可编辑的内容模块，请先运行初始化数据。'}</p>}
 
       {!loading && visibleSections.length > 0 && (
-        <div className="content-editor-layout">
-          <aside className="content-editor-sidebar">
-            <div className="content-editor-sidebar-title"><h2>选择模块</h2><p>点击左侧模块，右侧立即编辑。</p></div>
-            {visibleSections.map((section, index) => (
-              <button className={editing?.id === section.id ? 'content-editor-nav-item active' : 'content-editor-nav-item'} type="button" onClick={() => edit(section)} key={section.id}>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <div><strong>{sectionNames[section.sectionKey] || section.title}</strong><small>{config.moduleHelp[section.sectionKey] || '用于维护网站页面上的一块内容。'}</small></div>
-                <em>{section.isPublished ? '显示中' : '已隐藏'}</em>
-              </button>
-            ))}
-          </aside>
+        <div className={config.hideModuleSelector ? 'content-editor-layout content-editor-layout-simple' : 'content-editor-layout'}>
+          {!config.hideModuleSelector && (
+            <aside className="content-editor-sidebar">
+              <div className="content-editor-sidebar-title"><h2>选择模块</h2><p>点击左侧模块，右侧立即编辑。</p></div>
+              {visibleSections.map((section, index) => (
+                <button className={editing?.id === section.id ? 'content-editor-nav-item active' : 'content-editor-nav-item'} type="button" onClick={() => edit(section)} key={section.id}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <div><strong>{sectionNames[section.sectionKey] || section.title}</strong><small>{config.moduleHelp[section.sectionKey] || '用于维护网站页面上的一块内容。'}</small></div>
+                  <em>{section.isPublished ? '显示中' : '已隐藏'}</em>
+                </button>
+              ))}
+            </aside>
+          )}
 
           <div className="content-editor-pane">
             {editing && (
               <form className="admin-form content-editor-form" onSubmit={save}>
                 <div className="content-editor-pane-head">
                   <div><span className="page-editor-label">正在编辑</span><h2>{sectionNames[editing.sectionKey] || editing.sectionKey}</h2><p>{config.moduleHelp[editing.sectionKey] || '修改这个模块在网站上的展示内容。'}</p></div>
-                  <label className="content-publish-switch"><input type="checkbox" checked={editing.isPublished} onChange={(e) => updateEditing({ ...editing, isPublished: e.target.checked })} /><span />在网站显示</label>
+                  {(!config.hidePublishSwitch || !editing.isPublished) && <label className="content-publish-switch"><input type="checkbox" checked={editing.isPublished} onChange={(e) => updateEditing({ ...editing, isPublished: e.target.checked })} /><span />在网站显示</label>}
                 </div>
 
-                <div className="admin-subsection content-base-settings">
-                  <h2>模块基础设置</h2>
-                  <div className="content-base-grid">
-                    <label>模块标题<input value={editing.title || ''} onChange={(e) => updateEditing({ ...editing, title: e.target.value })} /></label>
-                    <label>模块副标题<input value={editing.subtitle || ''} onChange={(e) => updateEditing({ ...editing, subtitle: e.target.value })} /></label>
+                {!config.hideBaseSettings && (
+                  <div className="admin-subsection content-base-settings">
+                    <h2>模块基础设置</h2>
+                    <div className="content-base-grid">
+                      <label>模块标题<input value={editing.title || ''} onChange={(e) => updateEditing({ ...editing, title: e.target.value })} /></label>
+                      <label>模块副标题<input value={editing.subtitle || ''} onChange={(e) => updateEditing({ ...editing, subtitle: e.target.value })} /></label>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {editing.sectionKey === 'featureCards' && <FeatureCardsEditor items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}
+                {editing.sectionKey === 'featureCards' && <FeatureCardsEditor items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} mode={config.featureCardsEditorMode} />}
                 {editing.sectionKey === 'supportModule' && <SupportModuleEditor tabs={editing.data.tabs || []} onUpdate={updateSupportTab} onChange={(tabs) => setData({ tabs })} />}
                 {editing.sectionKey === 'processModule' && <ProcessModuleEditor items={(editing.data.items || []) as ProcessItem[]} backgroundImageUrl={editing.data.backgroundImageUrl} onUpdate={updateProcessItem} onChange={(items) => setData({ items })} onBackgroundChange={(backgroundImageUrl) => setData({ backgroundImageUrl })} />}
                 {editing.sectionKey === 'aboutPreview' && <AboutEditor data={editing.data as AboutData} onChange={setData} />}

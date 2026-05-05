@@ -39,19 +39,23 @@ const pageConfigs: Record<string, PageEditorConfig> = {
   enterprise: {
     title: '企业管理模块',
     publicLocation: '/',
-    description: '编辑首页企业管理模块中的卡片内容、说明和跳转入口。',
+    description: '编辑首页企业管理模块中的 4 张卡片，填写标题和说明即可。',
     tools: [],
     contentConfig: {
       pageKey: 'home',
       title: '企业管理模块',
-      description: '编辑首页企业管理模块的卡片、图标、说明和跳转链接。',
+      description: '每张卡片只需要填写标题和说明，保存后会同步到首页。',
       editableKeys: ['featureCards'],
       moduleHelp: {
         featureCards: '显示在首页企业管理模块区域，建议保持 4 个卡片。'
       },
       loadingText: '企业管理模块加载中...',
       saveSuccessText: '企业管理模块已保存',
-      saveButtonText: '保存企业管理模块'
+      saveButtonText: '保存企业管理模块',
+      hideModuleSelector: true,
+      hidePublishSwitch: true,
+      hideBaseSettings: true,
+      featureCardsEditorMode: 'simpleEnterprise'
     }
   },
   products: {

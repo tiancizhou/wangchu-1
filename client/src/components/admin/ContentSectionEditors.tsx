@@ -29,8 +29,37 @@ export const sectionNames: Record<string, string> = {
   contactPanel: '咨询页顾问信息'
 };
 
-export function FeatureCardsEditor({ items, onUpdate, onChange }: { items: FeatureItem[]; onUpdate: (index: number, patch: Partial<FeatureItem>) => void; onChange: (items: FeatureItem[]) => void }) {
+export function FeatureCardsEditor({ items, onUpdate, onChange, mode = 'default' }: { items: FeatureItem[]; onUpdate: (index: number, patch: Partial<FeatureItem>) => void; onChange: (items: FeatureItem[]) => void; mode?: 'default' | 'simpleEnterprise' }) {
+  if (mode === 'simpleEnterprise') return <SimpleEnterpriseCardsEditor items={items} onUpdate={onUpdate} />;
   return <div className="admin-subsection"><h2>企业管理模块</h2><p className="field-help">建议保持 4 个卡片，标题尽量简短，说明控制在一两句话。</p>{items.map((item, index) => <div className="content-item-editor" key={index}><h3>卡片 {index + 1}</h3><div className="inline-editor inline-editor-four"><label>图标符号<input placeholder="例如 ✥、●" value={item.icon || ''} onChange={(e) => onUpdate(index, { icon: e.target.value })} /></label><label>卡片标题<input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></label><label>点击后打开的页面<input placeholder="例如 /consult" value={item.linkUrl || ''} onChange={(e) => onUpdate(index, { linkUrl: e.target.value })} /></label><button type="button" onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>删除卡片</button></div><label>卡片说明<textarea value={item.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} /></label></div>)}<button type="button" onClick={() => onChange([...items, { title: '', description: '', icon: '✥', linkUrl: '/consult' }])}>新增模块卡片</button></div>;
+}
+
+function SimpleEnterpriseCardsEditor({ items, onUpdate }: { items: FeatureItem[]; onUpdate: (index: number, patch: Partial<FeatureItem>) => void }) {
+  return (
+    <div className="admin-subsection simple-enterprise-editor">
+      <div className="section-editor-title">
+        <div><h2>编辑首页卡片</h2><p className="field-help">每张卡片只需要填写标题和说明。建议保持 4 张卡片，保存后会同步到首页。</p></div>
+      </div>
+      <div className="simple-enterprise-card-list">
+        {items.map((item, index) => (
+          <article className="content-item-editor simple-enterprise-card" key={index}>
+            <div className="simple-enterprise-fields">
+              <h3>第 {index + 1} 张卡片</h3>
+              <label>首页显示标题<input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></label>
+              <label>首页显示说明<textarea value={item.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} /></label>
+            </div>
+            <div className="simple-card-preview" aria-label={`第 ${index + 1} 张卡片预览`}>
+              <b>{item.icon || '✥'}</b>
+              <h4>{item.title || `卡片 ${index + 1}`}</h4>
+              <p>{item.description || '这里会显示首页卡片说明。'}</p>
+              <span>了解更多</span>
+            </div>
+          </article>
+        ))}
+      </div>
+      {items.length === 0 && <p className="empty-state">还没有卡片，请到首页内容管理中恢复默认卡片。</p>}
+    </div>
+  );
 }
 
 export function SupportModuleEditor({ tabs, onUpdate, onChange }: { tabs: SupportTab[]; onUpdate: (index: number, patch: Partial<SupportTab>) => void; onChange: (tabs: SupportTab[]) => void }) {
