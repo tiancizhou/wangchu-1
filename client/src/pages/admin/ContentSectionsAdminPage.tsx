@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { App, Alert, Button, Card, Col, Form, Input, List, Row, Space, Switch, Tag, Typography } from 'antd';
 import { adminContentSections, saveContentSection } from '../../api/adminApi';
-import { AboutEditor, ContactPanelEditor, FeatureCardsEditor, GenericItemsEditor, ProcessModuleEditor, sectionNames, SupportModuleEditor, type AboutData, type ContactPanelData, type FeatureItem, type ProcessItem, type SectionData, type SupportTab } from '../../components/admin/ContentSectionEditors';
+import { AboutEditor, ContactInfoEditor, ContactPanelEditor, FeatureCardsEditor, GenericItemsEditor, ProcessModuleEditor, sectionNames, SupportModuleEditor, type AboutData, type ContactInfoData, type ContactPanelData, type FeatureItem, type ProcessItem, type SectionData, type SupportTab } from '../../components/admin/ContentSectionEditors';
 import type { ContentSection } from '../../api/publicApi';
 import { PageHeader } from '../../admin/components';
 
@@ -188,6 +188,7 @@ export function ContentSectionsAdminPage({ config = homeContentConfig }: { confi
                   {editing.sectionKey === 'advantages' && <GenericItemsEditor title="加盟优势" help="这些内容显示在产品中心的合作优势区域。" items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}
                   {editing.sectionKey === 'benefits' && <GenericItemsEditor title="加盟福利" help="这些内容显示在产品中心的合作支持区域。" items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}
                   {editing.sectionKey === 'contactPanel' && <ContactPanelEditor data={editing.data as ContactPanelData} onChange={setData} />}
+                  {editing.sectionKey === 'contactInfo' && <ContactInfoEditor data={editing.data as ContactInfoData} onChange={setData} />}
                   <Card><Space><Button type="primary" htmlType="submit" loading={saving}>{saving ? '保存中...' : (config.saveButtonText || '保存内容')}</Button><Typography.Text type={dirty ? 'warning' : 'success'}>{dirty ? '有未保存的修改' : '当前内容已保存'}</Typography.Text></Space></Card>
                 </Space>
               </form>

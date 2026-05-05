@@ -124,6 +124,21 @@ const contentSections = [
       buttonText: '在线咨询',
       industryOptions: ['汽车后市场', '工业设备', '渠道代理', '其他']
     }
+  },
+  {
+    pageKey: 'contact',
+    sectionKey: 'contactInfo',
+    title: '联系我们',
+    subtitle: '',
+    data: {
+      mapImageUrl: '',
+      items: [
+        { label: '公司地址', value: '北京市大兴区科创五街38号院' },
+        { label: '联系电话', value: '0519-68288220' },
+        { label: '服务热线', value: '0519-68288220' },
+        { label: '电子邮箱', value: 'service@example.com' }
+      ]
+    }
   }
 ];
 

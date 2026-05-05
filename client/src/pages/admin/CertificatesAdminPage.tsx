@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { App, Button, Card, Col, InputNumber, Row, Space, Statistic, Switch, Tag, Typography } from 'antd';
+import { useSearchParams } from 'react-router-dom';
+import { App, Button, Card, Col, InputNumber, Row, Space, Statistic, Switch, Tabs, Tag, Typography } from 'antd';
 import { adminCertificates, adminContentSection, deleteCertificate, saveCertificate, saveContentSection } from '../../api/adminApi';
 import type { Certificate, ContentSection } from '../../api/publicApi';
 import { ConfirmButton, DragHandle, DraggableList, Dropzone, PageHeader } from '../../admin/components';
@@ -8,8 +9,15 @@ import { normalizeHomeCertificateImages, type HomeCertificateImage } from '../..
 const defaultTitle = '荣誉资质';
 type CertificateSidebarData = { imageUrl?: string };
 type HomeCertificateSectionData = { images?: HomeCertificateImage[] };
+type TabKey = 'home' | 'detail';
+
+function getActiveTab(value: string | null): TabKey {
+  return value === 'detail' ? 'detail' : 'home';
+}
 
 export function CertificatesAdminPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = getActiveTab(searchParams.get('tab'));
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [homeCertificateSection, setHomeCertificateSection] = useState<ContentSection<HomeCertificateSectionData> | null>(null);
   const [sidebar, setSidebar] = useState<ContentSection<CertificateSidebarData> | null>(null);
@@ -37,6 +45,10 @@ export function CertificatesAdminPage() {
   }
 
   useEffect(() => { load(); }, []);
+
+  function onTabChange(key: string) {
+    setSearchParams(key === 'detail' ? { tab: 'detail' } : {});
+  }
 
   function markSaving(id: string, saving: boolean) {
     setSavingIds((ids) => saving ? [...new Set([...ids, id])] : ids.filter((item) => item !== id));
@@ -182,81 +194,113 @@ export function CertificatesAdminPage() {
   const homeCertificateImages = normalizeHomeCertificateImages(homeCertificateSection?.data.images);
   const publishedCount = certificates.filter((item) => item.isPublished).length;
 
+  function renderHomeTab() {
+    return (
+      <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Card title="上传首页荣誉图片">
+          <Dropzone value="" multiple onChange={() => {}} onMultipleChange={onHomeImagesUploaded} hint="用于首页荣誉资质展示，建议上传横向组合图" />
+        </Card>
+        {loading && <Card><Typography.Text type="secondary">首页荣誉图片加载中...</Typography.Text></Card>}
+        {!loading && homeCertificateImages.length === 0 && <Card><Typography.Text type="secondary">还没有首页荣誉图片，请先上传图片。</Typography.Text></Card>}
+        {homeCertificateImages.length > 0 && (
+          <Card title="首页荣誉图片列表" loading={savingIds.includes('home-certificates')}>
+            <DraggableList
+              items={homeCertificateImages}
+              getItemId={(image) => image.id}
+              onReorder={saveHomeCertificateImages}
+              renderItem={(image, index, dragHandle) => (
+                <Card size="small">
+                  <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(220px, 360px) 1fr auto', gap: 16, alignItems: 'center' }}>
+                    <DragHandle dragHandle={dragHandle} />
+                    <img src={image.imageUrl} alt={image.title} style={{ width: '100%', maxHeight: 140, objectFit: 'contain', background: '#f8fafc' }} />
+                    <Space direction="vertical">
+                      <Typography.Text strong>首页荣誉图片 #{index + 1}</Typography.Text>
+                      <Switch checked={Boolean(image.isPublished)} onChange={(checked) => saveHomeCertificateImages(homeCertificateImages.map((item) => item.id === image.id ? { ...item, isPublished: checked } : item))} checkedChildren="显示" unCheckedChildren="隐藏" />
+                    </Space>
+                    <Space>
+                      <Dropzone value={image.imageUrl} onChange={(url) => saveHomeCertificateImages(homeCertificateImages.map((item) => item.id === image.id ? { ...item, imageUrl: url } : item))} />
+                      <ConfirmButton danger title="确定删除这张首页荣誉图片吗？" onConfirm={() => saveHomeCertificateImages(homeCertificateImages.filter((item) => item.id !== image.id))}>删除</ConfirmButton>
+                    </Space>
+                  </div>
+                </Card>
+              )}
+            />
+          </Card>
+        )}
+      </Space>
+    );
+  }
+
+  function renderDetailTab() {
+    return (
+      <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}><Card><Statistic title="全部图片" value={certificates.length} /></Card></Col>
+          <Col xs={24} md={8}><Card><Statistic title="前台显示" value={publishedCount} /></Card></Col>
+          <Col xs={24} md={8}><Card><Statistic title="待保存" value={dirtyIds.length} /></Card></Col>
+        </Row>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} lg={12}><Card title="详情页左侧图片" loading={savingIds.includes('sidebar')}><Dropzone value={sidebar?.data.imageUrl} onChange={saveSidebarImage} /></Card></Col>
+          <Col xs={24} lg={12}><Card title="上传详情页证书图片" loading={savingIds.includes('batch')}><Dropzone value="" multiple onChange={() => {}} onMultipleChange={onImagesUploaded} hint="用于荣誉资质详情页列表，建议上传纵向证书图" /></Card></Col>
+        </Row>
+        {loading && <Card><Typography.Text type="secondary">资质详情页图片加载中...</Typography.Text></Card>}
+        {!loading && certificates.length === 0 && <Card><Typography.Text type="secondary">还没有资质详情页证书图片，请先上传图片。</Typography.Text></Card>}
+        {!loading && certificates.length > 0 && (
+          <Card title="详情页证书图片列表">
+            <DraggableList
+              items={certificates}
+              getItemId={(certificate) => certificate.id}
+              onReorder={reorderCertificates}
+              renderItem={(certificate, index, dragHandle) => {
+                const saving = savingIds.includes(certificate.id);
+                const dirty = dirtyIds.includes(certificate.id);
+                return (
+                  <Card>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(140px, 220px) 1fr auto', gap: 16, alignItems: 'center' }}>
+                      <DragHandle dragHandle={dragHandle} />
+                      <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', background: '#f8fafc', minHeight: 120, display: 'grid', placeItems: 'center' }}>
+                        {certificate.imageUrl ? <img src={certificate.imageUrl} alt="荣誉资质" style={{ width: '100%', maxHeight: 160, objectFit: 'cover' }} /> : <Typography.Text type="secondary">暂无图片</Typography.Text>}
+                        <Tag color={certificate.isPublished ? 'success' : 'default'} style={{ position: 'absolute', right: 8, top: 8 }}>{certificate.isPublished ? '前台显示' : '暂不显示'}</Tag>
+                      </div>
+                      <Space direction="vertical" style={{ width: '100%' }}>
+                        <Typography.Text strong>详情页证书 #{index + 1}</Typography.Text>
+                        <Space wrap>
+                          <span>排序</span><InputNumber value={certificate.sortOrder || 0} onChange={(value) => updateCertificate(certificate.id, { sortOrder: Number(value ?? 0) })} />
+                          <Switch checked={Boolean(certificate.isPublished)} onChange={(checked) => updateCertificate(certificate.id, { isPublished: checked })} checkedChildren="显示" unCheckedChildren="隐藏" />
+                          {dirty && <Tag color="warning">待保存</Tag>}
+                        </Space>
+                        <Dropzone value={certificate.imageUrl} onChange={(url) => updateCertificate(certificate.id, { imageUrl: url })} />
+                      </Space>
+                      <Space>
+                        <Button loading={saving} onClick={() => saveOne(certificate)}>{dirty ? '保存' : '已保存'}</Button>
+                        <ConfirmButton danger disabled={saving} title="确定删除这张资质详情页证书图片吗？" onConfirm={() => onDelete(certificate)}>删除</ConfirmButton>
+                      </Space>
+                    </div>
+                  </Card>
+                );
+              }}
+            />
+          </Card>
+        )}
+      </Space>
+    );
+  }
+
   return (
     <div>
-      <PageHeader title="荣誉资质" description="上传和维护网站展示的证书、资质和荣誉图片。" extra={<Button type="primary" disabled={dirtyIds.length === 0} loading={savingIds.includes('dirty')} onClick={saveDirtyCertificates}>保存全部修改</Button>} />
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} md={8}><Card><Statistic title="全部图片" value={certificates.length} /></Card></Col>
-        <Col xs={24} md={8}><Card><Statistic title="前台显示" value={publishedCount} /></Card></Col>
-        <Col xs={24} md={8}><Card><Statistic title="待保存" value={dirtyIds.length} /></Card></Col>
-      </Row>
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} lg={12}><Card title="首页荣誉资质横向图片"><Dropzone value="" multiple onChange={() => {}} onMultipleChange={onHomeImagesUploaded} hint="用于首页荣誉资质展示，建议上传横向组合图" /></Card></Col>
-        <Col xs={24} lg={12}><Card title="资质详情页左侧图片"><Dropzone value={sidebar?.data.imageUrl} onChange={saveSidebarImage} /></Card></Col>
-      </Row>
-      {homeCertificateImages.length > 0 && (
-        <Card title="首页荣誉资质横向图片" style={{ marginBottom: 16 }}>
-          <DraggableList
-            items={homeCertificateImages}
-            getItemId={(image) => image.id}
-            onReorder={saveHomeCertificateImages}
-            renderItem={(image, index, dragHandle) => (
-              <Card size="small">
-                <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(220px, 360px) 1fr auto', gap: 16, alignItems: 'center' }}>
-                  <DragHandle dragHandle={dragHandle} />
-                  <img src={image.imageUrl} alt={image.title} style={{ width: '100%', maxHeight: 140, objectFit: 'contain', background: '#f8fafc' }} />
-                  <Space direction="vertical">
-                    <Typography.Text strong>首页荣誉资质 #{index + 1}</Typography.Text>
-                    <Switch checked={Boolean(image.isPublished)} onChange={(checked) => saveHomeCertificateImages(homeCertificateImages.map((item) => item.id === image.id ? { ...item, isPublished: checked } : item))} checkedChildren="显示" unCheckedChildren="隐藏" />
-                  </Space>
-                  <Space>
-                    <Dropzone value={image.imageUrl} onChange={(url) => saveHomeCertificateImages(homeCertificateImages.map((item) => item.id === image.id ? { ...item, imageUrl: url } : item))} />
-                    <ConfirmButton danger title="确定删除这张首页荣誉资质图片吗？" onConfirm={() => saveHomeCertificateImages(homeCertificateImages.filter((item) => item.id !== image.id))}>删除</ConfirmButton>
-                  </Space>
-                </div>
-              </Card>
-            )}
-          />
-        </Card>
-      )}
-      <Card title="上传资质详情页证书图片" style={{ marginBottom: 16 }}><Dropzone value="" multiple onChange={() => {}} onMultipleChange={onImagesUploaded} hint="用于荣誉资质详情页列表，建议上传纵向证书图" /></Card>
-      {loading && <Card><Typography.Text type="secondary">荣誉资质加载中...</Typography.Text></Card>}
-      {!loading && certificates.length === 0 && <Card><Typography.Text type="secondary">还没有荣誉资质图片，请先上传图片。</Typography.Text></Card>}
-      {!loading && certificates.length > 0 && (
-        <DraggableList
-          items={certificates}
-          getItemId={(certificate) => certificate.id}
-          onReorder={reorderCertificates}
-          renderItem={(certificate, index, dragHandle) => {
-            const saving = savingIds.includes(certificate.id);
-            const dirty = dirtyIds.includes(certificate.id);
-            return (
-              <Card>
-                <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(140px, 220px) 1fr auto', gap: 16, alignItems: 'center' }}>
-                  <DragHandle dragHandle={dragHandle} />
-                  <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', background: '#f8fafc', minHeight: 120, display: 'grid', placeItems: 'center' }}>
-                    {certificate.imageUrl ? <img src={certificate.imageUrl} alt="荣誉资质" style={{ width: '100%', maxHeight: 160, objectFit: 'cover' }} /> : <Typography.Text type="secondary">暂无图片</Typography.Text>}
-                    <Tag color={certificate.isPublished ? 'success' : 'default'} style={{ position: 'absolute', right: 8, top: 8 }}>{certificate.isPublished ? '前台显示' : '暂不显示'}</Tag>
-                  </div>
-                  <Space direction="vertical" style={{ width: '100%' }}>
-                    <Typography.Text strong>荣誉资质 #{index + 1}</Typography.Text>
-                    <Space wrap>
-                      <span>排序</span><InputNumber value={certificate.sortOrder || 0} onChange={(value) => updateCertificate(certificate.id, { sortOrder: Number(value ?? 0) })} />
-                      <Switch checked={Boolean(certificate.isPublished)} onChange={(checked) => updateCertificate(certificate.id, { isPublished: checked })} checkedChildren="显示" unCheckedChildren="隐藏" />
-                      {dirty && <Tag color="warning">待保存</Tag>}
-                    </Space>
-                    <Dropzone value={certificate.imageUrl} onChange={(url) => updateCertificate(certificate.id, { imageUrl: url })} />
-                  </Space>
-                  <Space>
-                    <Button loading={saving} onClick={() => saveOne(certificate)}>{dirty ? '保存' : '已保存'}</Button>
-                    <ConfirmButton danger disabled={saving} title="确定删除这张荣誉资质图片吗？" onConfirm={() => onDelete(certificate)}>删除</ConfirmButton>
-                  </Space>
-                </div>
-              </Card>
-            );
-          }}
-        />
-      )}
+      <PageHeader
+        title="荣誉资质"
+        description="分别维护首页荣誉展示图片和荣誉资质详情页图片。"
+        extra={activeTab === 'detail' ? <Button type="primary" disabled={dirtyIds.length === 0} loading={savingIds.includes('dirty')} onClick={saveDirtyCertificates}>保存全部修改</Button> : undefined}
+      />
+      <Tabs
+        activeKey={activeTab}
+        onChange={onTabChange}
+        items={[
+          { key: 'home', label: '首页荣誉图片', children: renderHomeTab() },
+          { key: 'detail', label: '资质详情页图片', children: renderDetailTab() }
+        ]}
+      />
     </div>
   );
 }

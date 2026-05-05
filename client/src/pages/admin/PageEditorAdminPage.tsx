@@ -159,6 +159,29 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       hidePageChrome: true
     }
   },
+  contact: {
+    title: '联系我们',
+    publicLocation: '/contact',
+    description: '管理联系我们页面的地图图片、地址、电话、邮箱等联系信息。',
+    tools: [],
+    contentConfig: {
+      pageKey: 'contact',
+      title: '联系我们页面内容',
+      description: '编辑联系我们页面左侧联系信息和右侧地图图片。',
+      editableKeys: ['contactInfo'],
+      moduleHelp: {
+        contactInfo: '显示在联系我们页面的联系信息条和地图图片。建议保持 4 条联系信息。'
+      },
+      loadingText: '联系我们内容加载中...',
+      emptyText: '还没有联系我们内容模块，请先运行初始化数据。',
+      saveSuccessText: '联系我们内容已保存',
+      saveButtonText: '保存联系我们内容',
+      hideModuleSelector: true,
+      hideBaseSettings: true,
+      hideEditorHeader: true,
+      hidePageChrome: true
+    }
+  },
   about: {
     title: '关于我们',
     publicLocation: '/#about、/certificates',

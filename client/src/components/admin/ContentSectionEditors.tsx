@@ -6,11 +6,14 @@ export type SupportTab = { title?: string; heading?: string; description?: strin
 export type ProcessItem = { title?: string; description?: string; imageUrl?: string };
 export type AboutData = { imageUrl?: string; body?: string; linkUrl?: string };
 export type ContactPanelData = { consultantName?: string; consultantTitle?: string; consultantAvatarUrl?: string; description?: string; buttonText?: string; industryOptions?: string[] };
+export type ContactInfoItem = { label?: string; value?: string };
+export type ContactInfoData = { mapImageUrl?: string; items?: ContactInfoItem[] };
 export type SectionData = {
-  items?: FeatureItem[] | ProcessItem[];
+  items?: FeatureItem[] | ProcessItem[] | ContactInfoItem[];
   tabs?: SupportTab[];
   imageUrl?: string;
   backgroundImageUrl?: string;
+  mapImageUrl?: string;
   body?: string;
   linkUrl?: string;
   consultantName?: string;
@@ -28,7 +31,8 @@ export const sectionNames: Record<string, string> = {
   aboutPreview: '关于我们',
   advantages: '加盟优势',
   benefits: '加盟福利',
-  contactPanel: '咨询页顾问信息'
+  contactPanel: '咨询页顾问信息',
+  contactInfo: '联系我们'
 };
 
 export function FeatureCardsEditor({ items, onUpdate, onChange }: { items: FeatureItem[]; onUpdate: (index: number, patch: Partial<FeatureItem>) => void; onChange: (items: FeatureItem[]) => void; mode?: 'default' | 'simpleEnterprise' }) {
@@ -143,6 +147,47 @@ export function GenericItemsEditor({ title, help, items, onUpdate, onChange }: {
         )}
       />
     </div>
+  );
+}
+
+const defaultContactInfoItems: ContactInfoItem[] = [
+  { label: '公司地址', value: '北京市大兴区科创五街38号院' },
+  { label: '联系电话', value: '0519-68288220' },
+  { label: '服务热线', value: '0519-68288220' },
+  { label: '电子邮箱', value: 'service@example.com' }
+];
+
+function normalizeContactInfoItems(items?: ContactInfoItem[]) {
+  return defaultContactInfoItems.map((fallback, index) => ({
+    label: items?.[index]?.label || fallback.label,
+    value: items?.[index]?.value || fallback.value
+  }));
+}
+
+export function ContactInfoEditor({ data, onChange }: { data: ContactInfoData; onChange: (patch: Partial<SectionData>) => void }) {
+  const items = normalizeContactInfoItems(data.items);
+  const updateItem = (index: number, patch: Partial<ContactInfoItem>) => onChange({ items: items.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item) });
+
+  return (
+    <Row gutter={[16, 16]}>
+      <Col xs={24} xl={10}>
+        <Card title="地图图片">
+          <Dropzone value={data.mapImageUrl} onChange={(mapImageUrl) => onChange({ mapImageUrl })} hint="建议上传 3:2 比例地图坐标图片。" />
+        </Card>
+      </Col>
+      <Col xs={24} xl={14}>
+        <Card title="联系信息">
+          <Space direction="vertical" style={{ width: '100%' }}>
+            {items.map((item, index) => (
+              <Row gutter={12} key={index}>
+                <Col xs={24} md={8}><Form.Item label={`第 ${index + 1} 条标题`}><Input value={item.label || ''} onChange={(e) => updateItem(index, { label: e.target.value })} /></Form.Item></Col>
+                <Col xs={24} md={16}><Form.Item label="内容"><Input value={item.value || ''} onChange={(e) => updateItem(index, { value: e.target.value })} /></Form.Item></Col>
+              </Row>
+            ))}
+          </Space>
+        </Card>
+      </Col>
+    </Row>
   );
 }
 
