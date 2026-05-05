@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { App, Alert, Button, Card, Col, Form, Input, List, Row, Space, Switch, Tag, Typography } from 'antd';
 import { adminContentSections, saveContentSection } from '../../api/adminApi';
 import { AboutEditor, ContactPanelEditor, FeatureCardsEditor, GenericItemsEditor, ProcessModuleEditor, sectionNames, SupportModuleEditor, type AboutData, type ContactPanelData, type FeatureItem, type ProcessItem, type SectionData, type SupportTab } from '../../components/admin/ContentSectionEditors';
 import type { ContentSection } from '../../api/publicApi';
+import { PageHeader } from '../../admin/components';
 
 export type ContentSectionEditorConfig = {
   pageKey: string;
@@ -16,6 +18,8 @@ export type ContentSectionEditorConfig = {
   hideModuleSelector?: boolean;
   hidePublishSwitch?: boolean;
   hideBaseSettings?: boolean;
+  hidePageChrome?: boolean;
+  hideEditorHeader?: boolean;
   featureCardsEditorMode?: 'default' | 'simpleEnterprise';
 };
 
@@ -43,26 +47,35 @@ export function ContentSectionsAdminPage({ config = homeContentConfig }: { confi
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const { modal, message } = App.useApp();
 
-  async function load() {
-    setLoading(true);
-    setError('');
-    try {
-      setSections(await adminContentSections(config.pageKey));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '内容加载失败');
-    } finally {
-      setLoading(false);
+  const configSignature = `${config.pageKey}:${config.editableKeys.join('|')}`;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError('');
+      try {
+        const nextSections = await adminContentSections(config.pageKey);
+        if (!cancelled) setSections(nextSections);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : '内容加载失败');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-  }
+
+    load();
+    return () => { cancelled = true; };
+  }, [config.pageKey]);
 
   useEffect(() => {
     setEditing(null);
     setDirty(false);
-    setMessage('');
-    load();
-  }, [config.pageKey]);
+    setError('');
+  }, [configSignature]);
 
   const visibleSections = useMemo(() => config.editableKeys.map((key) => sections.find((section) => section.sectionKey === key)).filter(Boolean) as ContentSection[], [config.editableKeys, sections]);
 
@@ -73,11 +86,17 @@ export function ContentSectionsAdminPage({ config = homeContentConfig }: { confi
   }, [editing, loading, visibleSections]);
 
   function edit(section: ContentSection) {
-    if (dirty && !confirm('当前内容还没有保存，确定切换到其他模块吗？')) return;
     setEditing(structuredClone(section) as ContentSection<SectionData>);
     setDirty(false);
     setError('');
-    setMessage('');
+  }
+
+  function requestEdit(section: ContentSection) {
+    if (!dirty) {
+      edit(section);
+      return;
+    }
+    modal.confirm({ title: '当前内容还没有保存，确定切换到其他模块吗？', okText: '切换', cancelText: '继续编辑', onOk: () => edit(section) });
   }
 
   function updateEditing(section: ContentSection<SectionData>) {
@@ -115,7 +134,7 @@ export function ContentSectionsAdminPage({ config = homeContentConfig }: { confi
     setError('');
     try {
       const saved = await saveContentSection(editing);
-      setMessage(config.saveSuccessText || '内容已保存');
+      message.success(config.saveSuccessText || '内容已保存');
       setDirty(false);
       setSections((items) => items.map((item) => item.id === saved.id ? saved : item));
       setEditing(structuredClone(saved) as ContentSection<SectionData>);
@@ -127,65 +146,55 @@ export function ContentSectionsAdminPage({ config = homeContentConfig }: { confi
   }
 
   return (
-    <section className="admin-panel content-sections-page">
-      <div className="admin-title-block content-sections-title">
-        <span className="page-editor-label">内容模块</span>
-        <h1>{config.title}</h1>
-        <p>{config.description}</p>
-      </div>
-      {error && <p className="error">{error}</p>}
-      {message && <p className="success">{message}</p>}
-      {loading && <p className="page-loading">{config.loadingText || '内容加载中...'}</p>}
-
-      {!loading && visibleSections.length === 0 && <p className="empty-state">{config.emptyText || '还没有可编辑的内容模块，请先运行初始化数据。'}</p>}
-
+    <div>
+      {!config.hidePageChrome && <PageHeader title={config.title} description={config.description} />}
+      {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
+      {loading && <Card><Typography.Text type="secondary">{config.loadingText || '内容加载中...'}</Typography.Text></Card>}
+      {!loading && visibleSections.length === 0 && <Card><Typography.Text type="secondary">{config.emptyText || '还没有可编辑的内容模块，请先运行初始化数据。'}</Typography.Text></Card>}
       {!loading && visibleSections.length > 0 && (
-        <div className={config.hideModuleSelector ? 'content-editor-layout content-editor-layout-simple' : 'content-editor-layout'}>
+        <Row gutter={[16, 16]}>
           {!config.hideModuleSelector && (
-            <aside className="content-editor-sidebar">
-              <div className="content-editor-sidebar-title"><h2>选择模块</h2><p>点击左侧模块，右侧立即编辑。</p></div>
-              {visibleSections.map((section, index) => (
-                <button className={editing?.id === section.id ? 'content-editor-nav-item active' : 'content-editor-nav-item'} type="button" onClick={() => edit(section)} key={section.id}>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <div><strong>{sectionNames[section.sectionKey] || section.title}</strong><small>{config.moduleHelp[section.sectionKey] || '用于维护网站页面上的一块内容。'}</small></div>
-                  <em>{section.isPublished ? '显示中' : '已隐藏'}</em>
-                </button>
-              ))}
-            </aside>
+            <Col xs={24} lg={7}>
+              <Card title="选择模块">
+                <List
+                  dataSource={visibleSections}
+                  renderItem={(section, index) => (
+                    <List.Item onClick={() => requestEdit(section)} style={{ cursor: 'pointer', padding: 12, borderRadius: 10, background: editing?.id === section.id ? 'rgba(22,119,255,0.08)' : undefined }}>
+                      <List.Item.Meta title={<Space><Typography.Text>{String(index + 1).padStart(2, '0')}</Typography.Text><Typography.Text strong>{sectionNames[section.sectionKey] || section.title}</Typography.Text></Space>} description={config.moduleHelp[section.sectionKey] || '用于维护网站页面上的一块内容。'} />
+                      <Tag color={section.isPublished ? 'success' : 'default'}>{section.isPublished ? '显示中' : '已隐藏'}</Tag>
+                    </List.Item>
+                  )}
+                />
+              </Card>
+            </Col>
           )}
-
-          <div className="content-editor-pane">
+          <Col xs={24} lg={config.hideModuleSelector ? 24 : 17}>
             {editing && (
-              <form className="admin-form content-editor-form" onSubmit={save}>
-                <div className="content-editor-pane-head">
-                  <div><span className="page-editor-label">正在编辑</span><h2>{sectionNames[editing.sectionKey] || editing.sectionKey}</h2><p>{config.moduleHelp[editing.sectionKey] || '修改这个模块在网站上的展示内容。'}</p></div>
-                  {(!config.hidePublishSwitch || !editing.isPublished) && <label className="content-publish-switch"><input type="checkbox" checked={editing.isPublished} onChange={(e) => updateEditing({ ...editing, isPublished: e.target.checked })} /><span />在网站显示</label>}
-                </div>
-
-                {!config.hideBaseSettings && (
-                  <div className="admin-subsection content-base-settings">
-                    <h2>模块基础设置</h2>
-                    <div className="content-base-grid">
-                      <label>模块标题<input value={editing.title || ''} onChange={(e) => updateEditing({ ...editing, title: e.target.value })} /></label>
-                      <label>模块副标题<input value={editing.subtitle || ''} onChange={(e) => updateEditing({ ...editing, subtitle: e.target.value })} /></label>
-                    </div>
-                  </div>
-                )}
-
-                {editing.sectionKey === 'featureCards' && <FeatureCardsEditor items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} mode={config.featureCardsEditorMode} />}
-                {editing.sectionKey === 'supportModule' && <SupportModuleEditor tabs={editing.data.tabs || []} onUpdate={updateSupportTab} onChange={(tabs) => setData({ tabs })} />}
-                {editing.sectionKey === 'processModule' && <ProcessModuleEditor items={(editing.data.items || []) as ProcessItem[]} backgroundImageUrl={editing.data.backgroundImageUrl} onUpdate={updateProcessItem} onChange={(items) => setData({ items })} onBackgroundChange={(backgroundImageUrl) => setData({ backgroundImageUrl })} />}
-                {editing.sectionKey === 'aboutPreview' && <AboutEditor data={editing.data as AboutData} onChange={setData} />}
-                {editing.sectionKey === 'advantages' && <GenericItemsEditor title="加盟优势" help="这些内容显示在产品中心的合作优势区域。" items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}
-                {editing.sectionKey === 'benefits' && <GenericItemsEditor title="加盟福利" help="这些内容显示在产品中心的合作支持区域。" items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}
-                {editing.sectionKey === 'contactPanel' && <ContactPanelEditor data={editing.data as ContactPanelData} onChange={setData} />}
-
-                <div className="content-editor-save-bar"><button disabled={saving}>{saving ? '保存中...' : (config.saveButtonText || '保存内容')}</button>{dirty ? <span>有未保存的修改</span> : <span>当前内容已保存</span>}</div>
+              <form onSubmit={save}>
+                <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                  {(!config.hideEditorHeader || !config.hidePublishSwitch || !editing.isPublished) && (
+                    <Card>
+                      <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }}>
+                        {!config.hideEditorHeader && <div><Typography.Text type="secondary">正在编辑</Typography.Text><Typography.Title level={4} style={{ margin: 0 }}>{sectionNames[editing.sectionKey] || editing.sectionKey}</Typography.Title><Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>{config.moduleHelp[editing.sectionKey] || '修改这个模块在网站上的展示内容。'}</Typography.Paragraph></div>}
+                        {(!config.hidePublishSwitch || !editing.isPublished) && <Space><Switch checked={editing.isPublished} onChange={(checked) => updateEditing({ ...editing, isPublished: checked })} />在网站显示</Space>}
+                      </Space>
+                    </Card>
+                  )}
+                  {!config.hideBaseSettings && <Card title="模块基础设置"><Row gutter={16}><Col xs={24} md={12}><Form.Item label="模块标题"><Input value={editing.title || ''} onChange={(e) => updateEditing({ ...editing, title: e.target.value })} /></Form.Item></Col><Col xs={24} md={12}><Form.Item label="模块副标题"><Input value={editing.subtitle || ''} onChange={(e) => updateEditing({ ...editing, subtitle: e.target.value })} /></Form.Item></Col></Row></Card>}
+                  {editing.sectionKey === 'featureCards' && <FeatureCardsEditor items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} mode={config.featureCardsEditorMode} />}
+                  {editing.sectionKey === 'supportModule' && <SupportModuleEditor tabs={editing.data.tabs || []} onUpdate={updateSupportTab} onChange={(tabs) => setData({ tabs })} />}
+                  {editing.sectionKey === 'processModule' && <ProcessModuleEditor items={(editing.data.items || []) as ProcessItem[]} backgroundImageUrl={editing.data.backgroundImageUrl} onUpdate={updateProcessItem} onChange={(items) => setData({ items })} onBackgroundChange={(backgroundImageUrl) => setData({ backgroundImageUrl })} />}
+                  {editing.sectionKey === 'aboutPreview' && <AboutEditor data={editing.data as AboutData} onChange={setData} />}
+                  {editing.sectionKey === 'advantages' && <GenericItemsEditor title="加盟优势" help="这些内容显示在产品中心的合作优势区域。" items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}
+                  {editing.sectionKey === 'benefits' && <GenericItemsEditor title="加盟福利" help="这些内容显示在产品中心的合作支持区域。" items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}
+                  {editing.sectionKey === 'contactPanel' && <ContactPanelEditor data={editing.data as ContactPanelData} onChange={setData} />}
+                  <Card><Space><Button type="primary" htmlType="submit" loading={saving}>{saving ? '保存中...' : (config.saveButtonText || '保存内容')}</Button><Typography.Text type={dirty ? 'warning' : 'success'}>{dirty ? '有未保存的修改' : '当前内容已保存'}</Typography.Text></Space></Card>
+                </Space>
               </form>
             )}
-          </div>
-        </div>
+          </Col>
+        </Row>
       )}
-    </section>
+    </div>
   );
 }

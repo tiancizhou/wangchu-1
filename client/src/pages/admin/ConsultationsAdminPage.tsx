@@ -1,19 +1,66 @@
 import { useEffect, useState } from 'react';
+import { App, Button, Drawer, Form, Input, Select, Tag } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { adminConsultations, updateConsultation, type ConsultationSubmission } from '../../api/adminApi';
+import { PageHeader, SearchableTable } from '../../admin/components';
+
+const statusLabels: Record<string, string> = {
+  new: '新提交',
+  contacted: '已联系',
+  closed: '已关闭'
+};
+
+const statusOptions = Object.entries(statusLabels).map(([value, label]) => ({ value, label }));
 
 export function ConsultationsAdminPage() {
   const [items, setItems] = useState<ConsultationSubmission[]>([]);
   const [editing, setEditing] = useState<ConsultationSubmission | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form] = Form.useForm<Pick<ConsultationSubmission, 'status' | 'adminNote'>>();
+  const { message } = App.useApp();
 
   async function load() { setItems(await adminConsultations()); }
-  useEffect(() => { load(); }, []);
 
-  async function save() {
+  useEffect(() => { load().catch((err) => message.error(err instanceof Error ? err.message : '咨询记录加载失败')); }, [message]);
+  useEffect(() => { if (editing) form.setFieldsValue({ status: editing.status, adminNote: editing.adminNote }); }, [editing, form]);
+
+  async function save(values: Pick<ConsultationSubmission, 'status' | 'adminNote'>) {
     if (!editing) return;
-    await updateConsultation(editing.id, { status: editing.status, adminNote: editing.adminNote });
-    setEditing(null);
-    await load();
+    setSaving(true);
+    try {
+      await updateConsultation(editing.id, { status: values.status, adminNote: values.adminNote });
+      message.success('处理记录已保存');
+      setEditing(null);
+      await load();
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '处理记录保存失败');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  return <section className="admin-panel"><h1>咨询记录</h1>{editing && <div className="admin-form"><h2>处理记录</h2><p>{editing.name}　{editing.phone}</p><label>状态<select value={editing.status} onChange={(e) => setEditing({ ...editing, status: e.target.value })}><option value="new">新提交</option><option value="contacted">已联系</option><option value="closed">已关闭</option></select></label><label>备注<textarea value={editing.adminNote} onChange={(e) => setEditing({ ...editing, adminNote: e.target.value })} /></label><button onClick={save}>保存处理结果</button></div>}<table className="admin-table"><thead><tr><th>姓名</th><th>电话</th><th>行业</th><th>说明</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody>{items.map((item) => <tr key={item.id}><td>{item.name}</td><td>{item.phone}</td><td>{item.industry}</td><td>{item.message}</td><td>{item.status}</td><td>{new Date(item.createdAt).toLocaleString()}</td><td><button onClick={() => setEditing(item)}>处理</button></td></tr>)}</tbody></table></section>;
+  const columns: ColumnsType<ConsultationSubmission> = [
+    { title: '姓名', dataIndex: 'name' },
+    { title: '电话', dataIndex: 'phone' },
+    { title: '行业', dataIndex: 'industry' },
+    { title: '说明', dataIndex: 'message', ellipsis: true },
+    { title: '状态', dataIndex: 'status', filters: statusOptions.map(({ value, label }) => ({ value, text: label })), onFilter: (value, record) => record.status === value, render: (status: string) => <Tag color={status === 'new' ? 'processing' : status === 'contacted' ? 'success' : 'default'}>{statusLabels[status] || status}</Tag> },
+    { title: '时间', dataIndex: 'createdAt', sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(), render: (value: string) => new Date(value).toLocaleString() },
+    { title: '操作', render: (_, item) => <Button size="small" onClick={() => setEditing(item)}>处理</Button> }
+  ];
+
+  return (
+    <div>
+      <PageHeader title="咨询记录" description="查看客户提交的合作咨询，并记录跟进状态。" />
+      <SearchableTable columns={columns} data={items} rowKey="id" searchableKeys={['name', 'phone', 'industry', 'message']} searchPlaceholder="搜索姓名、电话、行业或说明" mobileRender={(item) => <div><strong>{item.name}</strong><p>{item.phone} · {item.industry}</p><Tag>{statusLabels[item.status] || item.status}</Tag><Button size="small" onClick={() => setEditing(item)}>处理</Button></div>} />
+      <Drawer title="处理咨询记录" open={Boolean(editing)} onClose={() => setEditing(null)} width={420}>
+        {editing && <p>{editing.name}　{editing.phone}</p>}
+        <Form form={form} layout="vertical" onFinish={save}>
+          <Form.Item name="status" label="状态" rules={[{ required: true, message: '请选择状态' }]}><Select options={statusOptions} /></Form.Item>
+          <Form.Item name="adminNote" label="备注"><Input.TextArea rows={5} /></Form.Item>
+          <Button type="primary" htmlType="submit" loading={saving}>保存处理结果</Button>
+        </Form>
+      </Drawer>
+    </div>
+  );
 }

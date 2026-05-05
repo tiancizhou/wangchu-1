@@ -1,38 +1,19 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { App, Button, Card, Col, Form, Input, InputNumber, Row, Select, Space, Switch, Typography } from 'antd';
 import { adminCategories, adminProduct, saveProduct } from '../../api/adminApi';
 import type { Product, ProductCategory, ProductGalleryItem, ProductPerformanceItem } from '../../api/publicApi';
-import { ImageUploader } from '../../components/admin/ImageUploader';
+import { ConfirmButton, Dropzone, PageHeader, SectionCard, SectionCardGroup } from '../../admin/components';
 
 const defaultPerformanceTitle = '稳定的生产表现';
 const defaultPerformanceText = '公司围绕润滑产品建立研发、生产和服务体系，为客户提供可靠产品和持续支持。';
 
 const emptyProduct: Partial<Product> = {
-  name: '',
-  slug: '',
-  categoryName: '工业油品',
-  categoryId: '',
-  coverImageUrl: '',
-  topSubtitle: '',
-  detailTitle: '',
-  detailDescription: '',
-  detailImageUrl: '',
-  productSpecsImageUrl: '',
-  detailGallery: [],
-  performanceTitle: defaultPerformanceTitle,
-  performanceText: defaultPerformanceText,
-  performanceItems: [],
-  sortOrder: 0,
-  isPublished: true
+  name: '', slug: '', categoryName: '工业油品', categoryId: '', coverImageUrl: '', topSubtitle: '', detailTitle: '', detailDescription: '', detailImageUrl: '', productSpecsImageUrl: '', detailGallery: [], performanceTitle: defaultPerformanceTitle, performanceText: defaultPerformanceText, performanceItems: [], sortOrder: 0, isPublished: true
 };
 
 function createSlug(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  return value.toLowerCase().trim().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 export function ProductEditPage() {
@@ -41,45 +22,31 @@ export function ProductEditPage() {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [form] = Form.useForm<Partial<Product>>();
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      setError('');
       try {
         const rows = await adminCategories();
         setCategories(rows);
-        if (id) {
-          setProduct(await adminProduct(id));
-        } else {
-          setProduct({ ...emptyProduct, categoryId: rows[0]?.id || '', categoryName: rows[0]?.name || '工业油品' });
-        }
+        const data = id ? await adminProduct(id) : { ...emptyProduct, categoryId: rows[0]?.id || '', categoryName: rows[0]?.name || '工业油品' };
+        setProduct(data);
+        form.setFieldsValue(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '产品信息加载失败');
+        message.error(err instanceof Error ? err.message : '产品信息加载失败');
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [id]);
+  }, [id, form, message]);
 
   function setField<K extends keyof Product>(key: K, value: Product[K]) {
     setProduct((prev) => ({ ...prev, [key]: value }));
-    setMessage('');
-  }
-
-  function setName(value: string) {
-    setProduct((prev) => ({ ...prev, name: value, slug: prev.slug || createSlug(value) }));
-    setMessage('');
-  }
-
-  function setCategory(categoryId: string) {
-    const category = categories.find((item) => item.id === categoryId);
-    setProduct((prev) => ({ ...prev, categoryId, categoryName: category?.name || prev.categoryName || '工业油品' }));
-    setMessage('');
+    form.setFieldValue(key, value);
   }
 
   function updateGallery(index: number, patch: Partial<ProductGalleryItem>) {
@@ -94,30 +61,16 @@ export function ProductEditPage() {
     setField('performanceItems', nextItems);
   }
 
-  function validate() {
-    if (!product.name?.trim()) return '请填写产品名称';
-    if (!product.categoryId) return '请选择产品分类';
-    return '';
-  }
-
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
-    const validation = validate();
-    if (validation) {
-      setError(validation);
-      return;
-    }
-
+  async function onSubmit(values: Partial<Product>) {
     setSaving(true);
-    setError('');
-    setMessage('');
     try {
-      const category = categories.find((item) => item.id === product.categoryId);
-      const slug = product.slug?.trim() || createSlug(product.name || '') || `product-${Date.now()}`;
-      await saveProduct({ ...product, slug, categoryName: category?.name || product.categoryName || '工业油品' });
+      const category = categories.find((item) => item.id === values.categoryId);
+      const slug = values.slug?.trim() || createSlug(values.name || '') || `product-${Date.now()}`;
+      await saveProduct({ ...product, ...values, slug, categoryName: category?.name || product.categoryName || '工业油品' });
+      message.success('产品已保存');
       navigate('/admin/products');
     } catch (err) {
-      setError(err instanceof Error ? err.message : '产品保存失败，请稍后重试');
+      message.error(err instanceof Error ? err.message : '产品保存失败，请稍后重试');
     } finally {
       setSaving(false);
     }
@@ -125,80 +78,51 @@ export function ProductEditPage() {
 
   const detailGallery = product.detailGallery || [];
   const performanceItems = product.performanceItems || [];
-  const selectedCategory = categories.find((category) => category.id === product.categoryId);
   const saveText = id ? '保存修改' : '创建产品';
 
   return (
-    <section className="admin-panel product-edit-page">
-      <div className="product-edit-hero">
-        <div className="admin-title-block">
-          <span className="page-editor-label">{id ? '产品编辑' : '新建产品'}</span>
-          <h1>{id ? '编辑产品' : '新建产品'}</h1>
-          <p>按照前台详情页截图的区块顺序维护内容：顶部产品信息、产品详情介绍、参数与属性、细节图库、稳定生产表现。</p>
-        </div>
-        <div className={product.isPublished ? 'product-publish-pill active' : 'product-publish-pill'}>{product.isPublished ? '前台显示' : '暂不显示'}</div>
-      </div>
-
-      {loading && <p className="page-loading">产品信息加载中...</p>}
-      {error && <p className="error">{error}</p>}
-      {message && <p className="success">{message}</p>}
-
-      {!loading && (
-        <form className="product-edit-workspace product-edit-linear" onSubmit={onSubmit}>
-          <div className="product-edit-main">
-            <section className="admin-subsection product-edit-card">
-              <div className="product-edit-section-title"><span>01</span><div><h2>顶部产品信息</h2><p>对应详情页最上方的产品图、产品名称、简短说明和咨询按钮。</p></div></div>
-              <div className="product-top-fields-grid">
-                <label>产品名称<input value={product.name || ''} onChange={(e) => setName(e.target.value)} placeholder="例如：王储全合成汽油机油" /></label>
-                <label>产品分类<select value={product.categoryId || ''} onChange={(e) => setCategory(e.target.value)}><option value="">请选择分类</option>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
-                <label>显示顺序<input type="number" value={product.sortOrder || 0} onChange={(e) => setField('sortOrder', Number(e.target.value))} /></label>
-                <label>顶部简短说明<input value={product.topSubtitle || ''} onChange={(e) => setField('topSubtitle', e.target.value)} placeholder="显示在产品名称下方" /></label>
-              </div>
-              <div className="product-intro-editor-grid">
-                <div className="section-media-block"><div className="section-block-title"><h4>顶部产品图</h4><p>显示在详情页顶部左侧，也是产品列表图。</p></div><ImageUploader value={product.coverImageUrl} onChange={(url) => setField('coverImageUrl', url)} /></div>
-                <div className="product-preview-copy"><small>{selectedCategory?.name || '请选择产品分类'}</small><h3>{product.name || '产品名称'}</h3><p>{product.topSubtitle || '顶部简短说明会显示在产品名称下方。'}</p><label className="checkbox"><input type="checkbox" checked={Boolean(product.isPublished)} onChange={(e) => setField('isPublished', e.target.checked)} />前台显示这个产品</label></div>
-              </div>
-              <p className="field-help">数字越小，产品在列表中越靠前。详情页网址会根据产品名称自动生成。</p>
-            </section>
-
-            <section className="admin-subsection product-edit-card">
-              <div className="product-edit-section-title"><span>02</span><div><h2>产品详情介绍</h2><p>对应截图中的详情标题、介绍文字和产品大图。</p></div></div>
-              <div className="product-intro-editor-grid">
-                <div className="section-fields-stack"><label>详情标题<input value={product.detailTitle || ''} onChange={(e) => setField('detailTitle', e.target.value)} placeholder="例如：OMAJIC-UV2030" /></label><label>详情描述<textarea value={product.detailDescription || ''} onChange={(e) => setField('detailDescription', e.target.value)} placeholder="填写详情区域展示的产品介绍文字。" /></label></div>
-                <div className="section-media-block"><div className="section-block-title"><h4>详情大图</h4><p>显示在产品详情介绍下方，可以和顶部产品图不同。</p></div><ImageUploader value={product.detailImageUrl} onChange={(url) => setField('detailImageUrl', url)} /></div>
-              </div>
-            </section>
-
-            <section className="admin-subsection product-edit-card">
-              <div className="product-edit-section-title"><span>03</span><div><h2>产品参数与基本属性</h2><p>客户会上传一张完整设计图，前台按原图比例完整展示。</p></div></div>
-              <div className="product-parameter-image-editor single">
-                <div className="section-media-block parameter-image-card"><div className="section-block-title"><h4>产品参数与基本属性图</h4><p>对应参考图中的完整参数和属性区域，建议上传清晰的白底整图。</p></div><ImageUploader value={product.productSpecsImageUrl} onChange={(url) => setField('productSpecsImageUrl', url)} /></div>
-              </div>
-            </section>
-
-            <section className="admin-subsection product-edit-card">
-              <div className="product-edit-section-title"><span>04</span><div><h2>产品细节图库</h2><p>对应截图中的 6 张产品细节图，每张图都可以填写说明文字。</p></div></div>
-              <div className="product-editor-toolbar"><h3>细节图片</h3><button type="button" disabled={detailGallery.length >= 6} onClick={() => setField('detailGallery', [...detailGallery, { imageUrl: '', caption: '细节' }])}>新增细节图</button></div>
-              <div className="product-gallery-editor-grid">
-                {detailGallery.map((item, index) => <article className="product-gallery-editor-card" key={index}><div className="product-detail-block-head"><span>细节 {index + 1}</span><button type="button" onClick={() => setField('detailGallery', detailGallery.filter((_, itemIndex) => itemIndex !== index))}>删除</button></div><ImageUploader value={item.imageUrl} onChange={(imageUrl) => updateGallery(index, { imageUrl })} /><label>图片说明<input value={item.caption || ''} onChange={(e) => updateGallery(index, { caption: e.target.value })} placeholder="细节" /></label></article>)}
-              </div>
-              {detailGallery.length === 0 && <p className="empty-state">暂未添加产品细节图。截图建议维护 6 张。</p>}
-            </section>
-
-            <section className="admin-subsection product-edit-card">
-              <div className="product-edit-section-title"><span>05</span><div><h2>稳定生产表现</h2><p>对应详情页底部标题、说明文字和 4 个特点图标。</p></div></div>
-              <div className="product-performance-intro-grid"><label>模块标题<input value={product.performanceTitle || ''} onChange={(e) => setField('performanceTitle', e.target.value)} placeholder={defaultPerformanceTitle} /></label><label>模块说明<textarea value={product.performanceText || ''} onChange={(e) => setField('performanceText', e.target.value)} placeholder={defaultPerformanceText} /></label></div>
-              <div className="product-editor-toolbar"><h3>特点图标</h3><button type="button" disabled={performanceItems.length >= 4} onClick={() => setField('performanceItems', [...performanceItems, { icon: '●', title: '', description: '' }])}>新增特点</button></div>
-              <div className="product-performance-editor-grid">
-                {performanceItems.map((item, index) => <article className="product-performance-editor-card" key={index}><div><span>{item.icon || '●'}</span><button type="button" onClick={() => setField('performanceItems', performanceItems.filter((_, itemIndex) => itemIndex !== index))}>删除</button></div><label>图标<input value={item.icon || ''} onChange={(e) => updatePerformanceItem(index, { icon: e.target.value })} placeholder="例如 ●、⚙、▣" /></label><label>标题<input value={item.title || ''} onChange={(e) => updatePerformanceItem(index, { title: e.target.value })} /></label><label>说明<input value={item.description || ''} onChange={(e) => updatePerformanceItem(index, { description: e.target.value })} /></label></article>)}
-              </div>
-              {performanceItems.length === 0 && <p className="empty-state">不填写特点图标时，前台会显示默认特点。</p>}
-            </section>
-          </div>
-
-          <div className="product-save-bar"><div><strong>{product.name || '未命名产品'}</strong><span>{product.isPublished ? '保存后将在前台显示' : '保存后暂不在前台显示'}</span></div><button disabled={saving}>{saving ? '保存中...' : saveText}</button><button type="button" onClick={() => navigate('/admin/products')}>返回产品列表</button></div>
-        </form>
+    <div>
+      <PageHeader title={id ? '编辑产品' : '新建产品'} description="按照前台详情页区块顺序维护产品信息、图片、参数和生产表现。" extra={<Button onClick={() => navigate('/admin/products')}>返回产品列表</Button>} />
+      {loading ? <Card><Typography.Text type="secondary">产品信息加载中...</Typography.Text></Card> : (
+        <Form form={form} layout="vertical" initialValues={emptyProduct} onFinish={onSubmit}>
+          <SectionCardGroup mode="accordion" defaultExpandedIndex={0}>
+            <SectionCard title="顶部产品信息" description="产品图、产品名称、简短说明和咨询按钮。" status={product.isPublished ? 'active' : 'hidden'}>
+              <Row gutter={16}>
+                <Col xs={24} md={12}><Form.Item name="name" label="产品名称" rules={[{ required: true, message: '请填写产品名称' }]}><Input placeholder="例如：王储全合成汽油机油" /></Form.Item></Col>
+                <Col xs={24} md={12}><Form.Item name="categoryId" label="产品分类" rules={[{ required: true, message: '请选择产品分类' }]}><Select options={categories.map((category) => ({ label: category.name, value: category.id }))} /></Form.Item></Col>
+                <Col xs={24} md={12}><Form.Item name="sortOrder" label="显示顺序"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
+                <Col xs={24} md={12}><Form.Item name="topSubtitle" label="顶部简短说明"><Input /></Form.Item></Col>
+                <Col xs={24} md={12}><Form.Item name="slug" label="网址标识"><Input placeholder="不填会根据产品名称生成" /></Form.Item></Col>
+                <Col xs={24} md={12}><Form.Item name="isPublished" label="前台显示" valuePropName="checked"><Switch /></Form.Item></Col>
+              </Row>
+              <Form.Item name="coverImageUrl" label="顶部产品图"><Dropzone value={product.coverImageUrl} onChange={(url) => setField('coverImageUrl', url)} /></Form.Item>
+            </SectionCard>
+            <SectionCard title="产品详情介绍" description="详情标题、介绍文字和产品大图。">
+              <Form.Item name="detailTitle" label="详情标题"><Input placeholder="例如：OMAJIC-UV2030" /></Form.Item>
+              <Form.Item name="detailDescription" label="详情描述"><Input.TextArea rows={5} /></Form.Item>
+              <Form.Item name="detailImageUrl" label="详情大图"><Dropzone value={product.detailImageUrl} onChange={(url) => setField('detailImageUrl', url)} /></Form.Item>
+            </SectionCard>
+            <SectionCard title="产品参数与基本属性" description="上传完整参数与属性图。">
+              <Form.Item name="productSpecsImageUrl" label="产品参数与基本属性图"><Dropzone value={product.productSpecsImageUrl} onChange={(url) => setField('productSpecsImageUrl', url)} /></Form.Item>
+            </SectionCard>
+            <SectionCard title="产品细节图库" description="维护产品细节图和说明。">
+              <Space style={{ marginBottom: 12 }}><Button type="primary" disabled={detailGallery.length >= 6} onClick={() => setField('detailGallery', [...detailGallery, { imageUrl: '', caption: '细节' }])}>新增细节图</Button></Space>
+              <Row gutter={[16, 16]}>
+                {detailGallery.map((item, index) => <Col xs={24} md={12} xl={8} key={index}><Card title={`细节 ${index + 1}`} extra={<ConfirmButton danger size="small" title="确定删除这张细节图吗？" onConfirm={() => setField('detailGallery', detailGallery.filter((_, itemIndex) => itemIndex !== index))}>删除</ConfirmButton>}><Dropzone value={item.imageUrl} onChange={(imageUrl) => updateGallery(index, { imageUrl })} /><Input style={{ marginTop: 12 }} value={item.caption || ''} onChange={(e) => updateGallery(index, { caption: e.target.value })} placeholder="图片说明" /></Card></Col>)}
+              </Row>
+            </SectionCard>
+            <SectionCard title="稳定生产表现" description="底部标题、说明文字和特点图标。">
+              <Form.Item name="performanceTitle" label="模块标题"><Input placeholder={defaultPerformanceTitle} /></Form.Item>
+              <Form.Item name="performanceText" label="模块说明"><Input.TextArea rows={4} placeholder={defaultPerformanceText} /></Form.Item>
+              <Space style={{ marginBottom: 12 }}><Button type="primary" disabled={performanceItems.length >= 4} onClick={() => setField('performanceItems', [...performanceItems, { icon: '●', title: '', description: '' }])}>新增特点</Button></Space>
+              <Row gutter={[16, 16]}>
+                {performanceItems.map((item, index) => <Col xs={24} md={12} xl={6} key={index}><Card title={`特点 ${index + 1}`} extra={<ConfirmButton danger size="small" title="确定删除这个特点吗？" onConfirm={() => setField('performanceItems', performanceItems.filter((_, itemIndex) => itemIndex !== index))}>删除</ConfirmButton>}><Input value={item.icon || ''} onChange={(e) => updatePerformanceItem(index, { icon: e.target.value })} placeholder="图标" /><Input style={{ marginTop: 12 }} value={item.title || ''} onChange={(e) => updatePerformanceItem(index, { title: e.target.value })} placeholder="标题" /><Input style={{ marginTop: 12 }} value={item.description || ''} onChange={(e) => updatePerformanceItem(index, { description: e.target.value })} placeholder="说明" /></Card></Col>)}
+              </Row>
+            </SectionCard>
+          </SectionCardGroup>
+          <Card style={{ marginTop: 16 }}><Space><Button type="primary" htmlType="submit" loading={saving}>{saveText}</Button><Button onClick={() => navigate('/admin/products')}>返回产品列表</Button></Space></Card>
+        </Form>
       )}
-    </section>
+    </div>
   );
 }

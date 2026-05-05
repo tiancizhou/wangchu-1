@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { AdminApp } from './admin/AdminApp';
 import { ProtectedRoute } from './components/admin/ProtectedRoute';
-import { AdminLayout } from './components/layout/AdminLayout';
+import { AdminLayout } from './admin/AdminLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { CertificatesPage } from './pages/CertificatesPage';
 import { ConsultPage } from './pages/ConsultPage';
@@ -13,7 +14,6 @@ import { CertificatesAdminPage } from './pages/admin/CertificatesAdminPage';
 import { ConsultationsAdminPage } from './pages/admin/ConsultationsAdminPage';
 import { ContentSectionsAdminPage } from './pages/admin/ContentSectionsAdminPage';
 import { DashboardPage } from './pages/admin/DashboardPage';
-import { HomeVisualEditorPage } from './pages/admin/HomeVisualEditorPage';
 import { LoginPage } from './pages/admin/LoginPage';
 import { NavigationAdminPage } from './pages/admin/NavigationAdminPage';
 import { PageEditorAdminPage } from './pages/admin/PageEditorAdminPage';
@@ -33,25 +33,29 @@ const router = createBrowserRouter([
       { path: 'certificates', element: <CertificatesPage /> }
     ]
   },
-  { path: '/admin/login', element: <LoginPage /> },
   {
-    path: '/admin',
-    element: <ProtectedRoute />,
-    children: [{ element: <AdminLayout />, children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'page/:page', element: <PageEditorAdminPage /> },
-      { path: 'site', element: <SiteSettingsPage /> },
-      { path: 'navigation', element: <NavigationAdminPage /> },
-      { path: 'home-editor', element: <HomeVisualEditorPage /> },
-      { path: 'content', element: <ContentSectionsAdminPage /> },
-      { path: 'categories', element: <CategoriesAdminPage /> },
-      { path: 'products', element: <ProductsAdminPage /> },
-      { path: 'products/new', element: <ProductEditPage /> },
-      { path: 'products/:id/edit', element: <ProductEditPage /> },
-      { path: 'banners', element: <BannersAdminPage /> },
-      { path: 'certificates', element: <CertificatesAdminPage /> },
-      { path: 'consultations', element: <ConsultationsAdminPage /> }
-    ] }]
+    element: <AdminApp />,
+    children: [
+      { path: '/admin/login', element: <LoginPage /> },
+      {
+        path: '/admin',
+        element: <ProtectedRoute />,
+        children: [{ element: <AdminLayout />, children: [
+          { index: true, element: <DashboardPage /> },
+          { path: 'page/:page', element: <PageEditorAdminPage /> },
+          { path: 'site', element: <SiteSettingsPage /> },
+          { path: 'navigation', element: <NavigationAdminPage /> },
+          { path: 'content', element: <ContentSectionsAdminPage /> },
+          { path: 'categories', element: <CategoriesAdminPage /> },
+          { path: 'products', element: <ProductsAdminPage /> },
+          { path: 'products/new', element: <ProductEditPage /> },
+          { path: 'products/:id/edit', element: <ProductEditPage /> },
+          { path: 'banners', element: <BannersAdminPage /> },
+          { path: 'certificates', element: <CertificatesAdminPage /> },
+          { path: 'consultations', element: <ConsultationsAdminPage /> }
+        ] }]
+      }
+    ]
   }
 ]);
 

@@ -1,4 +1,7 @@
+import { ArrowRightOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Row, Space, Typography } from 'antd';
 import { Link, useParams } from 'react-router-dom';
+import { PageHeader } from '../../admin/components';
 import { ContentSectionsAdminPage, type ContentSectionEditorConfig } from './ContentSectionsAdminPage';
 
 type PageTool = { title: string; description: string; to: string; action: string };
@@ -8,6 +11,7 @@ type PageEditorConfig = {
   description: string;
   tools: PageTool[];
   contentConfig?: ContentSectionEditorConfig;
+  hideHeroDetails?: boolean;
 };
 
 const pageConfigs: Record<string, PageEditorConfig> = {
@@ -39,12 +43,13 @@ const pageConfigs: Record<string, PageEditorConfig> = {
   enterprise: {
     title: '企业管理模块',
     publicLocation: '/',
-    description: '编辑首页企业管理模块中的 4 张卡片，填写标题和说明即可。',
+    description: '',
     tools: [],
+    hideHeroDetails: true,
     contentConfig: {
       pageKey: 'home',
       title: '企业管理模块',
-      description: '每张卡片只需要填写标题和说明，保存后会同步到首页。',
+      description: '',
       editableKeys: ['featureCards'],
       moduleHelp: {
         featureCards: '显示在首页企业管理模块区域，建议保持 4 个卡片。'
@@ -55,6 +60,8 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       hideModuleSelector: true,
       hidePublishSwitch: true,
       hideBaseSettings: true,
+      hidePageChrome: true,
+      hideEditorHeader: true,
       featureCardsEditorMode: 'simpleEnterprise'
     }
   },
@@ -84,46 +91,56 @@ const pageConfigs: Record<string, PageEditorConfig> = {
   support: {
     title: '生产设计与制作',
     publicLocation: '/#support',
-    description: '编辑首页“生产设计与制作”模块中的栏目、主图、说明和底部轮播图片。',
+    description: '',
     tools: [],
+    hideHeroDetails: true,
     contentConfig: {
       pageKey: 'home',
       title: '生产设计与制作',
-      description: '编辑首页“生产设计与制作”模块中的栏目、主图、说明和底部轮播图片。',
+      description: '',
       editableKeys: ['supportModule'],
       moduleHelp: {
         supportModule: '显示在“生产设计与制作”区域，用于介绍生产、检测、检验能力。'
       },
       loadingText: '生产设计与制作加载中...',
       saveSuccessText: '生产设计与制作已保存',
-      saveButtonText: '保存生产设计与制作'
+      saveButtonText: '保存生产设计与制作',
+      hideModuleSelector: true,
+      hidePublishSwitch: true,
+      hideBaseSettings: true,
+      hidePageChrome: true,
+      hideEditorHeader: true
     }
   },
   process: {
     title: '先进的制作工艺',
     publicLocation: '/#process',
-    description: '编辑首页先进的制作工艺区域的背景图、工艺项目和说明文字。',
+    description: '',
     tools: [],
+    hideHeroDetails: true,
     contentConfig: {
       pageKey: 'home',
       title: '先进的制作工艺',
-      description: '编辑首页先进的制作工艺模块中的背景图、项目图片、标题和说明。',
+      description: '',
       editableKeys: ['processModule'],
       moduleHelp: {
         processModule: '显示在首页“先进的制作工艺”区域，用于介绍制作工艺和设备能力。'
       },
       loadingText: '先进的制作工艺加载中...',
       saveSuccessText: '先进的制作工艺已保存',
-      saveButtonText: '保存先进的制作工艺'
+      saveButtonText: '保存先进的制作工艺',
+      hideModuleSelector: true,
+      hidePublishSwitch: true,
+      hideBaseSettings: true,
+      hidePageChrome: true,
+      hideEditorHeader: true
     }
   },
   consult: {
     title: '渠道合作',
     publicLocation: '/consult',
-    description: '管理渠道合作咨询页的顾问信息、行业选项，并查看客户提交的咨询记录。',
-    tools: [
-      { title: '咨询记录', description: '查看客户提交的合作咨询，并记录跟进状态。', to: '/admin/consultations', action: '进入咨询记录' }
-    ],
+    description: '管理渠道合作咨询页的顾问信息、按钮文案、行业选项，并查看客户提交的咨询记录。',
+    tools: [],
     contentConfig: {
       pageKey: 'consult',
       title: '渠道合作页面内容',
@@ -135,28 +152,35 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       loadingText: '渠道合作内容加载中...',
       emptyText: '还没有渠道合作内容模块，请先运行初始化数据。',
       saveSuccessText: '渠道合作内容已保存',
-      saveButtonText: '保存渠道合作内容'
+      saveButtonText: '保存渠道合作内容',
+      hideModuleSelector: true,
+      hideBaseSettings: true,
+      hideEditorHeader: true,
+      hidePageChrome: true
     }
   },
   about: {
     title: '关于我们',
     publicLocation: '/#about、/certificates',
-    description: '管理首页关于我们简介、公司基础信息和荣誉资质内容。',
-    tools: [
-      { title: '荣誉资质', description: '上传和维护网站展示的证书、资质和荣誉图片。', to: '/admin/certificates', action: '进入荣誉资质' },
-      { title: '基础信息', description: '维护公司名称、Logo、联系方式和页脚文案。', to: '/admin/site', action: '进入基础信息' }
-    ],
+    description: '',
+    tools: [],
+    hideHeroDetails: true,
     contentConfig: {
       pageKey: 'home',
       title: '关于我们',
-      description: '编辑首页“关于我们”区域的公司简介和展示图片。',
+      description: '',
       editableKeys: ['aboutPreview'],
       moduleHelp: {
         aboutPreview: '显示在首页“关于我们”区域，用于展示公司简介和图片。'
       },
       loadingText: '关于我们内容加载中...',
       saveSuccessText: '关于我们内容已保存',
-      saveButtonText: '保存关于我们内容'
+      saveButtonText: '保存关于我们内容',
+      hideModuleSelector: true,
+      hidePublishSwitch: true,
+      hideBaseSettings: true,
+      hidePageChrome: true,
+      hideEditorHeader: true
     }
   }
 };
@@ -166,22 +190,25 @@ export function PageEditorAdminPage() {
   const config = pageConfigs[page] || pageConfigs.home;
 
   return (
-    <div className="admin-page-editor">
-      <section className="admin-panel page-editor-hero">
-        <div className="admin-title-block">
-          <span className="page-editor-label">网站页面</span>
-          <h1>{config.title}</h1>
-          <p>{config.description}</p>
-          <small>前台位置：{config.publicLocation}</small>
-        </div>
-      </section>
-
+    <div>
+      <PageHeader title={config.title} description={config.hideHeroDetails ? undefined : config.description} publicLocation={config.hideHeroDetails ? undefined : config.publicLocation} />
       {config.tools.length > 0 && (
-        <section className="page-tool-grid">
-          {config.tools.map((tool) => <article className="page-tool-card" key={tool.to}><h2>{tool.title}</h2><p>{tool.description}</p><Link to={tool.to}>{tool.action}</Link></article>)}
-        </section>
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          {config.tools.map((tool) => (
+            <Col xs={24} md={12} xl={6} key={tool.to}>
+              <Card hoverable style={{ height: '100%' }}>
+                <Space direction="vertical" size={12} style={{ height: '100%', justifyContent: 'space-between' }}>
+                  <div>
+                    <Typography.Title level={5} style={{ marginTop: 0 }}>{tool.title}</Typography.Title>
+                    <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>{tool.description}</Typography.Paragraph>
+                  </div>
+                  <Link to={tool.to}><Button type="primary" icon={<ArrowRightOutlined />}>{tool.action}</Button></Link>
+                </Space>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       )}
-
       {config.contentConfig && <ContentSectionsAdminPage config={config.contentConfig} />}
     </div>
   );
