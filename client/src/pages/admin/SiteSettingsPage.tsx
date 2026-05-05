@@ -4,14 +4,9 @@ import { adminSiteProfile, saveSiteProfile } from '../../api/adminApi';
 import type { FooterLink, SiteProfile } from '../../api/publicApi';
 import { ConfirmButton, Dropzone, PageHeader, SectionCard, SectionCardGroup } from '../../admin/components';
 
-const defaultFooterLinks: FooterLink[] = [
-  { label: '链接名称', url: '#' },
-  { label: '链接名称', url: '#' },
-  { label: '链接名称', url: '#' },
-  { label: '链接名称', url: '#' },
-  { label: '链接名称', url: '#' },
-  { label: '链接名称', url: '#' }
-];
+const maxFooterLinks = 4;
+
+const defaultFooterLinks: FooterLink[] = Array.from({ length: maxFooterLinks }, () => ({ label: '链接名称', url: '#' }));
 
 const emptyProfile: Partial<SiteProfile> = {
   companyName: '',
@@ -24,10 +19,6 @@ const emptyProfile: Partial<SiteProfile> = {
   footerLinksJson: '[]',
   footerLinks: defaultFooterLinks,
   footerLinkTitle: '友情链接：',
-  legalLabel: '法律声明',
-  legalUrl: '#',
-  contactLabel: '联系我们',
-  contactUrl: '#',
   copyrightText: '© 2003--现在 Taobao.com 版权所有',
   policeFilingText: '浙公网安备 33011002017548号',
   policeFilingUrl: '#',
@@ -49,7 +40,7 @@ export function SiteSettingsPage() {
       setLoading(true);
       try {
         const data = await adminSiteProfile();
-        const next = data || emptyProfile;
+        const next = data ? { ...data, footerLinks: (data.footerLinks?.length ? data.footerLinks : defaultFooterLinks).slice(0, maxFooterLinks) } : emptyProfile;
         setProfile(next);
         form.setFieldsValue(next);
       } catch (err) {
@@ -73,7 +64,9 @@ export function SiteSettingsPage() {
   }
 
   function addFooterLink() {
-    setField('footerLinks', [...(profile.footerLinks || []), { label: '', url: '#' }]);
+    const links = profile.footerLinks || [];
+    if (links.length >= maxFooterLinks) return;
+    setField('footerLinks', [...links, { label: '', url: '#' }]);
   }
 
   function removeFooterLink(index: number) {
@@ -83,7 +76,7 @@ export function SiteSettingsPage() {
   async function onSubmit(values: Partial<SiteProfile>) {
     setSaving(true);
     try {
-      const footerLinks = profile.footerLinks || [];
+      const footerLinks = (profile.footerLinks || []).slice(0, maxFooterLinks);
       const saved = await saveSiteProfile({
         ...profile,
         ...values,
@@ -104,7 +97,7 @@ export function SiteSettingsPage() {
 
   return (
     <div>
-      <PageHeader title="页脚" description="维护页脚中展示的公司信息、联系方式、友情链接、备案信息和搜索展示信息。" />
+      <PageHeader title="页脚" description="维护页脚中展示的公司信息、联系方式、友情链接和备案信息。" />
       {loading ? <Card><Typography.Text type="secondary">页脚信息加载中...</Typography.Text></Card> : (
         <Form form={form} layout="vertical" initialValues={emptyProfile} onFinish={onSubmit}>
           <Row gutter={[16, 16]}>
@@ -126,7 +119,7 @@ export function SiteSettingsPage() {
                 <SectionCard title="页脚信息" description="用于网站底部友情链接、法律入口、版权和备案信息。">
                   <Form.Item name="footerText" label="页脚文案"><Input.TextArea rows={4} placeholder="请输入页脚展示文案" /></Form.Item>
                   <Form.Item name="footerLinkTitle" label="友情链接标题"><Input placeholder="例如：友情链接：" /></Form.Item>
-                  <Card size="small" title="友情链接" extra={<Button type="primary" onClick={addFooterLink}>新增友情链接</Button>} style={{ marginBottom: 16 }}>
+                  <Card size="small" title="友情链接" extra={<Button type="primary" onClick={addFooterLink} disabled={footerLinks.length >= maxFooterLinks}>新增友情链接</Button>} style={{ marginBottom: 16 }}>
                     <Space direction="vertical" style={{ width: '100%' }}>
                       {footerLinks.map((link, index) => (
                         <Space key={index} style={{ width: '100%' }} align="start">
@@ -139,12 +132,6 @@ export function SiteSettingsPage() {
                       {footerLinks.length === 0 && <Typography.Text type="secondary">还没有友情链接，请点击“新增友情链接”。</Typography.Text>}
                     </Space>
                   </Card>
-                  <Row gutter={16}>
-                    <Col xs={24} md={12}><Form.Item name="legalLabel" label="法律声明文案"><Input /></Form.Item></Col>
-                    <Col xs={24} md={12}><Form.Item name="legalUrl" label="法律声明链接"><Input /></Form.Item></Col>
-                    <Col xs={24} md={12}><Form.Item name="contactLabel" label="联系我们文案"><Input /></Form.Item></Col>
-                    <Col xs={24} md={12}><Form.Item name="contactUrl" label="联系我们链接"><Input /></Form.Item></Col>
-                  </Row>
                   <Form.Item name="copyrightText" label="版权文本"><Input /></Form.Item>
                   <Row gutter={16}>
                     <Col xs={24} md={12}><Form.Item name="policeFilingText" label="公安备案文本"><Input /></Form.Item></Col>
@@ -152,10 +139,6 @@ export function SiteSettingsPage() {
                     <Col xs={24} md={12}><Form.Item name="icpText" label="ICP备案文本"><Input /></Form.Item></Col>
                     <Col xs={24} md={12}><Form.Item name="icpUrl" label="ICP备案链接"><Input /></Form.Item></Col>
                   </Row>
-                </SectionCard>
-                <SectionCard title="搜索设置（可选）" description="用于浏览器标题和搜索引擎展示，不确定可以先保持默认。">
-                  <Form.Item name="seoTitle" label="浏览器标题 / 搜索标题"><Input placeholder="请输入搜索标题" /></Form.Item>
-                  <Form.Item name="seoDescription" label="搜索结果简介"><Input.TextArea rows={4} placeholder="请输入搜索结果简介" /></Form.Item>
                 </SectionCard>
               </SectionCardGroup>
             </Col>

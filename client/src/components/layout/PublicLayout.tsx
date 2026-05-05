@@ -16,13 +16,11 @@ const fallbackProfile: SiteProfile = {
     { label: '链接名称', url: '#' },
     { label: '链接名称', url: '#' },
     { label: '链接名称', url: '#' },
-    { label: '链接名称', url: '#' },
-    { label: '链接名称', url: '#' },
     { label: '链接名称', url: '#' }
   ],
   footerLinkTitle: '友情链接：',
   legalLabel: '法律声明',
-  legalUrl: '#',
+  legalUrl: '/legal',
   contactLabel: '联系我们',
   contactUrl: '#',
   copyrightText: '© 2003--现在 Taobao.com 版权所有',
@@ -42,12 +40,18 @@ const fallbackNavigation: NavigationItem[] = [
   { id: 'about', label: '关于我们', url: '/#about', sortOrder: 5, isVisible: true, openInNewTab: false }
 ];
 
+function normalizeHref(url?: string) {
+  if (!url || url === '#') return '#';
+  if (url.startsWith('/') || url.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(url)) return url;
+  return `https://${url}`;
+}
+
 export function PublicLayout() {
   const location = useLocation();
   const isHome = location.pathname === '/';
   const [profile, setProfile] = useState<SiteProfile>(fallbackProfile);
   const [navigation, setNavigation] = useState<NavigationItem[]>(fallbackNavigation);
-  const visibleFooterLinks = (profile.footerLinks?.length ? profile.footerLinks : fallbackProfile.footerLinks || []).filter((link) => link.label);
+  const visibleFooterLinks = (profile.footerLinks?.length ? profile.footerLinks : fallbackProfile.footerLinks || []).filter((link) => link.label).slice(0, 4);
 
   useEffect(() => {
     getSiteProfile().then((data) => data && setProfile(data)).catch(() => {});
@@ -92,14 +96,14 @@ export function PublicLayout() {
         <section className="footer-legal">
           <div className="footer-links">
             <span>{profile.footerLinkTitle || fallbackProfile.footerLinkTitle}</span>
-            {visibleFooterLinks.map((link, index) => <a href={link.url || '#'} key={index}>{link.label}</a>)}
-            <a href={profile.legalUrl || '#'}>{profile.legalLabel || fallbackProfile.legalLabel}</a>
-            <a href={profile.contactUrl || '#'}>{profile.contactLabel || fallbackProfile.contactLabel}</a>
+            {visibleFooterLinks.map((link, index) => <a href={normalizeHref(link.url)} key={index}>{link.label}</a>)}
+            <Link to="/legal">法律声明</Link>
+            <Link to="/contact">联系我们</Link>
           </div>
           <p>
             {profile.copyrightText || fallbackProfile.copyrightText}
-            {(profile.policeFilingText || fallbackProfile.policeFilingText) && <>　<a href={profile.policeFilingUrl || '#'}>{profile.policeFilingText || fallbackProfile.policeFilingText}</a></>}
-            {(profile.icpText || fallbackProfile.icpText) && <>　<a href={profile.icpUrl || '#'}>{profile.icpText || fallbackProfile.icpText}</a></>}
+            {(profile.policeFilingText || fallbackProfile.policeFilingText) && <>　<a href={normalizeHref(profile.policeFilingUrl)}>{profile.policeFilingText || fallbackProfile.policeFilingText}</a></>}
+            {(profile.icpText || fallbackProfile.icpText) && <>　<a href={normalizeHref(profile.icpUrl)}>{profile.icpText || fallbackProfile.icpText}</a></>}
           </p>
         </section>
       </footer>

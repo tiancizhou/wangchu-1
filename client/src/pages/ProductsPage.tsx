@@ -82,7 +82,7 @@ function Pager({ total, page, pageSize, active }: { total: number; page: number;
   );
 }
 
-type ProductPageItem = { title?: string; description?: string; icon?: string; iconKey?: SupportIconName };
+type ProductPageItem = { title?: string; description?: string; icon?: string; iconKey?: SupportIconName; linkUrl?: string };
 
 type SupportIconName = 'thumb' | 'tag' | 'shield' | 'diamond' | 'user' | 'truck' | 'tools' | 'document' | 'link';
 
@@ -94,16 +94,20 @@ const advantageDefaults: ProductPageItem[] = [
 ];
 
 const benefitDefaults: ProductPageItem[] = [
-  { title: '专属经理对接', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'user' },
-  { title: '按需邮寄样品', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'truck' },
-  { title: '免费设计培训', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'tools' },
-  { title: '免费设计培训', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'tools' },
-  { title: '共建实施方案', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'document' },
-  { title: '建立长效机制', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'link' }
+  { title: '专属经理对接', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'user', linkUrl: '/benefits/dedicated-manager' },
+  { title: '按需邮寄样品', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'truck', linkUrl: '/benefits/sample-delivery' },
+  { title: '免费设计培训', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'tools', linkUrl: '/benefits/design-training' },
+  { title: '免费设计培训', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'tools', linkUrl: '/benefits/display-support' },
+  { title: '共建实施方案', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'document', linkUrl: '/benefits/implementation-plan' },
+  { title: '建立长效机制', description: '烟台恒基金属制品有限公司成立于2004年，', iconKey: 'link', linkUrl: '/benefits/long-term-service' }
 ];
 
 function normalizeSupportItems(items: ProductPageItem[] | undefined, defaults: ProductPageItem[]) {
-  return defaults.map((fallback, index) => ({ ...fallback, ...(items?.[index]?.title ? { title: items[index].title } : {}) }));
+  return defaults.map((fallback, index) => ({
+    ...fallback,
+    ...(items?.[index]?.title ? { title: items[index].title } : {}),
+    ...(items?.[index]?.description ? { description: items[index].description } : {})
+  }));
 }
 
 function AdvantageSections({ advantages, benefits }: { advantages?: ContentSection; benefits?: ContentSection }) {
@@ -115,7 +119,7 @@ function AdvantageSections({ advantages, benefits }: { advantages?: ContentSecti
       <div className="section-title"><h2>{advantages?.title || '加盟优势'}</h2><p>{advantages?.subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>
       <div className="advantage-row">{advantageItems.map((item, index) => <article key={`${item.title}-${index}`}><div className={index === 1 ? 'circle red' : 'circle'}><SupportIcon name={item.iconKey || 'diamond'} /></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
       <div className="section-title"><h2>{benefits?.title || '加盟福利'}</h2><p>{benefits?.subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>
-      <div className="benefit-grid">{benefitItems.map((item, index) => <article className={index === 1 ? 'active' : ''} key={`${item.title}-${index}`}><b><SupportIcon name={item.iconKey || 'document'} /></b><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
+      <div className="benefit-grid">{benefitItems.map((item, index) => <Link className={index === 1 ? 'active' : ''} to={item.linkUrl || `/benefits/${index + 1}`} key={`${item.title}-${index}`}><b><SupportIcon name={item.iconKey || 'document'} /></b><h3>{item.title}</h3><p>{item.description}</p></Link>)}</div>
     </section>
   );
 }

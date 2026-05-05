@@ -14,7 +14,6 @@ import {
   TeamOutlined,
   LinkOutlined,
   BankOutlined,
-  TagsOutlined,
   ShoppingOutlined,
   SafetyCertificateOutlined,
   MessageOutlined
@@ -46,8 +45,7 @@ const menuGroups: { key: string; label: string; items: MenuEntry[] }[] = [
     key: 'data',
     label: '数据管理',
     items: [
-      { key: '/admin/categories', label: '产品细项分类', icon: <TagsOutlined /> },
-      { key: '/admin/products', label: '产品编辑', icon: <ShoppingOutlined /> },
+      { key: '/admin/products', label: '产品管理', icon: <ShoppingOutlined /> },
       { key: '/admin/certificates', label: '荣誉资质', icon: <SafetyCertificateOutlined /> },
       { key: '/admin/consultations', label: '咨询记录', icon: <MessageOutlined /> }
     ]
@@ -73,7 +71,7 @@ function findMenuTitle(pathname: string): string {
     const match = group.items.find((item) => pathname.startsWith(item.key));
     if (match) return match.label;
   }
-  if (pathname.startsWith('/admin/products/')) return '产品编辑';
+  if (pathname.startsWith('/admin/products')) return '产品管理';
   return '后台';
 }
 

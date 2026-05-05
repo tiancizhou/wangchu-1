@@ -56,9 +56,16 @@ export function FeatureCardsEditor({ items, onUpdate, onChange }: { items: Featu
 }
 
 export function SupportModuleEditor({ tabs, onUpdate, onChange }: { tabs: SupportTab[]; onUpdate: (index: number, patch: Partial<SupportTab>) => void; onChange: (tabs: SupportTab[]) => void }) {
+  const canAddTab = tabs.length < 3;
+
+  function addTab() {
+    if (!canAddTab) return;
+    onChange([...tabs, { title: '', heading: '', description: '', imageUrl: '', thumbnails: [] }]);
+  }
+
   return (
     <div>
-      <Space style={{ marginBottom: 12 }}><Button type="primary" onClick={() => onChange([...tabs, { title: '', heading: '', description: '', imageUrl: '', thumbnails: [] }])}>新增栏目</Button></Space>
+      <Space style={{ marginBottom: 12 }}><Button type="primary" disabled={!canAddTab} onClick={addTab}>新增栏目</Button><Typography.Text type="secondary">最多设置 3 个栏目</Typography.Text></Space>
       <SectionCardGroup mode="accordion" defaultExpandedIndex={0}>
         {tabs.map((tab, index) => (
           <SectionCard key={index} title={tab.title || `栏目 ${index + 1}`} description={tab.heading || tab.description?.slice(0, 40) || '展开后编辑栏目内容'} extra={<ConfirmButton danger size="small" title="确定删除这个栏目吗？" onConfirm={() => onChange(tabs.filter((_, tabIndex) => tabIndex !== index))}>删除</ConfirmButton>}>
@@ -82,10 +89,17 @@ export function SupportModuleEditor({ tabs, onUpdate, onChange }: { tabs: Suppor
 }
 
 export function ProcessModuleEditor({ items, backgroundImageUrl, onUpdate, onChange, onBackgroundChange }: { items: ProcessItem[]; backgroundImageUrl?: string; onUpdate: (index: number, patch: Partial<ProcessItem>) => void; onChange: (items: ProcessItem[]) => void; onBackgroundChange: (url: string) => void }) {
+  const canAddItem = items.length < 4;
+
+  function addItem() {
+    if (!canAddItem) return;
+    onChange([...items, { title: '', description: '', imageUrl: '' }]);
+  }
+
   return (
     <div>
       <Card title="背景图片" style={{ marginBottom: 16 }}><Dropzone value={backgroundImageUrl} onChange={onBackgroundChange} /></Card>
-      <Space style={{ marginBottom: 12 }}><Button type="primary" onClick={() => onChange([...items, { title: '', description: '', imageUrl: '' }])}>新增项目</Button></Space>
+      <Space style={{ marginBottom: 12 }}><Button type="primary" disabled={!canAddItem} onClick={addItem}>新增项目</Button><Typography.Text type="secondary">最多设置 4 个项目</Typography.Text></Space>
       <SectionCardGroup mode="accordion" defaultExpandedIndex={0}>
         {items.map((item, index) => (
           <SectionCard key={index} title={item.title || `项目 ${index + 1}`} description={item.description?.slice(0, 40) || '展开后编辑工艺项目'} extra={<ConfirmButton danger size="small" title="确定删除这个项目吗？" onConfirm={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>删除</ConfirmButton>}>
@@ -117,14 +131,14 @@ export function GenericItemsEditor({ title, help, items, onUpdate, onChange }: {
   return (
     <div>
       <Typography.Paragraph type="secondary">{help}</Typography.Paragraph>
-      <Space style={{ marginBottom: 12 }}><Button type="primary" onClick={() => onChange([...items, { title: '', description: '', icon: '◆' }])}>新增内容</Button></Space>
+      <Space style={{ marginBottom: 12 }}><Button type="primary" onClick={() => onChange([...items, { title: '', description: '', icon: '◆', linkUrl: '' }])}>新增内容</Button></Space>
       <DraggableList
         items={rows}
         getItemId={(item) => item.__id}
         onReorder={(next) => onChange(next.map(({ __id, ...item }) => item))}
         renderItem={(item, index, dragHandle) => (
           <SectionCard title={item.title || `内容 ${index + 1}`} description={item.description || '展开后编辑内容'} extra={<><DragHandle dragHandle={dragHandle} /><ConfirmButton danger size="small" title="确定删除这条内容吗？" onConfirm={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>删除</ConfirmButton></>}>
-            <Form layout="vertical"><Form.Item label="图标符号"><Input value={item.icon || ''} onChange={(e) => onUpdate(index, { icon: e.target.value })} /></Form.Item><Form.Item label="标题"><Input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></Form.Item><Form.Item label="说明文字"><Input.TextArea value={item.description || ''} rows={4} onChange={(e) => onUpdate(index, { description: e.target.value })} /></Form.Item></Form>
+            <Form layout="vertical"><Form.Item label="图标符号"><Input value={item.icon || ''} onChange={(e) => onUpdate(index, { icon: e.target.value })} /></Form.Item><Form.Item label="标题"><Input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></Form.Item><Form.Item label="点击后打开的页面"><Input value={item.linkUrl || ''} onChange={(e) => onUpdate(index, { linkUrl: e.target.value })} placeholder="例如 /benefits/dedicated-manager" /></Form.Item><Form.Item label="说明文字"><Input.TextArea value={item.description || ''} rows={4} onChange={(e) => onUpdate(index, { description: e.target.value })} /></Form.Item></Form>
           </SectionCard>
         )}
       />

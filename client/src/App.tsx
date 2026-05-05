@@ -1,15 +1,17 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { AdminApp } from './admin/AdminApp';
 import { ProtectedRoute } from './components/admin/ProtectedRoute';
 import { AdminLayout } from './admin/AdminLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
+import { BenefitDetailPage } from './pages/BenefitDetailPage';
 import { CertificatesPage } from './pages/CertificatesPage';
 import { ConsultPage } from './pages/ConsultPage';
+import { ContactPage } from './pages/ContactPage';
 import { HomePage } from './pages/HomePage';
+import { LegalPage } from './pages/LegalPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { BannersAdminPage } from './pages/admin/BannersAdminPage';
-import { CategoriesAdminPage } from './pages/admin/CategoriesAdminPage';
 import { CertificatesAdminPage } from './pages/admin/CertificatesAdminPage';
 import { ConsultationsAdminPage } from './pages/admin/ConsultationsAdminPage';
 import { ContentSectionsAdminPage } from './pages/admin/ContentSectionsAdminPage';
@@ -18,7 +20,7 @@ import { LoginPage } from './pages/admin/LoginPage';
 import { NavigationAdminPage } from './pages/admin/NavigationAdminPage';
 import { PageEditorAdminPage } from './pages/admin/PageEditorAdminPage';
 import { ProductEditPage } from './pages/admin/ProductEditPage';
-import { ProductsAdminPage } from './pages/admin/ProductsAdminPage';
+import { ProductManagementAdminPage } from './pages/admin/ProductManagementAdminPage';
 import { SiteSettingsPage } from './pages/admin/SiteSettingsPage';
 
 const router = createBrowserRouter([
@@ -30,7 +32,10 @@ const router = createBrowserRouter([
       { path: 'products', element: <ProductsPage /> },
       { path: 'products/:slug', element: <ProductDetailPage /> },
       { path: 'consult', element: <ConsultPage /> },
-      { path: 'certificates', element: <CertificatesPage /> }
+      { path: 'certificates', element: <CertificatesPage /> },
+      { path: 'legal', element: <LegalPage /> },
+      { path: 'contact', element: <ContactPage /> },
+      { path: 'benefits/:slug', element: <BenefitDetailPage /> }
     ]
   },
   {
@@ -46,8 +51,8 @@ const router = createBrowserRouter([
           { path: 'site', element: <SiteSettingsPage /> },
           { path: 'navigation', element: <NavigationAdminPage /> },
           { path: 'content', element: <ContentSectionsAdminPage /> },
-          { path: 'categories', element: <CategoriesAdminPage /> },
-          { path: 'products', element: <ProductsAdminPage /> },
+          { path: 'categories', element: <Navigate to="/admin/products?tab=categories" replace /> },
+          { path: 'products', element: <ProductManagementAdminPage /> },
           { path: 'products/new', element: <ProductEditPage /> },
           { path: 'products/:id/edit', element: <ProductEditPage /> },
           { path: 'banners', element: <BannersAdminPage /> },

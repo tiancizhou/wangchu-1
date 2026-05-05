@@ -6,7 +6,11 @@ import { ConfirmButton, DragHandle, DraggableList, Dropzone, PageHeader, Section
 
 const emptyCategory: Partial<ProductCategory> = { name: '', slug: '', description: '', coverImageUrl: '', iconImageUrl: '', sortOrder: 0, isPublished: true };
 
-export function CategoriesAdminPage() {
+type CategoriesAdminPageProps = {
+  embedded?: boolean;
+};
+
+export function CategoriesAdminPage({ embedded = false }: CategoriesAdminPageProps) {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [editing, setEditing] = useState<Partial<ProductCategory>>(emptyCategory);
   const [loading, setLoading] = useState(true);
@@ -77,9 +81,12 @@ export function CategoriesAdminPage() {
 
   const isEditingExisting = Boolean(editing.id);
 
+  const actions = <><Button onClick={saveCategoryOrder} loading={saving}>保存排序</Button><Button type="primary" onClick={startCreate}>新建分类</Button></>;
+
   return (
     <div>
-      <PageHeader title="产品细项分类" description="维护产品中心的细项分类入口、排序、封面图和发布状态。" extra={<><Button onClick={saveCategoryOrder} loading={saving}>保存排序</Button><Button type="primary" onClick={startCreate}>新建分类</Button></>} />
+      {!embedded && <PageHeader title="产品细项分类" description="维护产品中心的细项分类入口、排序、封面图和发布状态。" extra={actions} />}
+      {embedded && <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 16 }}>{actions}</div>}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={8}>
           <Card title="选择分类">

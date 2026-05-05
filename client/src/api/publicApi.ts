@@ -124,7 +124,6 @@ export type HomeData = {
   categories: ProductCategory[];
   products: Product[];
   sections: Record<string, ContentSection>;
-  certificates: Certificate[];
 };
 
 export type ConsultationPayload = {

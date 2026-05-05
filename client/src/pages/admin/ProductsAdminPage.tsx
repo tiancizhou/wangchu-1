@@ -6,7 +6,11 @@ import { adminProducts, deleteProduct } from '../../api/adminApi';
 import type { Product } from '../../api/publicApi';
 import { ConfirmButton, PageHeader, SearchableTable } from '../../admin/components';
 
-export function ProductsAdminPage() {
+type ProductsAdminPageProps = {
+  embedded?: boolean;
+};
+
+export function ProductsAdminPage({ embedded = false }: ProductsAdminPageProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { message } = App.useApp();
@@ -43,9 +47,12 @@ export function ProductsAdminPage() {
     { title: '操作', render: (_, product) => <Space><Link to={`/admin/products/${product.id}/edit`}>编辑</Link><ConfirmButton size="small" danger title="确定删除这个商品吗？" onConfirm={() => onDelete(product.id)}>删除</ConfirmButton></Space> }
   ];
 
+  const createButton = <Link to="/admin/products/new"><Button type="primary">新增商品</Button></Link>;
+
   return (
     <div>
-      <PageHeader title="产品管理" description="维护产品中心展示的商品信息、图片、分类和发布状态。" extra={<Link to="/admin/products/new"><Button type="primary">新增商品</Button></Link>} />
+      {!embedded && <PageHeader title="产品管理" description="维护产品中心展示的商品信息、图片、分类和发布状态。" extra={createButton} />}
+      {embedded && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>{createButton}</div>}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} md={8}><Card><Statistic title="全部商品" value={products.length} /></Card></Col>
         <Col xs={24} md={8}><Card><Statistic title="已发布" value={publishedCount} /></Card></Col>

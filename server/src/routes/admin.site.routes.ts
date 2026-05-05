@@ -25,7 +25,7 @@ router.put('/site-profile', async (req, res) => {
     address: body.address || '',
     email: body.email || '',
     footerText: body.footerText || '',
-    footerLinksJson: stringifyJson(Array.isArray(body.footerLinks) ? body.footerLinks : parseJsonArray(body.footerLinksJson, []), []),
+    footerLinksJson: stringifyJson((Array.isArray(body.footerLinks) ? body.footerLinks : parseJsonArray(body.footerLinksJson, [])).slice(0, 4), []),
     footerLinkTitle: body.footerLinkTitle || '友情链接：',
     legalLabel: body.legalLabel || '法律声明',
     legalUrl: body.legalUrl || '#',

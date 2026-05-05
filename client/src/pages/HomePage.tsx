@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getHomeData, type Banner, type Certificate, type ContentSection, type HomeData, type Product, type ProductCategory } from '../api/publicApi';
+import { getHomeData, type Banner, type ContentSection, type HomeData, type ProductCategory } from '../api/publicApi';
+import { normalizeHomeCertificateImages, type HomeCertificateImage } from '../utils/homeCertificateImages';
 
 const fallbackCategories = ['汽油机油', '柴油机油', '工业油品', '导热油', '润滑油', '特种油品研发'];
 
@@ -55,10 +56,10 @@ export function HomePage() {
       <HeroCarousel banners={bannerImages} banner={banner} activeBannerIndex={activeBannerIndex} onSelect={setActiveBannerIndex} />
       <FeatureCards section={homeData?.sections.featureCards} />
       <SupportModule section={homeData?.sections.supportModule} activeIndex={activeSupportIndex} onSelect={setActiveSupportIndex} onPreview={setPreviewImage} />
-      <ProductCategoryGrid categories={homeData?.categories || []} products={homeData?.products || []} onPreview={setPreviewImage} />
+      <ProductCategoryGrid categories={homeData?.categories || []} />
       <ProcessModule section={homeData?.sections.processModule} onPreview={setPreviewImage} />
-      <AboutPreview section={homeData?.sections.aboutPreview} />
-      <CertificatePreview certificates={homeData?.certificates || []} />
+      <AboutPreview section={homeData?.sections.aboutPreview} companyName={homeData?.siteProfile?.companyName} />
+      <CertificatePreview images={normalizeHomeCertificateImages(homeData?.sections.certificatePreview?.data?.images)} />
       {previewImage && <ImagePreviewOverlay image={previewImage} onClose={() => setPreviewImage(null)} />}
     </main>
   );
@@ -153,13 +154,13 @@ export function SupportModule({ section, activeIndex, onSelect, onPreview }: { s
   );
 }
 
-export function ProductCategoryGrid({ categories, onPreview }: { categories: ProductCategory[]; products: Product[]; onPreview: (image: ImagePreview) => void }) {
+export function ProductCategoryGrid({ categories }: { categories: ProductCategory[] }) {
   const items = categories.length > 0 ? categories : fallbackCategories.map((name, index) => ({ id: name, name, slug: encodeURIComponent(name), description: '菜单文案菜单文案', coverImageUrl: '', iconImageUrl: '', sortOrder: index, isPublished: true, seoTitle: '', seoDescription: '' } as ProductCategory));
   return (
     <section className="section container product-category-section">
       <SectionTitle title="产品细项目分类" />
       <div className="product-category-grid">
-        {items.map((category) => <ProductCategoryCard category={category} onPreview={onPreview} key={category.id} />)}
+        {items.map((category) => <ProductCategoryCard category={category} key={category.id} />)}
       </div>
     </section>
   );
@@ -200,35 +201,43 @@ export function ProcessModule({ section, onPreview }: { section?: ContentSection
   );
 }
 
-export function AboutPreview({ section }: { section?: ContentSection }) {
+export function AboutPreview({ section, companyName }: { section?: ContentSection; companyName?: string }) {
   const data = section?.data as { imageUrl?: string; body?: string } | undefined;
+  const title = companyName || '稼尔润（北京）润滑油有限公司';
   return (
     <section className="section container" id="about">
       <SectionTitle title={section?.title || '关于我们'} subtitle={section?.subtitle} />
       <div className="about-block">
         {data?.imageUrl ? <img className="about-image" src={data.imageUrl} alt={section?.title || '关于我们'} /> : <div className="about-photo">Kronprins<br />王储</div>}
-        <p>{data?.body || '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。'}</p>
+        <div className="about-copy">
+          <h3>{title}</h3>
+          <p>{data?.body || '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。'}</p>
+        </div>
       </div>
     </section>
   );
 }
 
-export function CertificatePreview({ certificates }: { certificates: Certificate[] }) {
-  const allItems = certificates.length > 0 ? certificates : ['诚信经营示范单位证书', '检测报告', '营业执照', '商标注册证'].map((title, index) => ({ id: title, title, imageUrl: '', category: '', description: '', issuer: '', issueDate: '', sortOrder: index, isPublished: true } as Certificate));
+export function CertificatePreview({ images }: { images: HomeCertificateImage[] }) {
+  const allItems = images.filter((image) => image.isPublished);
   const [startIndex, setStartIndex] = useState(0);
   const visibleItems = Array.from({ length: Math.min(4, allItems.length) }, (_, index) => allItems[(startIndex + index) % allItems.length]);
 
   useEffect(() => {
     setStartIndex(0);
-  }, [certificates.length]);
+  }, [images.length]);
 
   function previousCertificates() {
+    if (allItems.length === 0) return;
     setStartIndex((index) => (index - 1 + allItems.length) % allItems.length);
   }
 
   function nextCertificates() {
+    if (allItems.length === 0) return;
     setStartIndex((index) => (index + 1) % allItems.length);
   }
+
+  if (allItems.length === 0) return null;
 
   return (
     <section className="section certificate-showcase-section">
@@ -238,7 +247,7 @@ export function CertificatePreview({ certificates }: { certificates: Certificate
         <div className="certificate-display">
           {visibleItems.map((certificate, index) => (
             <Link to="/certificates" className={`certificate-display-card certificate-display-card-${index + 1}`} key={`${certificate.id}-${startIndex}-${index}`}>
-              {certificate.imageUrl ? <img src={certificate.imageUrl} alt={certificate.title} /> : <div className="certificate-paper-placeholder">{certificate.title}</div>}
+              <img src={certificate.imageUrl} alt={certificate.title} />
             </Link>
           ))}
           <div className="certificate-shelf" />
@@ -253,13 +262,14 @@ function SectionTitle({ title, subtitle, light }: { title: string; subtitle?: st
   return <div className={light ? 'section-title light' : 'section-title'}><h2>{title}</h2><p>{subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>;
 }
 
-function ProductCategoryCard({ category, onPreview }: { category: ProductCategory; onPreview: (image: ImagePreview) => void }) {
+function ProductCategoryCard({ category }: { category: ProductCategory }) {
+  const categoryLink = `/products?${new URLSearchParams({ category: category.slug }).toString()}`;
   return (
     <article className="product-category-card">
-      <button className="product-category-image home-preview-image-button square" type="button" onClick={() => category.coverImageUrl && onPreview({ url: category.coverImageUrl, title: category.name })}>
+      <Link className="product-category-image square" to={categoryLink}>
         {category.coverImageUrl ? <img src={category.coverImageUrl} alt={category.name} /> : <div className="product-fallback">K</div>}
-      </button>
-      <Link to={`/products?category=${category.slug}`}><h3>{category.name}</h3></Link>
+      </Link>
+      <Link to={categoryLink}><h3>{category.name}</h3></Link>
       <p>{category.description || '菜单文案菜单文案'}</p>
     </article>
   );

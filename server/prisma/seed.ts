@@ -104,11 +104,12 @@ const contentSections = [
     subtitle: '稼尔润（北京）润滑油有限公司',
     data: {
       items: [
-        { title: '专属经理对接', description: '为合作客户提供专人对接服务。', icon: '♙' },
-        { title: '按需邮寄样品', description: '根据客户需求提供样品支持。', icon: '▣' },
-        { title: '免费设计培训', description: '提供产品展示和渠道运营支持。', icon: '✕' },
-        { title: '共建实施方案', description: '结合客户市场制定合作方案。', icon: '▤' },
-        { title: '建立长效机制', description: '持续跟进合作效果和供应需求。', icon: '🔗' }
+        { title: '专属经理对接', description: '为合作客户提供专人对接服务。', icon: '♙', linkUrl: '/benefits/dedicated-manager' },
+        { title: '按需邮寄样品', description: '根据客户需求提供样品支持。', icon: '▣', linkUrl: '/benefits/sample-delivery' },
+        { title: '免费设计培训', description: '提供产品展示和渠道运营支持。', icon: '✕', linkUrl: '/benefits/design-training' },
+        { title: '免费设计培训', description: '提供产品展示和渠道运营支持。', icon: '✕', linkUrl: '/benefits/display-support' },
+        { title: '共建实施方案', description: '结合客户市场制定合作方案。', icon: '▤', linkUrl: '/benefits/implementation-plan' },
+        { title: '建立长效机制', description: '持续跟进合作效果和供应需求。', icon: '🔗', linkUrl: '/benefits/long-term-service' }
       ]
     }
   },
@@ -147,8 +148,6 @@ async function main() {
     address: '北京市大兴区科创五街38号院',
     footerText: '专注润滑油产品研发、生产与渠道服务',
     footerLinksJson: JSON.stringify([
-      { label: '链接名称', url: '#' },
-      { label: '链接名称', url: '#' },
       { label: '链接名称', url: '#' },
       { label: '链接名称', url: '#' },
       { label: '链接名称', url: '#' },

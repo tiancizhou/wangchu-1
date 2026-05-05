@@ -92,14 +92,13 @@ router.get('/content-sections', async (req, res) => {
 });
 
 router.get('/home', async (_req, res) => {
-  const [siteProfile, navigation, banners, categories, products, sections, certificates] = await Promise.all([
+  const [siteProfile, navigation, banners, categories, products, sections] = await Promise.all([
     getSiteProfile(),
     getNavigation(),
     prisma.carouselBanner.findMany({ where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }] }),
     prisma.productCategory.findMany({ where: { isPublished: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] }),
     prisma.product.findMany({ where: { isPublished: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }], take: 6 }),
-    prisma.contentSection.findMany({ where: { pageKey: 'home', isPublished: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] }),
-    prisma.certificate.findMany({ where: { isPublished: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }], take: 6 })
+    prisma.contentSection.findMany({ where: { pageKey: 'home', isPublished: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] })
   ]);
 
   res.json({
@@ -108,8 +107,7 @@ router.get('/home', async (_req, res) => {
     banners,
     categories,
     products: products.map(mapProduct),
-    sections: Object.fromEntries(sections.map((section) => [section.sectionKey, mapSection(section)])),
-    certificates
+    sections: Object.fromEntries(sections.map((section) => [section.sectionKey, mapSection(section)]))
   });
 });
 

@@ -3,12 +3,15 @@ import { App, Button, Card, Col, InputNumber, Row, Space, Statistic, Switch, Tag
 import { adminCertificates, adminContentSection, deleteCertificate, saveCertificate, saveContentSection } from '../../api/adminApi';
 import type { Certificate, ContentSection } from '../../api/publicApi';
 import { ConfirmButton, DragHandle, DraggableList, Dropzone, PageHeader } from '../../admin/components';
+import { normalizeHomeCertificateImages, type HomeCertificateImage } from '../../utils/homeCertificateImages';
 
 const defaultTitle = '荣誉资质';
 type CertificateSidebarData = { imageUrl?: string };
+type HomeCertificateSectionData = { images?: HomeCertificateImage[] };
 
 export function CertificatesAdminPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [homeCertificateSection, setHomeCertificateSection] = useState<ContentSection<HomeCertificateSectionData> | null>(null);
   const [sidebar, setSidebar] = useState<ContentSection<CertificateSidebarData> | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingIds, setSavingIds] = useState<string[]>([]);
@@ -18,11 +21,13 @@ export function CertificatesAdminPage() {
   async function load() {
     setLoading(true);
     try {
-      const [certificateRows, sidebarSection] = await Promise.all([
+      const [certificateRows, homeSection, sidebarSection] = await Promise.all([
         adminCertificates(),
+        adminContentSection('home', 'certificatePreview').catch(() => null),
         adminContentSection('certificates', 'sidebar').catch(() => null)
       ]);
       setCertificates(certificateRows);
+      setHomeCertificateSection(homeSection as ContentSection<HomeCertificateSectionData> | null);
       setSidebar(sidebarSection as ContentSection<CertificateSidebarData> | null);
     } catch (err) {
       message.error(err instanceof Error ? err.message : '荣誉资质加载失败');
@@ -48,6 +53,28 @@ export function CertificatesAdminPage() {
     setDirtyIds((ids) => [...new Set([...ids, ...normalized.map((item) => item.id)])]);
   }
 
+  async function saveHomeCertificateImages(images: HomeCertificateImage[]) {
+    markSaving('home-certificates', true);
+    try {
+      const saved = await saveContentSection({
+        ...(homeCertificateSection || {}),
+        pageKey: 'home',
+        sectionKey: 'certificatePreview',
+        title: '荣誉资质',
+        subtitle: '',
+        data: { images: images.map((image, index) => ({ ...image, sortOrder: index + 1 })) },
+        sortOrder: 0,
+        isPublished: true
+      });
+      setHomeCertificateSection(saved as ContentSection<HomeCertificateSectionData>);
+      message.success('首页荣誉资质图片已保存');
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '首页荣誉资质图片保存失败');
+    } finally {
+      markSaving('home-certificates', false);
+    }
+  }
+
   async function saveSidebarImage(imageUrl: string) {
     markSaving('sidebar', true);
     try {
@@ -68,6 +95,21 @@ export function CertificatesAdminPage() {
     } finally {
       markSaving('sidebar', false);
     }
+  }
+
+  async function onHomeImagesUploaded(urls: string[]) {
+    if (urls.length === 0) return;
+    const current = normalizeHomeCertificateImages(homeCertificateSection?.data.images);
+    await saveHomeCertificateImages([
+      ...current,
+      ...urls.map((url, index) => ({
+        id: `home-certificate-${Date.now()}-${index}`,
+        imageUrl: url,
+        title: defaultTitle,
+        sortOrder: current.length + index + 1,
+        isPublished: true
+      }))
+    ]);
   }
 
   async function onImagesUploaded(urls: string[]) {
@@ -137,6 +179,7 @@ export function CertificatesAdminPage() {
     }
   }
 
+  const homeCertificateImages = normalizeHomeCertificateImages(homeCertificateSection?.data.images);
   const publishedCount = certificates.filter((item) => item.isPublished).length;
 
   return (
@@ -148,9 +191,35 @@ export function CertificatesAdminPage() {
         <Col xs={24} md={8}><Card><Statistic title="待保存" value={dirtyIds.length} /></Card></Col>
       </Row>
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} lg={12}><Card title="左侧展示图片"><Dropzone value={sidebar?.data.imageUrl} onChange={saveSidebarImage} /></Card></Col>
-        <Col xs={24} lg={12}><Card title="上传荣誉资质图片"><Dropzone value="" multiple onChange={() => {}} onMultipleChange={onImagesUploaded} /></Card></Col>
+        <Col xs={24} lg={12}><Card title="首页荣誉资质横向图片"><Dropzone value="" multiple onChange={() => {}} onMultipleChange={onHomeImagesUploaded} hint="用于首页荣誉资质展示，建议上传横向组合图" /></Card></Col>
+        <Col xs={24} lg={12}><Card title="资质详情页左侧图片"><Dropzone value={sidebar?.data.imageUrl} onChange={saveSidebarImage} /></Card></Col>
       </Row>
+      {homeCertificateImages.length > 0 && (
+        <Card title="首页荣誉资质横向图片" style={{ marginBottom: 16 }}>
+          <DraggableList
+            items={homeCertificateImages}
+            getItemId={(image) => image.id}
+            onReorder={saveHomeCertificateImages}
+            renderItem={(image, index, dragHandle) => (
+              <Card size="small">
+                <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(220px, 360px) 1fr auto', gap: 16, alignItems: 'center' }}>
+                  <DragHandle dragHandle={dragHandle} />
+                  <img src={image.imageUrl} alt={image.title} style={{ width: '100%', maxHeight: 140, objectFit: 'contain', background: '#f8fafc' }} />
+                  <Space direction="vertical">
+                    <Typography.Text strong>首页荣誉资质 #{index + 1}</Typography.Text>
+                    <Switch checked={Boolean(image.isPublished)} onChange={(checked) => saveHomeCertificateImages(homeCertificateImages.map((item) => item.id === image.id ? { ...item, isPublished: checked } : item))} checkedChildren="显示" unCheckedChildren="隐藏" />
+                  </Space>
+                  <Space>
+                    <Dropzone value={image.imageUrl} onChange={(url) => saveHomeCertificateImages(homeCertificateImages.map((item) => item.id === image.id ? { ...item, imageUrl: url } : item))} />
+                    <ConfirmButton danger title="确定删除这张首页荣誉资质图片吗？" onConfirm={() => saveHomeCertificateImages(homeCertificateImages.filter((item) => item.id !== image.id))}>删除</ConfirmButton>
+                  </Space>
+                </div>
+              </Card>
+            )}
+          />
+        </Card>
+      )}
+      <Card title="上传资质详情页证书图片" style={{ marginBottom: 16 }}><Dropzone value="" multiple onChange={() => {}} onMultipleChange={onImagesUploaded} hint="用于荣誉资质详情页列表，建议上传纵向证书图" /></Card>
       {loading && <Card><Typography.Text type="secondary">荣誉资质加载中...</Typography.Text></Card>}
       {!loading && certificates.length === 0 && <Card><Typography.Text type="secondary">还没有荣誉资质图片，请先上传图片。</Typography.Text></Card>}
       {!loading && certificates.length > 0 && (

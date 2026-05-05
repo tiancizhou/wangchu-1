@@ -8,7 +8,6 @@ import {
   TeamOutlined,
   MessageOutlined,
   BankOutlined,
-  TagsOutlined,
   ShoppingOutlined,
   SafetyCertificateOutlined,
   RightOutlined
@@ -29,8 +28,7 @@ const contentEntries: Entry[] = [
 ];
 
 const dataEntries: Entry[] = [
-  { to: '/admin/categories', title: '产品细项分类', description: '维护产品分类入口、封面图、说明和显示顺序。', icon: <TagsOutlined /> },
-  { to: '/admin/products', title: '产品编辑', description: '新增、编辑和管理前台展示的产品。', icon: <ShoppingOutlined /> },
+  { to: '/admin/products', title: '产品管理', description: '统一管理产品列表、产品详情、分类入口、排序和发布状态。', icon: <ShoppingOutlined /> },
   { to: '/admin/certificates', title: '荣誉资质', description: '上传和维护网站展示的证书、资质和荣誉图片。', icon: <SafetyCertificateOutlined /> },
   { to: '/admin/consultations', title: '咨询记录', description: '查看客户提交的解决方案需求，并记录跟进状态。', icon: <MessageOutlined /> }
 ];
