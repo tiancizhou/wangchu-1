@@ -7,6 +7,7 @@ const fallbackCategories = ['汽油机油', '柴油机油', '工业油品', '导
 type FeatureCard = { title?: string; description?: string; icon?: string; linkUrl?: string };
 type SupportTab = { title?: string; imageUrl?: string; heading?: string; description?: string; thumbnails?: string[] };
 type ProcessItem = { title?: string; description?: string; imageUrl?: string };
+type ImagePreview = { url: string; title: string };
 
 const videoPattern = /\.(mp4|webm|mov)$/i;
 
@@ -29,6 +30,7 @@ export function HomePage() {
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const [activeSupportIndex, setActiveSupportIndex] = useState(1);
+  const [previewImage, setPreviewImage] = useState<ImagePreview | null>(null);
 
   useEffect(() => {
     getHomeData().then(setHomeData).catch(() => {});
@@ -52,11 +54,12 @@ export function HomePage() {
     <main>
       <HeroCarousel banners={bannerImages} banner={banner} activeBannerIndex={activeBannerIndex} onSelect={setActiveBannerIndex} />
       <FeatureCards section={homeData?.sections.featureCards} />
-      <SupportModule section={homeData?.sections.supportModule} activeIndex={activeSupportIndex} onSelect={setActiveSupportIndex} />
-      <ProductCategoryGrid categories={homeData?.categories || []} products={homeData?.products || []} />
-      <ProcessModule section={homeData?.sections.processModule} />
+      <SupportModule section={homeData?.sections.supportModule} activeIndex={activeSupportIndex} onSelect={setActiveSupportIndex} onPreview={setPreviewImage} />
+      <ProductCategoryGrid categories={homeData?.categories || []} products={homeData?.products || []} onPreview={setPreviewImage} />
+      <ProcessModule section={homeData?.sections.processModule} onPreview={setPreviewImage} />
       <AboutPreview section={homeData?.sections.aboutPreview} />
       <CertificatePreview certificates={homeData?.certificates || []} />
+      {previewImage && <ImagePreviewOverlay image={previewImage} onClose={() => setPreviewImage(null)} />}
     </main>
   );
 }
@@ -104,7 +107,7 @@ export function FeatureCards({ section }: { section?: ContentSection }) {
   );
 }
 
-export function SupportModule({ section, activeIndex, onSelect }: { section?: ContentSection; activeIndex: number; onSelect: (index: number) => void }) {
+export function SupportModule({ section, activeIndex, onSelect, onPreview }: { section?: ContentSection; activeIndex: number; onSelect: (index: number) => void; onPreview: (image: ImagePreview) => void }) {
   const tabs = (section?.data.tabs as SupportTab[] | undefined) || [
     { title: '调和', heading: '生产调和', description: '标准化调和流程，为客户提供稳定可靠的产品生产支持。', thumbnails: [] },
     { title: '检测', heading: '锅炉百科', description: '围绕润滑油研发、生产检测与品质管理，建立标准化实验流程和技术服务体系。', thumbnails: [] },
@@ -139,28 +142,30 @@ export function SupportModule({ section, activeIndex, onSelect }: { section?: Co
             <div className="support-menu-title"><span>contents</span><strong>{section?.title || '生产设计与制作'}</strong></div>
             {tabs.map((tab, index) => <button className={index === activeIndex ? 'active' : ''} onClick={() => onSelect(index)} key={tab.title}>{index === 0 ? '⚙' : index === 1 ? '🧪' : '▲'} {tab.title}</button>)}
           </aside>
-          <div className="support-main-photo" style={active?.imageUrl ? { backgroundImage: `url(${active.imageUrl})` } : undefined} />
+          <div className="support-main-photo">
+            {active?.imageUrl && <button className="home-preview-image-button square" type="button" onClick={() => onPreview({ url: active.imageUrl!, title: active.heading || active.title || '生产设计与制作' })}><img src={active.imageUrl} alt={active.heading || active.title || '生产设计与制作'} /></button>}
+          </div>
           <article className="support-copy"><h3>{active?.heading}</h3><p>{active?.description}</p><Link to="/consult">立即查看</Link></article>
         </div>
-        <div className="support-gallery"><button aria-label="上一组" onClick={previousGallery}>‹</button>{visibleThumbs.map((image, index) => <div className={thumbnails.length > 0 ? 'support-thumb' : `support-thumb ${image}`} style={thumbnails.length > 0 ? { backgroundImage: `url(${image})` } : undefined} key={`${image}-${galleryPage}-${index}`} />)}<button aria-label="下一组" onClick={nextGallery}>›</button></div>
+        <div className="support-gallery"><button aria-label="上一组" onClick={previousGallery}>‹</button>{visibleThumbs.map((image, index) => thumbnails.length > 0 ? <button className="support-thumb home-preview-image-button square" type="button" onClick={() => onPreview({ url: image, title: active?.heading || active?.title || '生产设计与制作' })} key={`${image}-${galleryPage}-${index}`}><img src={image} alt={active?.heading || active?.title || '生产设计与制作'} /></button> : <div className={`support-thumb ${image}`} key={`${image}-${galleryPage}-${index}`} />)}<button aria-label="下一组" onClick={nextGallery}>›</button></div>
       </div>
     </section>
   );
 }
 
-export function ProductCategoryGrid({ categories }: { categories: ProductCategory[]; products: Product[] }) {
+export function ProductCategoryGrid({ categories, onPreview }: { categories: ProductCategory[]; products: Product[]; onPreview: (image: ImagePreview) => void }) {
   const items = categories.length > 0 ? categories : fallbackCategories.map((name, index) => ({ id: name, name, slug: encodeURIComponent(name), description: '菜单文案菜单文案', coverImageUrl: '', iconImageUrl: '', sortOrder: index, isPublished: true, seoTitle: '', seoDescription: '' } as ProductCategory));
   return (
     <section className="section container product-category-section">
       <SectionTitle title="产品细项目分类" />
       <div className="product-category-grid">
-        {items.map((category) => <ProductCategoryCard category={category} key={category.id} />)}
+        {items.map((category) => <ProductCategoryCard category={category} onPreview={onPreview} key={category.id} />)}
       </div>
     </section>
   );
 }
 
-export function ProcessModule({ section }: { section?: ContentSection }) {
+export function ProcessModule({ section, onPreview }: { section?: ContentSection; onPreview: (image: ImagePreview) => void }) {
   const data = section?.data as { items?: ProcessItem[]; backgroundImageUrl?: string } | undefined;
   const items = data?.items || [
     { title: '菜单文案', description: '稼尔润（北京）润滑油有限公司专注润滑油研发、生产与技术服务，围绕调和、灌装、检测和仓储建立标准化流程，为客户提供稳定可靠的产品交付能力。' },
@@ -181,12 +186,14 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
       <div className="factory-card">
         <div className="factory-showcase">
           <aside>{items.map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={item.title}><FactoryMenuIcon index={index} /><span>{item.title}</span></button>)}</aside>
-          <div className="factory-photo" style={active?.imageUrl ? { backgroundImage: `url(${active.imageUrl})` } : undefined} />
+          <div className="factory-photo">
+            {active?.imageUrl && <button className="home-preview-image-button ratio-3-2" type="button" onClick={() => onPreview({ url: active.imageUrl!, title: active.title || '先进的制作工艺' })}><img src={active.imageUrl} alt={active.title || '先进的制作工艺'} /></button>}
+          </div>
         </div>
         <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p><span>”</span></article>
         <div className="factory-gallery-title"><span>{active?.title}</span></div>
         <div className="factory-thumb-grid">
-          {items.slice(0, 4).map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={`${item.title}-thumb`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title} /> : <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />}<span>{item.title}</span></button>)}
+          {items.slice(0, 4).map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => item.imageUrl ? onPreview({ url: item.imageUrl, title: item.title || '先进的制作工艺' }) : setActiveIndex(index)} key={`${item.title}-thumb`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title} /> : <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />}<span>{item.title}</span></button>)}
         </div>
       </div>
     </section>
@@ -246,14 +253,26 @@ function SectionTitle({ title, subtitle, light }: { title: string; subtitle?: st
   return <div className={light ? 'section-title light' : 'section-title'}><h2>{title}</h2><p>{subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>;
 }
 
-function ProductCategoryCard({ category }: { category: ProductCategory }) {
+function ProductCategoryCard({ category, onPreview }: { category: ProductCategory; onPreview: (image: ImagePreview) => void }) {
   return (
-    <Link to={`/products?category=${category.slug}`} className="product-category-card">
-      <div className="product-category-image">
+    <article className="product-category-card">
+      <button className="product-category-image home-preview-image-button square" type="button" onClick={() => category.coverImageUrl && onPreview({ url: category.coverImageUrl, title: category.name })}>
         {category.coverImageUrl ? <img src={category.coverImageUrl} alt={category.name} /> : <div className="product-fallback">K</div>}
-      </div>
-      <h3>{category.name}</h3>
+      </button>
+      <Link to={`/products?category=${category.slug}`}><h3>{category.name}</h3></Link>
       <p>{category.description || '菜单文案菜单文案'}</p>
-    </Link>
+    </article>
+  );
+}
+
+function ImagePreviewOverlay({ image, onClose }: { image: ImagePreview; onClose: () => void }) {
+  return (
+    <button className="cert-preview-overlay" type="button" onClick={onClose} aria-label="关闭原图预览">
+      <span className="cert-preview-dialog">
+        <img src={image.url} alt={image.title} />
+        <strong>{image.title}</strong>
+        <em>点击任意位置关闭</em>
+      </span>
+    </button>
   );
 }
