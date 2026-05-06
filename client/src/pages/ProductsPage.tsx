@@ -38,7 +38,7 @@ export function ProductsPage() {
           <div className="list-grid">
             {products.map((product) => (
               <Link className="list-product" to={`/products/${product.slug}`} key={product.id}>
-                <figure>{product.coverImageUrl ? <img src={product.coverImageUrl} alt={product.name} /> : <div className="product-fallback">K</div>}</figure>
+                <figure>{(product.listCoverImageUrl || product.coverImageUrl) ? <img src={product.listCoverImageUrl || product.coverImageUrl} alt={product.name} /> : <div className="product-fallback">K</div>}</figure>
                 <span>{product.name}</span>
               </Link>
             ))}

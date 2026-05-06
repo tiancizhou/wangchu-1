@@ -38,6 +38,7 @@ const menuGroups: { key: string; label: string; items: MenuEntry[] }[] = [
       { key: '/admin/page/process', label: '先进的制作工艺', icon: <BulbOutlined /> },
       { key: '/admin/page/about', label: '关于我们', icon: <TeamOutlined /> },
       { key: '/admin/page/consult', label: '渠道合作', icon: <MessageOutlined /> },
+      { key: '/admin/page/legal', label: '法律声明', icon: <SafetyCertificateOutlined /> },
       { key: '/admin/page/contact', label: '联系我们', icon: <MessageOutlined /> },
       { key: '/admin/site', label: '页脚', icon: <BankOutlined /> }
     ]

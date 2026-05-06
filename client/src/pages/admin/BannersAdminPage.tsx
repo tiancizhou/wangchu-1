@@ -86,9 +86,9 @@ export function BannersAdminPage() {
 
   return (
     <div>
-      <PageHeader title="轮播图管理" description="上传首页顶部展示的图片、动图或视频。建议使用清晰横版素材，视频文件控制在 80MB 以内。" extra={<Button type="primary" loading={saving} onClick={saveOrder}>保存排序</Button>} />
+      <PageHeader title="轮播图管理" description="上传首页顶部展示的图片、动图或视频。图片上传前裁剪为 1920×936；视频和 GIF 请提前制作为对应比例，视频文件控制在 80MB 以内。" extra={<Button type="primary" loading={saving} onClick={saveOrder}>保存排序</Button>} />
       <Card title="上传轮播素材" style={{ marginBottom: 16 }}>
-        <MediaDropzone value="" multiple onChange={() => {}} onMultipleChange={onMediaUploaded} />
+        <MediaDropzone value="" multiple cropPreset="homepageHero" onChange={() => {}} onMultipleChange={onMediaUploaded} />
       </Card>
       <DraggableList
         items={banners}

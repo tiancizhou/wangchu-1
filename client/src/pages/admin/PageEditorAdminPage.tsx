@@ -100,7 +100,7 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       description: '',
       editableKeys: ['supportModule'],
       moduleHelp: {
-        supportModule: '显示在“生产设计与制作”区域，用于介绍生产、检测、检验能力。'
+        supportModule: '显示在“生产设计与制作”区域，用于介绍生产、检测、检验能力，并在每个栏目内维护立即查看详情正文。'
       },
       loadingText: '生产设计与制作加载中...',
       saveSuccessText: '生产设计与制作已保存',
@@ -159,6 +159,29 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       hidePageChrome: true
     }
   },
+  legal: {
+    title: '法律声明',
+    publicLocation: '/legal',
+    description: '管理法律声明页面正文内容，前台保持法律文档固定版式。',
+    tools: [],
+    contentConfig: {
+      pageKey: 'legal',
+      title: '法律声明页面内容',
+      description: '编辑法律声明页面正文内容。',
+      editableKeys: ['legalStatement'],
+      moduleHelp: {
+        legalStatement: '显示在法律声明页面正文区域。'
+      },
+      loadingText: '法律声明内容加载中...',
+      emptyText: '还没有法律声明内容模块，请先运行初始化数据。',
+      saveSuccessText: '法律声明内容已保存',
+      saveButtonText: '保存法律声明内容',
+      hideModuleSelector: true,
+      hideBaseSettings: true,
+      hideEditorHeader: true,
+      hidePageChrome: true
+    }
+  },
   contact: {
     title: '联系我们',
     publicLocation: '/contact',
@@ -170,7 +193,7 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       description: '编辑联系我们页面左侧联系信息和右侧地图图片。',
       editableKeys: ['contactInfo'],
       moduleHelp: {
-        contactInfo: '显示在联系我们页面的联系信息条和地图图片。建议保持 4 条联系信息。'
+        contactInfo: '显示在联系我们页面的正文、联系信息条和地图图片。建议保持 4 条联系信息。'
       },
       loadingText: '联系我们内容加载中...',
       emptyText: '还没有联系我们内容模块，请先运行初始化数据。',

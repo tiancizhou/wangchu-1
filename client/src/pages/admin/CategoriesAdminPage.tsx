@@ -117,7 +117,7 @@ export function CategoriesAdminPage({ embedded = false }: CategoriesAdminPagePro
                 <Col xs={24} md={12}><Form.Item name="isPublished" label="前台显示" valuePropName="checked"><Switch /></Form.Item></Col>
               </Row>
               <Form.Item name="description" label="分类描述"><Input.TextArea rows={4} placeholder="简要说明这个分类下包含哪些产品" /></Form.Item>
-              <Form.Item name="coverImageUrl" label="分类封面图"><Dropzone value={form.getFieldValue('coverImageUrl')} onChange={(url) => form.setFieldValue('coverImageUrl', url)} /></Form.Item>
+              <Form.Item name="coverImageUrl" label="分类封面图"><Dropzone value={form.getFieldValue('coverImageUrl')} cropPreset="productCategoryCover" onChange={(url) => form.setFieldValue('coverImageUrl', url)} /></Form.Item>
               <Space>
                 {isEditingExisting && <ConfirmButton danger title={`确定删除“${editing.name}”这个分类吗？`} onConfirm={() => onDelete(editing as ProductCategory)}>删除当前分类</ConfirmButton>}
                 <Button type="primary" htmlType="submit" loading={saving}>{isEditingExisting ? '保存分类修改' : '新增分类'}</Button>

@@ -22,7 +22,7 @@ const fallbackProfile: SiteProfile = {
   legalLabel: '法律声明',
   legalUrl: '/legal',
   contactLabel: '联系我们',
-  contactUrl: '#',
+  contactUrl: '/contact',
   copyrightText: '© 2003--现在 Taobao.com 版权所有',
   policeFilingText: '浙公网安备 33011002017548号',
   policeFilingUrl: '#',
@@ -37,13 +37,30 @@ const fallbackNavigation: NavigationItem[] = [
   { id: 'products', label: '产品中心', url: '/products', sortOrder: 2, isVisible: true, openInNewTab: false },
   { id: 'support', label: '技术支持', url: '/#support', sortOrder: 3, isVisible: true, openInNewTab: false },
   { id: 'consult', label: '渠道合作', url: '/consult', sortOrder: 4, isVisible: true, openInNewTab: false },
-  { id: 'about', label: '关于我们', url: '/#about', sortOrder: 5, isVisible: true, openInNewTab: false }
+  { id: 'about', label: '关于我们', url: '/about', sortOrder: 5, isVisible: true, openInNewTab: false }
 ];
+
+function normalizeNavigationItem(item: NavigationItem): NavigationItem {
+  return item.label === '关于我们' && item.url === '/#about' ? { ...item, url: '/about' } : item;
+}
 
 function normalizeHref(url?: string) {
   if (!url || url === '#') return '#';
   if (url.startsWith('/') || url.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(url)) return url;
   return `https://${url}`;
+}
+
+function footerEntryUrl(label?: string, url?: string) {
+  if ((label === fallbackProfile.legalLabel || label === '法律声明') && (!url || url === '#')) return fallbackProfile.legalUrl;
+  if ((label === fallbackProfile.contactLabel || label === '联系我们') && (!url || url === '#')) return fallbackProfile.contactUrl;
+  return url;
+}
+
+function FooterLink({ label, url }: { label?: string; url?: string }) {
+  const text = label || '';
+  const href = normalizeHref(footerEntryUrl(label, url));
+  if (!text) return null;
+  return href.startsWith('/') ? <Link to={href}>{text}</Link> : <a href={href}>{text}</a>;
 }
 
 export function PublicLayout() {
@@ -55,7 +72,7 @@ export function PublicLayout() {
 
   useEffect(() => {
     getSiteProfile().then((data) => data && setProfile(data)).catch(() => {});
-    getNavigation().then((items) => items.length > 0 && setNavigation(items)).catch(() => {});
+    getNavigation().then((items) => items.length > 0 && setNavigation(items.map(normalizeNavigationItem))).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -97,8 +114,8 @@ export function PublicLayout() {
           <div className="footer-links">
             <span>{profile.footerLinkTitle || fallbackProfile.footerLinkTitle}</span>
             {visibleFooterLinks.map((link, index) => <a href={normalizeHref(link.url)} key={index}>{link.label}</a>)}
-            <Link to="/legal">法律声明</Link>
-            <Link to="/contact">联系我们</Link>
+            <FooterLink label={profile.legalLabel || fallbackProfile.legalLabel} url={profile.legalUrl || fallbackProfile.legalUrl} />
+            <FooterLink label={profile.contactLabel || fallbackProfile.contactLabel} url={profile.contactUrl || fallbackProfile.contactUrl} />
           </div>
           <p>
             {profile.copyrightText || fallbackProfile.copyrightText}

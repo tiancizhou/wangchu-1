@@ -3,14 +3,18 @@ import { AdminApp } from './admin/AdminApp';
 import { ProtectedRoute } from './components/admin/ProtectedRoute';
 import { AdminLayout } from './admin/AdminLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
+import { AboutPage } from './pages/AboutPage';
 import { BenefitDetailPage } from './pages/BenefitDetailPage';
 import { CertificatesPage } from './pages/CertificatesPage';
 import { ConsultPage } from './pages/ConsultPage';
 import { ContactPage } from './pages/ContactPage';
+import { FeatureDetailPage } from './pages/FeatureDetailPage';
 import { HomePage } from './pages/HomePage';
 import { LegalPage } from './pages/LegalPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
+import { ProcessDetailPage } from './pages/ProcessDetailPage';
 import { ProductsPage } from './pages/ProductsPage';
+import { SupportDetailPage } from './pages/SupportDetailPage';
 import { BannersAdminPage } from './pages/admin/BannersAdminPage';
 import { CertificatesAdminPage } from './pages/admin/CertificatesAdminPage';
 import { ConsultationsAdminPage } from './pages/admin/ConsultationsAdminPage';
@@ -35,7 +39,11 @@ const router = createBrowserRouter([
       { path: 'certificates', element: <CertificatesPage /> },
       { path: 'legal', element: <LegalPage /> },
       { path: 'contact', element: <ContactPage /> },
-      { path: 'benefits/:slug', element: <BenefitDetailPage /> }
+      { path: 'about', element: <AboutPage /> },
+      { path: 'features/:slug', element: <FeatureDetailPage /> },
+      { path: 'benefits/:slug', element: <BenefitDetailPage /> },
+      { path: 'support/:slug', element: <SupportDetailPage /> },
+      { path: 'process/:slug', element: <ProcessDetailPage /> }
     ]
   },
   {

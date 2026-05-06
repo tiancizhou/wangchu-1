@@ -75,6 +75,7 @@ model Product {
   categoryName         String           @default("工业油品")
   categoryId           String?
   coverImageUrl        String           @default("")
+  listCoverImageUrl    String           @default("")
   topSubtitle          String           @default("")
   detailTitle          String           @default("产品详情")
   detailDescription    String           @default("")

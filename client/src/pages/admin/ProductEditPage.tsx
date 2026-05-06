@@ -9,7 +9,7 @@ const defaultPerformanceTitle = '稳定的生产表现';
 const defaultPerformanceText = '公司围绕润滑产品建立研发、生产和服务体系，为客户提供可靠产品和持续支持。';
 
 const emptyProduct: Partial<Product> = {
-  name: '', slug: '', categoryName: '工业油品', categoryId: '', coverImageUrl: '', topSubtitle: '', detailTitle: '', detailDescription: '', detailImageUrl: '', productSpecsImageUrl: '', detailGallery: [], performanceTitle: defaultPerformanceTitle, performanceText: defaultPerformanceText, performanceItems: [], sortOrder: 0, isPublished: true
+  name: '', slug: '', categoryName: '工业油品', categoryId: '', coverImageUrl: '', listCoverImageUrl: '', topSubtitle: '', detailTitle: '', detailDescription: '', detailImageUrl: '', productSpecsImageUrl: '', detailGallery: [], performanceTitle: defaultPerformanceTitle, performanceText: defaultPerformanceText, performanceItems: [], sortOrder: 0, isPublished: true
 };
 
 function createSlug(value: string) {
@@ -32,7 +32,7 @@ export function ProductEditPage() {
       try {
         const rows = await adminCategories();
         setCategories(rows);
-        const data = id ? await adminProduct(id) : { ...emptyProduct, categoryId: rows[0]?.id || '', categoryName: rows[0]?.name || '工业油品' };
+        const data = id ? { ...emptyProduct, ...(await adminProduct(id)) } : { ...emptyProduct, categoryId: rows[0]?.id || '', categoryName: rows[0]?.name || '工业油品' };
         setProduct(data);
         form.setFieldsValue(data);
       } catch (err) {
@@ -95,20 +95,23 @@ export function ProductEditPage() {
                 <Col xs={24} md={12}><Form.Item name="slug" label="网址标识"><Input placeholder="不填会根据产品名称生成" /></Form.Item></Col>
                 <Col xs={24} md={12}><Form.Item name="isPublished" label="前台显示" valuePropName="checked"><Switch /></Form.Item></Col>
               </Row>
-              <Form.Item name="coverImageUrl" label="顶部产品图"><Dropzone value={product.coverImageUrl} onChange={(url) => setField('coverImageUrl', url)} /></Form.Item>
+              <Row gutter={16}>
+                <Col xs={24} md={12}><Form.Item name="listCoverImageUrl" label="产品列表封面图"><Dropzone value={product.listCoverImageUrl} cropPreset="productListCover" onChange={(url) => setField('listCoverImageUrl', url)} /></Form.Item></Col>
+                <Col xs={24} md={12}><Form.Item name="coverImageUrl" label="详情页顶部产品图"><Dropzone value={product.coverImageUrl} cropPreset="productDetailTop" onChange={(url) => setField('coverImageUrl', url)} /></Form.Item></Col>
+              </Row>
             </SectionCard>
             <SectionCard title="产品详情介绍" description="详情标题、介绍文字和产品大图。">
               <Form.Item name="detailTitle" label="详情标题"><Input placeholder="例如：OMAJIC-UV2030" /></Form.Item>
               <Form.Item name="detailDescription" label="详情描述"><Input.TextArea rows={5} /></Form.Item>
-              <Form.Item name="detailImageUrl" label="详情大图"><Dropzone value={product.detailImageUrl} onChange={(url) => setField('detailImageUrl', url)} /></Form.Item>
+              <Form.Item name="detailImageUrl" label="详情大图"><Dropzone value={product.detailImageUrl} cropPreset="productDetailMiddle" onChange={(url) => setField('detailImageUrl', url)} /></Form.Item>
             </SectionCard>
             <SectionCard title="产品参数与基本属性" description="上传完整参数与属性图。">
-              <Form.Item name="productSpecsImageUrl" label="产品参数与基本属性图"><Dropzone value={product.productSpecsImageUrl} onChange={(url) => setField('productSpecsImageUrl', url)} /></Form.Item>
+              <Form.Item name="productSpecsImageUrl" label="产品参数与基本属性图"><Dropzone value={product.productSpecsImageUrl} cropPreset="productSpecs" onChange={(url) => setField('productSpecsImageUrl', url)} /></Form.Item>
             </SectionCard>
             <SectionCard title="产品细节图库" description="维护产品细节图和说明。">
               <Space style={{ marginBottom: 12 }}><Button type="primary" disabled={detailGallery.length >= 6} onClick={() => setField('detailGallery', [...detailGallery, { imageUrl: '', caption: '细节' }])}>新增细节图</Button></Space>
               <Row gutter={[16, 16]}>
-                {detailGallery.map((item, index) => <Col xs={24} md={12} xl={8} key={index}><Card title={`细节 ${index + 1}`} extra={<ConfirmButton danger size="small" title="确定删除这张细节图吗？" onConfirm={() => setField('detailGallery', detailGallery.filter((_, itemIndex) => itemIndex !== index))}>删除</ConfirmButton>}><Dropzone value={item.imageUrl} onChange={(imageUrl) => updateGallery(index, { imageUrl })} /><Input style={{ marginTop: 12 }} value={item.caption || ''} onChange={(e) => updateGallery(index, { caption: e.target.value })} placeholder="图片说明" /></Card></Col>)}
+                {detailGallery.map((item, index) => <Col xs={24} md={12} xl={8} key={index}><Card title={`细节 ${index + 1}`} extra={<ConfirmButton danger size="small" title="确定删除这张细节图吗？" onConfirm={() => setField('detailGallery', detailGallery.filter((_, itemIndex) => itemIndex !== index))}>删除</ConfirmButton>}><Dropzone value={item.imageUrl} cropPreset="productDetailGallery" onChange={(imageUrl) => updateGallery(index, { imageUrl })} /><Input style={{ marginTop: 12 }} value={item.caption || ''} onChange={(e) => updateGallery(index, { caption: e.target.value })} placeholder="图片说明" /></Card></Col>)}
               </Row>
             </SectionCard>
             <SectionCard title="稳定生产表现" description="底部标题、说明文字和特点图标。">

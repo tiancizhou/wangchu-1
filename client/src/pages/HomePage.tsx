@@ -6,9 +6,34 @@ import { normalizeHomeCertificateImages, type HomeCertificateImage } from '../ut
 const fallbackCategories = ['汽油机油', '柴油机油', '工业油品', '导热油', '润滑油', '特种油品研发'];
 
 type FeatureCard = { title?: string; description?: string; icon?: string; linkUrl?: string };
-type SupportTab = { title?: string; imageUrl?: string; heading?: string; description?: string; thumbnails?: string[] };
-type ProcessItem = { title?: string; description?: string; imageUrl?: string };
+type SupportTab = { title?: string; imageUrl?: string; heading?: string; description?: string; thumbnails?: string[]; linkUrl?: string };
+type ProcessItem = { title?: string; description?: string; imageUrl?: string; galleryImages?: string[]; linkUrl?: string };
 type ImagePreview = { url: string; title: string };
+
+const featureDetailLinks: Record<string, string> = {
+  品牌定制: '/features/brand-customization',
+  附加服务: '/features/additional-services',
+  天然保障: '/features/natural-assurance',
+  工厂直供: '/features/factory-direct'
+};
+
+const legacyFeatureLinks = new Set(['/consult', '/certificates', '/products']);
+const supportDetailLinks = ['/support/production-blending', '/support/lab-testing', '/support/quality-inspection'];
+const processDetailLinks = ['/process/filling-line', '/process/equipment-management', '/process/equipment', '/process/warehouse'];
+
+function processDetailLink(item: ProcessItem | undefined, index: number) {
+  return item?.linkUrl || processDetailLinks[index] || processDetailLinks[0];
+}
+
+function supportDetailLink(tab: SupportTab | undefined, index: number) {
+  return tab?.linkUrl || supportDetailLinks[index] || supportDetailLinks[0];
+}
+
+function featureCardLink(item: FeatureCard) {
+  const detailLink = item.title ? featureDetailLinks[item.title] : undefined;
+  if (!detailLink) return item.linkUrl || '/consult';
+  return !item.linkUrl || legacyFeatureLinks.has(item.linkUrl) ? detailLink : item.linkUrl;
+}
 
 const videoPattern = /\.(mp4|webm|mov)$/i;
 
@@ -57,7 +82,7 @@ export function HomePage() {
       <FeatureCards section={homeData?.sections.featureCards} />
       <SupportModule section={homeData?.sections.supportModule} activeIndex={activeSupportIndex} onSelect={setActiveSupportIndex} onPreview={setPreviewImage} />
       <ProductCategoryGrid categories={homeData?.categories || []} />
-      <ProcessModule section={homeData?.sections.processModule} onPreview={setPreviewImage} />
+      <ProcessModule section={homeData?.sections.processModule} />
       <AboutPreview section={homeData?.sections.aboutPreview} companyName={homeData?.siteProfile?.companyName} />
       <CertificatePreview images={normalizeHomeCertificateImages(homeData?.sections.certificatePreview?.data?.images)} />
       {previewImage && <ImagePreviewOverlay image={previewImage} onClose={() => setPreviewImage(null)} />}
@@ -67,7 +92,7 @@ export function HomePage() {
 
 export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect }: { banners: Banner[]; banner?: Banner; activeBannerIndex: number; onSelect: (index: number) => void }) {
   const heroStyle = {
-    aspectRatio: '1920 / 750',
+    aspectRatio: '1920 / 936',
     ...(banner?.imageUrl && !isVideoMedia(banner.imageUrl) ? { backgroundImage: `url(${banner.imageUrl})` } : {})
   };
 
@@ -88,10 +113,10 @@ export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect }: {
 
 export function FeatureCards({ section }: { section?: ContentSection }) {
   const items = (section?.data.items as FeatureCard[] | undefined) || [
-    { title: '品牌定制', description: '提供成熟的品牌定制与产品包装方案。', icon: '✥', linkUrl: '/consult' },
-    { title: '附加服务', description: '从设计、打样到生产交付，提供一站式服务支持。', icon: '✥', linkUrl: '/consult' },
-    { title: '天然保障', description: '严格检测流程和生产管理体系。', icon: '✥', linkUrl: '/certificates' },
-    { title: '工厂直供', description: '依托成熟供应链与生产体系。', icon: '✥', linkUrl: '/products' }
+    { title: '品牌定制', description: '提供成熟的品牌定制与产品包装方案。', icon: '✥', linkUrl: '/features/brand-customization' },
+    { title: '附加服务', description: '从设计、打样到生产交付，提供一站式服务支持。', icon: '✥', linkUrl: '/features/additional-services' },
+    { title: '天然保障', description: '严格检测流程和生产管理体系。', icon: '✥', linkUrl: '/features/natural-assurance' },
+    { title: '工厂直供', description: '依托成熟供应链与生产体系。', icon: '✥', linkUrl: '/features/factory-direct' }
   ];
 
   return (
@@ -101,7 +126,7 @@ export function FeatureCards({ section }: { section?: ContentSection }) {
           <div className="red-icon">{item.icon || '✥'}</div>
           <h3>{item.title}</h3>
           <p>{item.description}</p>
-          <Link to={item.linkUrl || '/consult'}>了解更多</Link>
+          <Link to={featureCardLink(item)}>了解更多</Link>
         </article>
       ))}
     </section>
@@ -115,6 +140,7 @@ export function SupportModule({ section, activeIndex, onSelect, onPreview }: { s
     { title: '检验', heading: '品质检验', description: '通过规范化检测标准，对产品性能、稳定性和适用性进行持续检验。', thumbnails: [] }
   ];
   const active = tabs[activeIndex] || tabs[0];
+  const detailLink = supportDetailLink(active, activeIndex);
   const [galleryPage, setGalleryPage] = useState(0);
   const thumbnails = active?.thumbnails?.length ? active.thumbnails : [];
   const fallbackThumbClasses = ['thumb-one', 'thumb-two', 'thumb-three', 'thumb-four', 'thumb-five'];
@@ -146,9 +172,9 @@ export function SupportModule({ section, activeIndex, onSelect, onPreview }: { s
           <div className="support-main-photo">
             {active?.imageUrl && <button className="home-preview-image-button square" type="button" onClick={() => onPreview({ url: active.imageUrl!, title: active.heading || active.title || '生产设计与制作' })}><img src={active.imageUrl} alt={active.heading || active.title || '生产设计与制作'} /></button>}
           </div>
-          <article className="support-copy"><h3>{active?.heading}</h3><p>{active?.description}</p><Link to="/consult">立即查看</Link></article>
+          <article className="support-copy"><h3>{active?.heading}</h3><p>{active?.description}</p><Link to={detailLink}>立即查看</Link></article>
         </div>
-        <div className="support-gallery"><button className="support-gallery-arrow" aria-label="上一组" onClick={previousGallery}>‹</button>{visibleThumbs.map((image, index) => thumbnails.length > 0 ? <button className="support-thumb home-preview-image-button square" type="button" onClick={() => onPreview({ url: image, title: active?.heading || active?.title || '生产设计与制作' })} key={`${image}-${galleryPage}-${index}`}><img src={image} alt={active?.heading || active?.title || '生产设计与制作'} /></button> : <div className={`support-thumb ${image}`} key={`${image}-${galleryPage}-${index}`} />)}<button className="support-gallery-arrow" aria-label="下一组" onClick={nextGallery}>›</button></div>
+        <div className="support-gallery"><button className="support-gallery-arrow" aria-label="上一组" onClick={previousGallery}>‹</button>{visibleThumbs.map((image, index) => thumbnails.length > 0 ? <Link to="/contact" className="support-thumb home-preview-image-button square" key={`${image}-${galleryPage}-${index}`}><img src={image} alt={active?.heading || active?.title || '生产设计与制作'} /></Link> : <Link to="/contact" className={`support-thumb ${image}`} key={`${image}-${galleryPage}-${index}`} aria-label="联系我们" />)}<button className="support-gallery-arrow" aria-label="下一组" onClick={nextGallery}>›</button></div>
       </div>
     </section>
   );
@@ -166,7 +192,7 @@ export function ProductCategoryGrid({ categories }: { categories: ProductCategor
   );
 }
 
-export function ProcessModule({ section, onPreview }: { section?: ContentSection; onPreview: (image: ImagePreview) => void }) {
+export function ProcessModule({ section }: { section?: ContentSection }) {
   const data = section?.data as { items?: ProcessItem[]; backgroundImageUrl?: string } | undefined;
   const items = data?.items || [
     { title: '菜单文案', description: '稼尔润（北京）润滑油有限公司专注润滑油研发、生产与技术服务，围绕调和、灌装、检测和仓储建立标准化流程，为客户提供稳定可靠的产品交付能力。' },
@@ -176,6 +202,8 @@ export function ProcessModule({ section, onPreview }: { section?: ContentSection
   ];
   const [activeIndex, setActiveIndex] = useState(0);
   const active = items[activeIndex] || items[0];
+  const activeDetailLink = processDetailLink(active, activeIndex);
+  const activeGalleryImages = active?.galleryImages?.length ? active.galleryImages : active?.imageUrl ? [active.imageUrl] : [];
 
   useEffect(() => {
     setActiveIndex(0);
@@ -188,13 +216,29 @@ export function ProcessModule({ section, onPreview }: { section?: ContentSection
         <div className="factory-showcase">
           <aside>{items.map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => setActiveIndex(index)} key={item.title}><FactoryMenuIcon index={index} /><span>{item.title}</span></button>)}</aside>
           <div className="factory-photo">
-            {active?.imageUrl && <button className="home-preview-image-button ratio-3-2" type="button" onClick={() => onPreview({ url: active.imageUrl!, title: active.title || '先进的制作工艺' })}><img src={active.imageUrl} alt={active.title || '先进的制作工艺'} /></button>}
+            {active?.imageUrl && <Link className="home-preview-image-button ratio-3-2" to={activeDetailLink}><img src={active.imageUrl} alt={active.title || '先进的制作工艺'} /></Link>}
           </div>
         </div>
         <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p><span>”</span></article>
         <div className="factory-gallery-title"><span>{active?.title}</span></div>
         <div className="factory-thumb-grid">
-          {items.slice(0, 4).map((item, index) => <button className={index === activeIndex ? 'active' : ''} type="button" onClick={() => item.imageUrl ? onPreview({ url: item.imageUrl, title: item.title || '先进的制作工艺' }) : setActiveIndex(index)} key={`${item.title}-thumb`}>{item.imageUrl ? <img src={item.imageUrl} alt={item.title} /> : <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />}<span>{item.title}</span></button>)}
+          {Array.from({ length: 4 }).map((_, index) => {
+            const imageUrl = activeGalleryImages[index];
+            const title = active?.title || '先进的制作工艺';
+            return (
+              imageUrl ? (
+                <Link className={index === 0 ? 'active' : ''} to={activeDetailLink} key={`${title}-gallery-${index}-${imageUrl}`}>
+                  <img src={imageUrl} alt={`${title} ${index + 1}`} />
+                  <span>{title}</span>
+                </Link>
+              ) : (
+                <button className={index === 0 ? 'active' : ''} type="button" disabled key={`${title}-gallery-${index}-empty`}>
+                  <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />
+                  <span>{title}</span>
+                </button>
+              )
+            );
+          })}
         </div>
       </div>
     </section>
@@ -202,17 +246,20 @@ export function ProcessModule({ section, onPreview }: { section?: ContentSection
 }
 
 export function AboutPreview({ section, companyName }: { section?: ContentSection; companyName?: string }) {
-  const data = section?.data as { imageUrl?: string; body?: string } | undefined;
+  const data = section?.data as { imageUrl?: string; body?: string; linkUrl?: string } | undefined;
   const title = companyName || '稼尔润（北京）润滑油有限公司';
+  const linkUrl = '/about';
   return (
     <section className="section container" id="about">
       <SectionTitle title={section?.title || '关于我们'} subtitle={section?.subtitle} />
       <div className="about-block">
-        {data?.imageUrl ? <img className="about-image" src={data.imageUrl} alt={section?.title || '关于我们'} /> : <div className="about-photo">Kronprins<br />王储</div>}
-        <div className="about-copy">
+        <Link className="about-media-link" to={linkUrl}>
+          {data?.imageUrl ? <img className="about-image" src={data.imageUrl} alt={section?.title || '关于我们'} /> : <div className="about-photo">Kronprins<br />王储</div>}
+        </Link>
+        <Link className="about-copy" to={linkUrl}>
           <h3>{title}</h3>
           <p>{data?.body || '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。'}</p>
-        </div>
+        </Link>
       </div>
     </section>
   );

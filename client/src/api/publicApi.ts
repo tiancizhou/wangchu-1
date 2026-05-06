@@ -71,6 +71,7 @@ export type Product = {
   categoryId?: string | null;
   categoryRef?: ProductCategory | null;
   coverImageUrl: string;
+  listCoverImageUrl: string;
   topSubtitle: string;
   detailTitle: string;
   detailDescription: string;

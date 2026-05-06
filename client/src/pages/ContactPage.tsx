@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getContentSections, type ContentSection } from '../api/publicApi';
 
 type ContactInfoItem = { label?: string; value?: string };
-type ContactInfoData = { mapImageUrl?: string; items?: ContactInfoItem[] };
+type ContactInfoData = { body?: string; mapImageUrl?: string; items?: ContactInfoItem[] };
 
 const defaultContactItems: ContactInfoItem[] = [
   { label: '公司地址', value: '北京市大兴区科创五街38号院' },

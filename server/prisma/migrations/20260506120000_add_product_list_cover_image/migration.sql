@@ -1,0 +1,1 @@
+ALTER TABLE "Product" ADD COLUMN "listCoverImageUrl" TEXT NOT NULL DEFAULT '';

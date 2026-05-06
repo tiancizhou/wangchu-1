@@ -2,6 +2,41 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '../src/utils/auth.js';
 
+const legalStatementSections = [
+  {
+    heading: '我们的责任',
+    paragraphs: [
+      '本站内的信息、内容不是全面的。尽管我们非常努力，但他们可能不是精确的、及时更新的或适合于任何特殊情况。我们不承担因不精确确或遗漏而产生的责任，但欺骗性的错误表述除外。您根据本站内的信息而做出的决定应完全是您的责任。桔尔润（北京）润滑油有限公司以及其子公司不承担因登录本站、使用本站或使用本站内的信息而产生的任何直接和间接的损失或损害。当然，如果您发电子邮件至juerrun@163.com提出问题，我们非常高兴和您讨论。',
+      '如果您提供的信息是有关个人方面的信息，我们将根据网站的《用户隐私声明》予以对待，否则，如果您提供信息给我们，视为同意我们对这些信息拥有无限的权利，我们可以选择任何方式使用这些信息。这些信息将不构成机密信息。'
+    ]
+  },
+  {
+    heading: '本网站的版权和商标所有权',
+    paragraphs: [
+      '除非另有规定，本站的全部内容和下载内容直接归所有我司或通过子公司间接归其所有。版权所有，违者必究。',
+      '您有责任遵守所有可适用的版权法。我们允许您在浏览网页的过程中进行复制作为必要的附带行为；为个人合理使用之目的，您可以打印本站内容，但严禁用于其它方面。“kronprinsK”“kronprins”“王储”产品的品牌都是商标，归桔尔润（北京）润滑油有限公司所有。没有我们的明示许可，您不得抄袭本站，也不可将其连接到主页以外的其它网页。'
+    ]
+  },
+  {
+    heading: '链接使用',
+    paragraphs: [
+      '我们和我们的子公司不对其它网站的内容负责，包括友情链接网站的内容。我们对这些网站或链接不负任何相关责任。',
+      '如果我们对第三方网站提供超级连接，那是因为我们诚实地相信该网站含有或可能含有与我们的网站内容相关的材料。这链接并不意味着桔尔润（北京）润滑油有限公司或其子公司已经检查过或赞成该第三方网站或其内容——实际上有时候超链接链接到的第三方网站所载的观点可能与桔尔润（北京）润滑油有限公司或其子公司网站的内容相矛盾。'
+    ]
+  },
+  {
+    heading: '本网站所适用的法律',
+    paragraphs: [
+      '您对本网站和其下载内容的使用及这些条件条款的作用均适用中国法律，对于因使用本网站引起的纠纷，管辖地法院应拥有排他性的管辖权。',
+      '倘主管当局认为这些条件条款的任何条款或条款的任何部分在某一限度内无效、非法或不可实施，则该条款将在相应限度内终止效力，其余条款仍将在法律允许的最大限度内有效和实施。'
+    ]
+  },
+  {
+    heading: '版权所有 翻版必究',
+    paragraphs: []
+  }
+];
+
 const prisma = new PrismaClient();
 
 const categories = [
@@ -20,10 +55,66 @@ const contentSections = [
     title: '服务优势',
     data: {
       items: [
-        { title: '品牌定制', description: '提供成熟的品牌定制与产品包装方案，满足渠道客户展示和销售需求。', icon: '✥', linkUrl: '/consult' },
-        { title: '附加服务', description: '从设计、打样到生产交付，提供稳定高效的一站式服务支持。', icon: '✥', linkUrl: '/consult' },
-        { title: '天然保障', description: '严格检测流程和生产管理体系，保障产品品质稳定可靠。', icon: '✥', linkUrl: '/certificates' },
-        { title: '工厂直供', description: '依托成熟供应链与生产体系，为客户提供高性价比合作方案。', icon: '✥', linkUrl: '/products' }
+        {
+          title: '品牌定制',
+          description: '提供成熟的品牌定制与产品包装方案，满足渠道客户展示和销售需求。',
+          icon: '✥',
+          linkUrl: '/features/brand-customization',
+          sections: [
+            {
+              heading: '品牌定制',
+              paragraphs: [
+                '围绕客户品牌定位、渠道形象和产品系列规划，提供包装设计、标签规范、产品组合和展示资料等定制服务。',
+                '通过成熟的产品体系和生产协同能力，帮助合作客户快速形成统一的品牌展示效果，满足终端销售和渠道推广需求。'
+              ]
+            }
+          ]
+        },
+        {
+          title: '附加服务',
+          description: '从设计、打样到生产交付，提供稳定高效的一站式服务支持。',
+          icon: '✥',
+          linkUrl: '/features/additional-services',
+          sections: [
+            {
+              heading: '附加服务',
+              paragraphs: [
+                '从前期沟通、产品建议、包装打样到生产交付，围绕客户合作流程提供配套服务支持。',
+                '根据客户经营场景和市场需求，协助完善产品资料、展示内容和交付安排，提升合作效率。'
+              ]
+            }
+          ]
+        },
+        {
+          title: '天然保障',
+          description: '严格检测流程和生产管理体系，保障产品品质稳定可靠。',
+          icon: '✥',
+          linkUrl: '/features/natural-assurance',
+          sections: [
+            {
+              heading: '天然保障',
+              paragraphs: [
+                '依托规范化检测流程和生产管理体系，对原料、生产过程和成品质量进行持续管理。',
+                '通过关键指标检测、过程记录和质量复核，保障产品在不同应用场景中的稳定性和可靠性。'
+              ]
+            }
+          ]
+        },
+        {
+          title: '工厂直供',
+          description: '依托成熟供应链与生产体系，为客户提供高性价比合作方案。',
+          icon: '✥',
+          linkUrl: '/features/factory-direct',
+          sections: [
+            {
+              heading: '工厂直供',
+              paragraphs: [
+                '依托成熟的供应链和生产组织能力，减少中间环节，为合作客户提供稳定的产品供应支持。',
+                '结合订单需求、包装规格和交付节奏，提供更具效率的生产安排和合作方案。'
+              ]
+            }
+          ]
+        }
       ]
     }
   },
@@ -39,21 +130,24 @@ const contentSections = [
           imageUrl: '',
           heading: '生产调和',
           description: '围绕不同油品应用场景，建立标准化调和流程，为客户提供稳定可靠的产品生产支持。',
-          thumbnails: []
+          thumbnails: [],
+          linkUrl: '/support/production-blending'
         },
         {
           title: '检测',
           imageUrl: '',
           heading: '锅炉百科',
           description: '围绕润滑油研发、生产检测与品质管理，建立标准化实验流程和技术服务体系。',
-          thumbnails: []
+          thumbnails: [],
+          linkUrl: '/support/lab-testing'
         },
         {
           title: '检验',
           imageUrl: '',
           heading: '品质检验',
           description: '通过规范化检测标准，对产品性能、稳定性和适用性进行持续检验。',
-          thumbnails: []
+          thumbnails: [],
+          linkUrl: '/support/quality-inspection'
         }
       ]
     }
@@ -65,10 +159,38 @@ const contentSections = [
     subtitle: '稼尔润（北京）润滑油有限公司',
     data: {
       items: [
-        { title: '巡检工艺', description: '标准化巡检流程保障生产连续性与品质稳定。', imageUrl: '' },
-        { title: '资料', description: '完善资料体系支撑产品研发、检测和交付。', imageUrl: '' },
-        { title: '设备', description: '成熟设备体系满足多类油品生产需求。', imageUrl: '' },
-        { title: '仓储', description: '规范仓储管理保障产品交付效率。', imageUrl: '' }
+        {
+          title: '灌装线',
+          description: '自动化灌装流程提升生产效率，保障产品包装规格统一、出厂品质稳定。',
+          imageUrl: '',
+          galleryImages: [],
+          linkUrl: '/process/filling-line',
+          sections: [{ paragraphs: ['自动化灌装流程提升生产效率，围绕灌装、封口、贴标和装箱等环节建立规范化作业流程，保障产品包装规格统一、出厂品质稳定。'] }]
+        },
+        {
+          title: '设备管理',
+          description: '规范化设备管理保障生产连续性与品质稳定。',
+          imageUrl: '',
+          galleryImages: [],
+          linkUrl: '/process/equipment-management',
+          sections: [{ paragraphs: ['通过规范化设备管理、日常维护和运行检查，保障生产设备保持稳定状态，为连续生产和品质控制提供可靠基础。'] }]
+        },
+        {
+          title: '设备',
+          description: '成熟设备体系满足多类油品生产需求。',
+          imageUrl: '',
+          galleryImages: [],
+          linkUrl: '/process/equipment',
+          sections: [{ paragraphs: ['成熟设备体系覆盖调和、灌装、检测和辅助生产环节，能够满足多类润滑油产品生产需求，并支持不同规格订单的稳定交付。'] }]
+        },
+        {
+          title: '仓储',
+          description: '规范仓储管理保障产品交付效率。',
+          imageUrl: '',
+          galleryImages: [],
+          linkUrl: '/process/warehouse',
+          sections: [{ paragraphs: ['规范仓储管理围绕产品入库、存放、出库和交付流程展开，保障产品存放安全、库存清晰和订单交付效率。'] }]
+        }
       ]
     }
   },
@@ -80,7 +202,7 @@ const contentSections = [
     data: {
       imageUrl: '',
       body: '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。',
-      linkUrl: '/#about'
+      linkUrl: '/about'
     }
   },
   {
@@ -131,12 +253,73 @@ const contentSections = [
     title: '联系我们',
     subtitle: '',
     data: {
+      body: '',
       mapImageUrl: '',
       items: [
         { label: '公司地址', value: '北京市大兴区科创五街38号院' },
         { label: '联系电话', value: '0519-68288220' },
         { label: '服务热线', value: '0519-68288220' },
         { label: '电子邮箱', value: 'service@example.com' }
+      ]
+    }
+  },
+  {
+    pageKey: 'legal',
+    sectionKey: 'legalStatement',
+    title: '法律声明',
+    subtitle: '',
+    data: {
+      sections: legalStatementSections
+    }
+  },
+  {
+    pageKey: 'supportDetails',
+    sectionKey: 'productionBlending',
+    title: '生产调和',
+    subtitle: '',
+    data: {
+      sections: [
+        {
+          heading: '生产调和',
+          paragraphs: [
+            '围绕不同油品应用场景，建立标准化调和流程，对基础油、添加剂和调和工艺进行规范管理，保障产品性能稳定。',
+            '生产过程按照配方、温度、时间和检验节点执行，配合过程记录和质量复核，为客户提供可靠的产品生产支持。'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    pageKey: 'supportDetails',
+    sectionKey: 'labTesting',
+    title: '锅炉百科',
+    subtitle: '',
+    data: {
+      sections: [
+        {
+          heading: '检测体系',
+          paragraphs: [
+            '围绕润滑油研发、生产检测与品质管理，建立标准化实验流程和技术服务体系，覆盖原料、半成品和成品检测环节。',
+            '通过关键指标检测和数据记录，持续跟踪产品稳定性与适用性，为生产调整和客户应用提供依据。'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    pageKey: 'supportDetails',
+    sectionKey: 'qualityInspection',
+    title: '品质检验',
+    subtitle: '',
+    data: {
+      sections: [
+        {
+          heading: '品质检验',
+          paragraphs: [
+            '通过规范化检测标准，对产品性能、稳定性和适用性进行持续检验，确保不同批次产品保持一致品质。',
+            '检验流程覆盖入库、生产、出厂等关键节点，并结合留样和记录管理，为产品交付提供质量保障。'
+          ]
+        }
       ]
     }
   }
@@ -146,15 +329,16 @@ async function main() {
   const username = process.env.ADMIN_USERNAME || 'admin';
   const password = process.env.ADMIN_PASSWORD || 'admin123456';
 
-  await prisma.adminUser.upsert({
-    where: { username },
-    update: {},
-    create: {
-      username,
-      passwordHash: await hashPassword(password),
-      role: 'admin'
-    }
-  });
+  const adminUser = await prisma.adminUser.findUnique({ where: { username } });
+  if (!adminUser) {
+    await prisma.adminUser.create({
+      data: {
+        username,
+        passwordHash: await hashPassword(password),
+        role: 'admin'
+      }
+    });
+  }
 
   const footerDefaults = {
     companyName: '桔尔润（北京）润滑油有限公司',
@@ -170,9 +354,9 @@ async function main() {
     ]),
     footerLinkTitle: '友情链接：',
     legalLabel: '法律声明',
-    legalUrl: '#',
+    legalUrl: '/legal',
     contactLabel: '联系我们',
-    contactUrl: '#',
+    contactUrl: '/contact',
     copyrightText: '© 2003--现在 Taobao.com 版权所有',
     policeFilingText: '浙公网安备 33011002017548号',
     policeFilingUrl: '#',
@@ -183,9 +367,7 @@ async function main() {
   };
 
   const siteProfile = await prisma.siteProfile.findFirst();
-  if (siteProfile) {
-    await prisma.siteProfile.update({ where: { id: siteProfile.id }, data: footerDefaults });
-  } else {
+  if (!siteProfile) {
     await prisma.siteProfile.create({ data: footerDefaults });
   }
 
@@ -197,17 +379,16 @@ async function main() {
         { label: '产品中心', url: '/products', sortOrder: 2 },
         { label: '技术支持', url: '/#support', sortOrder: 3 },
         { label: '渠道合作', url: '/consult', sortOrder: 4 },
-        { label: '关于我们', url: '/#about', sortOrder: 5 }
+        { label: '关于我们', url: '/about', sortOrder: 5 }
       ]
     });
   }
 
   for (const category of categories) {
-    await prisma.productCategory.upsert({
-      where: { slug: category.slug },
-      update: { name: category.name, sortOrder: category.sortOrder },
-      create: category
-    });
+    const existingCategory = await prisma.productCategory.findUnique({ where: { slug: category.slug } });
+    if (!existingCategory) {
+      await prisma.productCategory.create({ data: category });
+    }
   }
 
   const categoryRows = await prisma.productCategory.findMany();
@@ -252,11 +433,10 @@ async function main() {
   ];
 
   for (const product of products) {
-    await prisma.product.upsert({
-      where: { slug: product.slug },
-      update: product,
-      create: product
-    });
+    const existingProduct = await prisma.product.findUnique({ where: { slug: product.slug } });
+    if (!existingProduct) {
+      await prisma.product.create({ data: product });
+    }
   }
 
   const bannerCount = await prisma.carouselBanner.count();
@@ -273,17 +453,20 @@ async function main() {
   }
 
   for (const section of contentSections) {
-    await prisma.contentSection.upsert({
-      where: { pageKey_sectionKey: { pageKey: section.pageKey, sectionKey: section.sectionKey } },
-      update: {},
-      create: {
-        pageKey: section.pageKey,
-        sectionKey: section.sectionKey,
-        title: section.title,
-        subtitle: section.subtitle || '',
-        dataJson: JSON.stringify(section.data)
-      }
+    const existingSection = await prisma.contentSection.findUnique({
+      where: { pageKey_sectionKey: { pageKey: section.pageKey, sectionKey: section.sectionKey } }
     });
+    if (!existingSection) {
+      await prisma.contentSection.create({
+        data: {
+          pageKey: section.pageKey,
+          sectionKey: section.sectionKey,
+          title: section.title,
+          subtitle: section.subtitle || '',
+          dataJson: JSON.stringify(section.data)
+        }
+      });
+    }
   }
 
   const certificateCount = await prisma.certificate.count();

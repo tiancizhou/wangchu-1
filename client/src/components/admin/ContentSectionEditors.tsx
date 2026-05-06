@@ -1,16 +1,19 @@
 import { Button, Card, Col, Form, Input, Row, Space, Typography } from 'antd';
 import { ConfirmButton, Dropzone, DragHandle, DraggableList, SectionCard, SectionCardGroup } from '../../admin/components';
 
-export type FeatureItem = { title?: string; description?: string; icon?: string; linkUrl?: string };
-export type SupportTab = { title?: string; heading?: string; description?: string; imageUrl?: string; thumbnails?: string[] };
-export type ProcessItem = { title?: string; description?: string; imageUrl?: string };
+export type FeatureItem = { title?: string; description?: string; icon?: string; linkUrl?: string; sections?: LegalStatementSection[] };
+export type SupportTab = { title?: string; heading?: string; description?: string; imageUrl?: string; thumbnails?: string[]; linkUrl?: string; sections?: LegalStatementSection[] };
+export type ProcessItem = { title?: string; description?: string; imageUrl?: string; galleryImages?: string[]; linkUrl?: string; sections?: LegalStatementSection[] };
 export type AboutData = { imageUrl?: string; body?: string; linkUrl?: string };
 export type ContactPanelData = { consultantName?: string; consultantTitle?: string; consultantAvatarUrl?: string; description?: string; buttonText?: string; industryOptions?: string[] };
 export type ContactInfoItem = { label?: string; value?: string };
-export type ContactInfoData = { mapImageUrl?: string; items?: ContactInfoItem[] };
+export type ContactInfoData = { body?: string; mapImageUrl?: string; items?: ContactInfoItem[] };
+export type LegalStatementSection = { heading?: string; paragraphs?: string[] };
+export type LegalStatementData = { sections?: LegalStatementSection[] };
 export type SectionData = {
   items?: FeatureItem[] | ProcessItem[] | ContactInfoItem[];
   tabs?: SupportTab[];
+  sections?: LegalStatementSection[];
   imageUrl?: string;
   backgroundImageUrl?: string;
   mapImageUrl?: string;
@@ -32,8 +35,41 @@ export const sectionNames: Record<string, string> = {
   advantages: '加盟优势',
   benefits: '加盟福利',
   contactPanel: '咨询页顾问信息',
-  contactInfo: '联系我们'
+  contactInfo: '联系我们',
+  legalStatement: '法律声明',
+  brandCustomization: '品牌定制',
+  additionalServices: '附加服务',
+  naturalAssurance: '天然保障',
+  factoryDirect: '工厂直供',
+  productionBlending: '生产调和详情',
+  labTesting: '检测详情',
+  qualityInspection: '品质检验详情'
 };
+
+const paragraphsToText = (paragraphs?: string[]) => (paragraphs || []).join('\n\n');
+const textToParagraphs = (value: string) => value.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
+
+function FeatureDetailArticleEditor({ item, onUpdate }: { item: FeatureItem; onUpdate: (patch: Partial<FeatureItem>) => void }) {
+  const paragraphs = item.sections?.flatMap((section) => section.paragraphs || []) || [];
+
+  return (
+    <Card title="了解更多正文" style={{ marginTop: 16 }}>
+      <Typography.Paragraph type="secondary">详情页标题会显示在 A4 纸内部，正文按关于我们页面的富文本格式展示。每段正文之间请空一行。</Typography.Paragraph>
+      <Form.Item label="正文内容"><Input.TextArea rows={10} value={paragraphsToText(paragraphs)} onChange={(event) => onUpdate({ sections: [{ paragraphs: textToParagraphs(event.target.value) }] })} placeholder="每段之间请空一行" /></Form.Item>
+    </Card>
+  );
+}
+
+function SingleDetailArticleEditor<T extends { sections?: LegalStatementSection[] }>({ item, onUpdate, title = '详情页正文' }: { item: T; onUpdate: (patch: Partial<T>) => void; title?: string }) {
+  const paragraphs = item.sections?.flatMap((section) => section.paragraphs || []) || [];
+
+  return (
+    <Card title={title} style={{ marginTop: 16 }}>
+      <Typography.Paragraph type="secondary">正文按关于我们页面的富文本格式展示。每段正文之间请空一行。</Typography.Paragraph>
+      <Form.Item label="正文内容"><Input.TextArea rows={10} value={paragraphsToText(paragraphs)} onChange={(event) => onUpdate({ sections: [{ paragraphs: textToParagraphs(event.target.value) }] } as Partial<T>)} placeholder="每段之间请空一行" /></Form.Item>
+    </Card>
+  );
+}
 
 export function FeatureCardsEditor({ items, onUpdate, onChange }: { items: FeatureItem[]; onUpdate: (index: number, patch: Partial<FeatureItem>) => void; onChange: (items: FeatureItem[]) => void; mode?: 'default' | 'simpleEnterprise' }) {
   const rows = items.map((item, index) => ({ ...item, __id: `${index}-${item.title || 'card'}` }));
@@ -49,8 +85,9 @@ export function FeatureCardsEditor({ items, onUpdate, onChange }: { items: Featu
             <Form layout="vertical">
               <Form.Item label="图标符号"><Input value={item.icon || ''} onChange={(e) => onUpdate(index, { icon: e.target.value })} placeholder="例如 ✥、●" /></Form.Item>
               <Form.Item label="首页显示标题"><Input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></Form.Item>
-              <Form.Item label="点击后打开的页面"><Input value={item.linkUrl || ''} onChange={(e) => onUpdate(index, { linkUrl: e.target.value })} placeholder="例如 /consult" /></Form.Item>
+              <Form.Item label="点击后打开的页面"><Input value={item.linkUrl || ''} onChange={(e) => onUpdate(index, { linkUrl: e.target.value })} placeholder="例如 /features/brand-customization" /></Form.Item>
               <Form.Item label="首页显示说明"><Input.TextArea value={item.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} rows={4} /></Form.Item>
+              <FeatureDetailArticleEditor item={item} onUpdate={(patch) => onUpdate(index, patch)} />
             </Form>
           </SectionCard>
         )}
@@ -64,7 +101,8 @@ export function SupportModuleEditor({ tabs, onUpdate, onChange }: { tabs: Suppor
 
   function addTab() {
     if (!canAddTab) return;
-    onChange([...tabs, { title: '', heading: '', description: '', imageUrl: '', thumbnails: [] }]);
+    const defaultLinks = ['/support/production-blending', '/support/lab-testing', '/support/quality-inspection'];
+    onChange([...tabs, { title: '', heading: '', description: '', imageUrl: '', thumbnails: [], linkUrl: defaultLinks[tabs.length] || defaultLinks[0], sections: [] }]);
   }
 
   return (
@@ -79,9 +117,11 @@ export function SupportModuleEditor({ tabs, onUpdate, onChange }: { tabs: Suppor
                 <Col xs={24} md={12}><Form.Item label="标题"><Input value={tab.heading || ''} onChange={(e) => onUpdate(index, { heading: e.target.value })} /></Form.Item></Col>
               </Row>
               <Form.Item label="说明文字"><Input.TextArea value={tab.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} rows={4} /></Form.Item>
+              <Form.Item label="立即查看跳转页面"><Input value={tab.linkUrl || ''} onChange={(e) => onUpdate(index, { linkUrl: e.target.value })} placeholder="例如 /support/production-blending" /></Form.Item>
+              <SingleDetailArticleEditor item={tab} onUpdate={(patch) => onUpdate(index, patch)} />
               <Row gutter={[16, 16]}>
-                <Col xs={24} lg={12}><Card title="主图"><Dropzone value={tab.imageUrl} onChange={(url) => onUpdate(index, { imageUrl: url })} /></Card></Col>
-                <Col xs={24} lg={12}><Card title="轮播图片"><Dropzone value="" multiple onChange={() => {}} onMultipleChange={(urls) => onUpdate(index, { thumbnails: [...(tab.thumbnails || []), ...urls] })} /><Row gutter={[8, 8]} style={{ marginTop: 12 }}>{(tab.thumbnails || []).map((url) => <Col span={12} key={url}><Card size="small" cover={<img src={url} alt="底部轮播图" style={{ height: 90, objectFit: 'cover' }} />} actions={[<Button type="link" danger onClick={() => onUpdate(index, { thumbnails: (tab.thumbnails || []).filter((item) => item !== url) })}>移除图片</Button>]} /></Col>)}</Row></Card></Col>
+                <Col xs={24} lg={12}><Card title="主图"><Dropzone value={tab.imageUrl} cropPreset="supportMiddle" onChange={(url) => onUpdate(index, { imageUrl: url })} /></Card></Col>
+                <Col xs={24} lg={12}><Card title="轮播图片"><Dropzone value="" multiple cropPreset="supportThumbnail" onChange={() => {}} onMultipleChange={(urls) => onUpdate(index, { thumbnails: [...(tab.thumbnails || []), ...urls] })} /><Row gutter={[8, 8]} style={{ marginTop: 12 }}>{(tab.thumbnails || []).map((url) => <Col span={12} key={url}><Card size="small" cover={<img src={url} alt="底部轮播图" style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover' }} />} actions={[<Button type="link" danger onClick={() => onUpdate(index, { thumbnails: (tab.thumbnails || []).filter((item) => item !== url) })}>移除图片</Button>]} /></Col>)}</Row></Card></Col>
               </Row>
             </Form>
           </SectionCard>
@@ -97,19 +137,29 @@ export function ProcessModuleEditor({ items, backgroundImageUrl, onUpdate, onCha
 
   function addItem() {
     if (!canAddItem) return;
-    onChange([...items, { title: '', description: '', imageUrl: '' }]);
+    const defaultLinks = ['/process/filling-line', '/process/equipment-management', '/process/equipment', '/process/warehouse'];
+    onChange([...items, { title: '', description: '', imageUrl: '', galleryImages: [], linkUrl: defaultLinks[items.length] || defaultLinks[0], sections: [] }]);
   }
 
   return (
     <div>
-      <Card title="背景图片" style={{ marginBottom: 16 }}><Dropzone value={backgroundImageUrl} onChange={onBackgroundChange} /></Card>
+      <Card title="背景图片" style={{ marginBottom: 16 }}><Dropzone value={backgroundImageUrl} cropPreset="processBackground" onChange={onBackgroundChange} /></Card>
       <Space style={{ marginBottom: 12 }}><Button type="primary" disabled={!canAddItem} onClick={addItem}>新增项目</Button><Typography.Text type="secondary">最多设置 4 个项目</Typography.Text></Space>
       <SectionCardGroup mode="accordion" defaultExpandedIndex={0}>
         {items.map((item, index) => (
           <SectionCard key={index} title={item.title || `项目 ${index + 1}`} description={item.description?.slice(0, 40) || '展开后编辑工艺项目'} extra={<ConfirmButton danger size="small" title="确定删除这个项目吗？" onConfirm={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>删除</ConfirmButton>}>
             <Row gutter={16}>
-              <Col xs={24} lg={12}><Form layout="vertical"><Form.Item label="标题"><Input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></Form.Item><Form.Item label="说明文字"><Input.TextArea value={item.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} rows={5} /></Form.Item></Form></Col>
-              <Col xs={24} lg={12}><Card title="图片"><Dropzone value={item.imageUrl} onChange={(url) => onUpdate(index, { imageUrl: url })} /></Card></Col>
+              <Col xs={24} lg={12}><Form layout="vertical"><Form.Item label="标题"><Input value={item.title || ''} onChange={(e) => onUpdate(index, { title: e.target.value })} /></Form.Item><Form.Item label="说明文字"><Input.TextArea value={item.description || ''} onChange={(e) => onUpdate(index, { description: e.target.value })} rows={5} /></Form.Item><FeatureDetailArticleEditor item={item} onUpdate={(patch: Partial<ProcessItem>) => onUpdate(index, patch)} /></Form></Col>
+              <Col xs={24} lg={12}>
+                <Space direction="vertical" style={{ width: '100%' }} size={16}>
+                  <Card title="主图"><Dropzone value={item.imageUrl} cropPreset="processMain" onChange={(url) => onUpdate(index, { imageUrl: url })} /></Card>
+                  <Card title="底部轮播图">
+                    <Dropzone value="" multiple cropPreset="processGallery" onChange={() => {}} onMultipleChange={(urls) => onUpdate(index, { galleryImages: [...(item.galleryImages || []), ...urls].slice(0, 4) })} hint="每个项目最多设置 4 张底部轮播图，上传前裁剪为 275 × 160" />
+                    <Row gutter={[8, 8]} style={{ marginTop: 12 }}>{(item.galleryImages || []).map((url, galleryIndex) => <Col span={12} key={`${url}-${galleryIndex}`}><Card size="small" cover={<img src={url} alt="底部轮播图" style={{ width: '100%', aspectRatio: '275 / 160', objectFit: 'cover' }} />} actions={[<Button type="link" danger onClick={() => onUpdate(index, { galleryImages: (item.galleryImages || []).filter((_, imageIndex) => imageIndex !== galleryIndex) })}>移除图片</Button>]} /></Col>)}</Row>
+                    <Typography.Text type="secondary">已设置 {(item.galleryImages || []).length}/4 张底部轮播图。</Typography.Text>
+                  </Card>
+                </Space>
+              </Col>
             </Row>
           </SectionCard>
         ))}
@@ -123,8 +173,8 @@ export function AboutEditor({ data, onChange }: { data: AboutData; onChange: (pa
   return (
     <Form layout="vertical">
       <Row gutter={16}>
-        <Col xs={24} lg={12}><Form.Item label="跳转页面"><Input placeholder="例如 /#about" value={data.linkUrl || ''} onChange={(e) => onChange({ linkUrl: e.target.value })} /></Form.Item><Form.Item label="公司简介"><Input.TextArea rows={8} value={data.body || ''} onChange={(e) => onChange({ body: e.target.value })} /></Form.Item></Col>
-        <Col xs={24} lg={12}><Card title="展示图片"><Dropzone value={data.imageUrl} onChange={(url) => onChange({ imageUrl: url })} /></Card></Col>
+        <Col xs={24} lg={12}><Form.Item label="公司简介"><Input.TextArea rows={8} value={data.body || ''} onChange={(e) => onChange({ body: e.target.value })} /></Form.Item></Col>
+        <Col xs={24} lg={12}><Card title="展示图片"><Dropzone value={data.imageUrl} cropPreset="aboutPreview" onChange={(url) => onChange({ imageUrl: url })} /></Card></Col>
       </Row>
     </Form>
   );
@@ -164,6 +214,42 @@ function normalizeContactInfoItems(items?: ContactInfoItem[]) {
   }));
 }
 
+export function RichTextArticleEditor({ data, onChange, description = '前台会自动首行缩进、两端对齐，并按富文本文章版式展示。每段正文之间请空一行。' }: { data: LegalStatementData; onChange: (patch: Partial<SectionData>) => void; description?: string }) {
+  const sections = data.sections || [];
+  const updateSection = (index: number, patch: Partial<LegalStatementSection>) => onChange({ sections: sections.map((section, sectionIndex) => sectionIndex === index ? { ...section, ...patch } : section) });
+  const paragraphsToText = (paragraphs?: string[]) => (paragraphs || []).join('\n\n');
+  const textToParagraphs = (value: string) => value.split(/\n\s*\n/).map((item) => item.trim()).filter(Boolean);
+
+  return (
+    <div>
+      <Typography.Paragraph type="secondary">{description}</Typography.Paragraph>
+      <Space style={{ marginBottom: 12 }}><Button type="primary" onClick={() => onChange({ sections: [...sections, { heading: '', paragraphs: [] }] })}>新增章节</Button></Space>
+      <SectionCardGroup mode="accordion" defaultExpandedIndex={0}>
+        {sections.map((section, index) => (
+          <SectionCard key={index} title={section.heading || `章节 ${index + 1}`} description={(section.paragraphs || []).join('').slice(0, 40) || '展开后编辑正文'} extra={<ConfirmButton danger size="small" title="确定删除这个章节吗？" onConfirm={() => onChange({ sections: sections.filter((_, sectionIndex) => sectionIndex !== index) })}>删除</ConfirmButton>}>
+            <Form layout="vertical">
+              <Form.Item label="章节标题"><Input value={section.heading || ''} onChange={(e) => updateSection(index, { heading: e.target.value })} /></Form.Item>
+              <Form.Item label="正文段落"><Input.TextArea rows={8} value={paragraphsToText(section.paragraphs)} onChange={(e) => updateSection(index, { paragraphs: textToParagraphs(e.target.value) })} placeholder="每段之间请空一行" /></Form.Item>
+            </Form>
+          </SectionCard>
+        ))}
+      </SectionCardGroup>
+      {sections.length === 0 && <Card><Typography.Text type="secondary">还没有正文章节，请点击“新增章节”。</Typography.Text></Card>}
+    </div>
+  );
+}
+
+export function LegalStatementEditor({ data, onChange }: { data: LegalStatementData; onChange: (patch: Partial<SectionData>) => void }) {
+  const paragraphs = data.sections?.flatMap((section) => section.paragraphs || []) || [];
+
+  return (
+    <Card title="正文内容">
+      <Typography.Paragraph type="secondary">正文按关于我们页面的富文本格式展示。每段正文之间请空一行。</Typography.Paragraph>
+      <Form.Item label="正文内容"><Input.TextArea rows={12} value={paragraphsToText(paragraphs)} onChange={(event) => onChange({ sections: [{ paragraphs: textToParagraphs(event.target.value) }] })} placeholder="每段之间请空一行" /></Form.Item>
+    </Card>
+  );
+}
+
 export function ContactInfoEditor({ data, onChange }: { data: ContactInfoData; onChange: (patch: Partial<SectionData>) => void }) {
   const items = normalizeContactInfoItems(data.items);
   const updateItem = (index: number, patch: Partial<ContactInfoItem>) => onChange({ items: items.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item) });
@@ -176,16 +262,18 @@ export function ContactInfoEditor({ data, onChange }: { data: ContactInfoData; o
         </Card>
       </Col>
       <Col xs={24} xl={14}>
-        <Card title="联系信息">
-          <Space direction="vertical" style={{ width: '100%' }}>
-            {items.map((item, index) => (
-              <Row gutter={12} key={index}>
-                <Col xs={24} md={8}><Form.Item label={`第 ${index + 1} 条标题`}><Input value={item.label || ''} onChange={(e) => updateItem(index, { label: e.target.value })} /></Form.Item></Col>
-                <Col xs={24} md={16}><Form.Item label="内容"><Input value={item.value || ''} onChange={(e) => updateItem(index, { value: e.target.value })} /></Form.Item></Col>
-              </Row>
-            ))}
-          </Space>
-        </Card>
+        <Space direction="vertical" style={{ width: '100%' }} size={16}>
+          <Card title="联系信息">
+            <Space direction="vertical" style={{ width: '100%' }}>
+              {items.map((item, index) => (
+                <Row gutter={12} key={index}>
+                  <Col xs={24} md={8}><Form.Item label={`第 ${index + 1} 条标题`}><Input value={item.label || ''} onChange={(e) => updateItem(index, { label: e.target.value })} /></Form.Item></Col>
+                  <Col xs={24} md={16}><Form.Item label="内容"><Input value={item.value || ''} onChange={(e) => updateItem(index, { value: e.target.value })} /></Form.Item></Col>
+                </Row>
+              ))}
+            </Space>
+          </Card>
+        </Space>
       </Col>
     </Row>
   );

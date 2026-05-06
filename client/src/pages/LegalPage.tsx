@@ -1,18 +1,38 @@
-import { legalStatementContent } from './legalStatementContent';
+import { useEffect, useState } from 'react';
+import { getContentSections, type ContentSection } from '../api/publicApi';
+import { legalStatementContent, type LegalStatementSection } from './legalStatementContent';
+
+type LegalStatementData = { sections?: LegalStatementSection[] };
 
 export function LegalPage() {
+  const [section, setSection] = useState<ContentSection<LegalStatementData> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getContentSections('legal')
+      .then((sections) => {
+        if (!cancelled) setSection(sections.legalStatement as ContentSection<LegalStatementData> | undefined || null);
+      })
+      .catch(() => {
+        if (!cancelled) setSection(null);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  const title = legalStatementContent.title;
+  const paragraphs = section?.data.sections?.flatMap((item) => item.paragraphs || []).filter(Boolean) || legalStatementContent.sections.flatMap((item) => item.paragraphs || []).filter(Boolean);
+
   return (
-    <main className="gray-page legal-page">
+    <main className="gray-page legal-page about-page">
       <div className="breadcrumb container">当前位置：首页 › 法律声明</div>
-      <section className="content-card container legal-content">
-        <h1>{legalStatementContent.title}</h1>
-        <article className="rich-text-placeholder legal-statement-document">
-          {legalStatementContent.sections.map((section) => (
-            <section className="legal-statement-section" key={section.heading}>
-              <h2>{section.heading}</h2>
-              {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-            </section>
-          ))}
+      <section className="content-card container legal-content about-content">
+        <article className="rich-text-placeholder legal-statement-document about-rich-text">
+          <h1>{title}</h1>
+          <section className="about-statement-section">
+            {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          </section>
         </article>
       </section>
     </main>
