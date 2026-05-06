@@ -18,7 +18,7 @@ router.put('/site-profile', async (req, res) => {
   const body = req.body;
   const existing = await prisma.siteProfile.findFirst();
   const data = {
-    companyName: body.companyName || '稼尔润（北京）润滑油有限公司',
+    companyName: body.companyName || '桔尔润（北京）润滑油有限公司',
     logoUrl: body.logoUrl || '',
     phone: body.phone || '',
     hotline: body.hotline || '',

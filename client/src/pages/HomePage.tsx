@@ -195,7 +195,7 @@ export function ProductCategoryGrid({ categories }: { categories: ProductCategor
 export function ProcessModule({ section }: { section?: ContentSection }) {
   const data = section?.data as { items?: ProcessItem[]; backgroundImageUrl?: string } | undefined;
   const items = data?.items || [
-    { title: '菜单文案', description: '稼尔润（北京）润滑油有限公司专注润滑油研发、生产与技术服务，围绕调和、灌装、检测和仓储建立标准化流程，为客户提供稳定可靠的产品交付能力。' },
+    { title: '菜单文案', description: '桔尔润（北京）润滑油有限公司专注润滑油研发、生产与技术服务，围绕调和、灌装、检测和仓储建立标准化流程，为客户提供稳定可靠的产品交付能力。' },
     { title: '灌装', description: '自动化灌装流程提升生产效率，保障产品包装规格统一、出厂品质稳定。' },
     { title: '设备', description: '成熟设备体系满足多类润滑油产品生产、调和与检测需求。' },
     { title: '仓储', description: '规范仓储管理保障产品存放安全和订单交付效率。' }
@@ -219,7 +219,7 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
             {active?.imageUrl && <Link className="home-preview-image-button ratio-3-2" to={activeDetailLink}><img src={active.imageUrl} alt={active.title || '先进的制作工艺'} /></Link>}
           </div>
         </div>
-        <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p><span>”</span></article>
+        <article className="factory-copy"><h3>{active?.title}</h3><p>{active?.description}</p></article>
         <div className="factory-gallery-title"><span>{active?.title}</span></div>
         <div className="factory-thumb-grid">
           {Array.from({ length: 4 }).map((_, index) => {
@@ -247,7 +247,7 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
 
 export function AboutPreview({ section, companyName }: { section?: ContentSection; companyName?: string }) {
   const data = section?.data as { imageUrl?: string; body?: string; linkUrl?: string } | undefined;
-  const title = companyName || '稼尔润（北京）润滑油有限公司';
+  const title = companyName || '桔尔润（北京）润滑油有限公司';
   const linkUrl = '/about';
   return (
     <section className="section container" id="about">
@@ -258,7 +258,7 @@ export function AboutPreview({ section, companyName }: { section?: ContentSectio
         </Link>
         <Link className="about-copy" to={linkUrl}>
           <h3>{title}</h3>
-          <p>{data?.body || '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。'}</p>
+          <p>{data?.body || '桔尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。'}</p>
         </Link>
       </div>
     </section>
@@ -306,7 +306,7 @@ export function CertificatePreview({ images }: { images: HomeCertificateImage[] 
 }
 
 function SectionTitle({ title, subtitle, light }: { title: string; subtitle?: string; light?: boolean }) {
-  return <div className={light ? 'section-title light' : 'section-title'}><h2>{title}</h2><p>{subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>;
+  return <div className={light ? 'section-title light' : 'section-title'}><h2>{title}</h2><p>{subtitle || '桔尔润（北京）润滑油有限公司'}</p></div>;
 }
 
 function ProductCategoryCard({ category }: { category: ProductCategory }) {

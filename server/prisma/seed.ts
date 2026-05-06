@@ -122,7 +122,7 @@ const contentSections = [
     pageKey: 'home',
     sectionKey: 'supportModule',
     title: '生产设计与制作',
-    subtitle: '稼尔润（北京）润滑油有限公司',
+    subtitle: '桔尔润（北京）润滑油有限公司',
     data: {
       tabs: [
         {
@@ -156,7 +156,7 @@ const contentSections = [
     pageKey: 'home',
     sectionKey: 'processModule',
     title: '先进的制作工艺',
-    subtitle: '稼尔润（北京）润滑油有限公司',
+    subtitle: '桔尔润（北京）润滑油有限公司',
     data: {
       items: [
         {
@@ -198,10 +198,10 @@ const contentSections = [
     pageKey: 'home',
     sectionKey: 'aboutPreview',
     title: '关于我们',
-    subtitle: '稼尔润（北京）润滑油有限公司',
+    subtitle: '桔尔润（北京）润滑油有限公司',
     data: {
       imageUrl: '',
-      body: '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。',
+      body: '桔尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。',
       linkUrl: '/about'
     }
   },
@@ -209,7 +209,7 @@ const contentSections = [
     pageKey: 'products',
     sectionKey: 'advantages',
     title: '加盟优势',
-    subtitle: '稼尔润（北京）润滑油有限公司',
+    subtitle: '桔尔润（北京）润滑油有限公司',
     data: {
       items: [
         { title: '产品优势', description: '成熟产品体系覆盖多类应用场景。', icon: '👍' },
@@ -223,7 +223,7 @@ const contentSections = [
     pageKey: 'products',
     sectionKey: 'benefits',
     title: '加盟福利',
-    subtitle: '稼尔润（北京）润滑油有限公司',
+    subtitle: '桔尔润（北京）润滑油有限公司',
     data: {
       items: [
         { title: '专属经理对接', description: '为合作客户提供专人对接服务。', icon: '♙', linkUrl: '/benefits/dedicated-manager' },
@@ -256,7 +256,7 @@ const contentSections = [
       body: '',
       mapImageUrl: '',
       items: [
-        { label: '公司名称', value: '稼尔润（北京）润滑油有限公司' },
+        { label: '公司名称', value: '桔尔润（北京）润滑油有限公司' },
         { label: '公司地址', value: '北京市大兴区科创五街38号院' },
         { label: '联系电话', value: '0519-68288220' },
         { label: '服务热线', value: '0519-68288220' },

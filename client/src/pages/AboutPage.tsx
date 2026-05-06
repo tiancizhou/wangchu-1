@@ -3,7 +3,7 @@ import { getHomeData, type ContentSection, type HomeData } from '../api/publicAp
 
 type AboutData = { imageUrl?: string; body?: string };
 
-const fallbackBody = '稼尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。';
+const fallbackBody = '桔尔润（北京）润滑油有限公司专注润滑油产品研发、生产与渠道服务。公司围绕汽车润滑、工业润滑和特种油品场景，为客户提供稳定可靠的产品和合作支持。';
 
 function splitParagraphs(value: string) {
   return value.split(/\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);

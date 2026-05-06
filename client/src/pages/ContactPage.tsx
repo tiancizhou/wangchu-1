@@ -5,7 +5,7 @@ type ContactInfoItem = { label?: string; value?: string };
 type ContactInfoData = { body?: string; mapImageUrl?: string; items?: ContactInfoItem[] };
 
 const defaultContactItems: ContactInfoItem[] = [
-  { label: '公司名称', value: '稼尔润（北京）润滑油有限公司' },
+  { label: '公司名称', value: '桔尔润（北京）润滑油有限公司' },
   { label: '公司地址', value: '北京市大兴区科创五街38号院' },
   { label: '联系电话', value: '0519-68288220' },
   { label: '服务热线', value: '0519-68288220' },

@@ -116,9 +116,9 @@ function AdvantageSections({ advantages, benefits }: { advantages?: ContentSecti
 
   return (
     <section className="section container product-center-support">
-      <div className="section-title"><h2>{advantages?.title || '加盟优势'}</h2><p>{advantages?.subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>
+      <div className="section-title"><h2>{advantages?.title || '加盟优势'}</h2><p>{advantages?.subtitle || '桔尔润（北京）润滑油有限公司'}</p></div>
       <div className="advantage-row">{advantageItems.map((item, index) => <article key={`${item.title}-${index}`}><div className={index === 1 ? 'circle red' : 'circle'}><SupportIcon name={item.iconKey || 'diamond'} /></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
-      <div className="section-title"><h2>{benefits?.title || '加盟福利'}</h2><p>{benefits?.subtitle || '稼尔润（北京）润滑油有限公司'}</p></div>
+      <div className="section-title"><h2>{benefits?.title || '加盟福利'}</h2><p>{benefits?.subtitle || '桔尔润（北京）润滑油有限公司'}</p></div>
       <div className="benefit-grid">{benefitItems.map((item, index) => <Link className={index === 1 ? 'active' : ''} to={item.linkUrl || `/benefits/${index + 1}`} key={`${item.title}-${index}`}><b><SupportIcon name={item.iconKey || 'document'} /></b><h3>{item.title}</h3><p>{item.description}</p></Link>)}</div>
     </section>
   );
