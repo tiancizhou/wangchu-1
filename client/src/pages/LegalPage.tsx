@@ -1,3 +1,4 @@
+import { renderRichText } from '../utils/richText';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getContentSections, type ContentSection } from '../api/publicApi';
@@ -32,7 +33,7 @@ export function LegalPage() {
         <article className="rich-text-placeholder legal-statement-document about-rich-text">
           <h1>{title}</h1>
           <section className="about-statement-section">
-            {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            {paragraphs.map((paragraph) => <p key={paragraph}>{renderRichText(paragraph)}</p>)}
           </section>
         </article>
       </section>

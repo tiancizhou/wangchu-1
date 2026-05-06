@@ -470,6 +470,13 @@ async function main() {
     }
   }
 
+  const legacyName = '稼尔润（北京）润滑油有限公司';
+  const correctName = '桔尔润（北京）润滑油有限公司';
+  const sectionsWithLegacyName = await prisma.contentSection.findMany({ where: { subtitle: legacyName } });
+  for (const section of sectionsWithLegacyName) {
+    await prisma.contentSection.update({ where: { id: section.id }, data: { subtitle: correctName } });
+  }
+
   const certificateCount = await prisma.certificate.count();
   if (certificateCount === 0) {
     await prisma.certificate.createMany({

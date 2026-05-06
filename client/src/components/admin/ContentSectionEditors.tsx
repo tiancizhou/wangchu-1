@@ -1,4 +1,5 @@
-import { Button, Card, Col, Form, Input, Row, Space, Typography } from 'antd';
+import { Button, Card, Col, Form, Input, Row, Space, Tooltip, Typography } from 'antd';
+import { BoldOutlined } from '@ant-design/icons';
 import { ConfirmButton, Dropzone, DragHandle, DraggableList, SectionCard, SectionCardGroup } from '../../admin/components';
 
 export type FeatureItem = { title?: string; description?: string; icon?: string; linkUrl?: string; sections?: LegalStatementSection[] };
@@ -49,13 +50,43 @@ export const sectionNames: Record<string, string> = {
 const paragraphsToText = (paragraphs?: string[]) => (paragraphs || []).join('\n\n');
 const textToParagraphs = (value: string) => value.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
 
+function RichTextArea({ value, onChange, rows = 10, placeholder }: { value: string; onChange: (value: string) => void; rows?: number; placeholder?: string }) {
+  const ref = Input.TextArea;
+
+  function wrapSelection(wrapper: string) {
+    const textarea = document.activeElement as HTMLTextAreaElement;
+    if (!textarea || textarea.tagName !== 'TEXTAREA') return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = value.slice(start, end);
+    if (!selected) return;
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+    const newValue = `${before}${wrapper}${selected}${wrapper}${after}`;
+    onChange(newValue);
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start, end + wrapper.length * 2);
+    });
+  }
+
+  return (
+    <div>
+      <Space style={{ marginBottom: 4 }}>
+        <Tooltip title="加粗选中文字"><Button size="small" icon={<BoldOutlined />} onClick={() => wrapSelection('**')} /></Tooltip>
+      </Space>
+      <Input.TextArea rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+    </div>
+  );
+}
+
 function FeatureDetailArticleEditor({ item, onUpdate }: { item: FeatureItem; onUpdate: (patch: Partial<FeatureItem>) => void }) {
   const paragraphs = item.sections?.flatMap((section) => section.paragraphs || []) || [];
 
   return (
     <Card title="了解更多正文" style={{ marginTop: 16 }}>
       <Typography.Paragraph type="secondary">详情页标题会显示在 A4 纸内部，正文按关于我们页面的富文本格式展示。每段正文之间请空一行。</Typography.Paragraph>
-      <Form.Item label="正文内容"><Input.TextArea rows={10} value={paragraphsToText(paragraphs)} onChange={(event) => onUpdate({ sections: [{ paragraphs: textToParagraphs(event.target.value) }] })} placeholder="每段之间请空一行" /></Form.Item>
+      <Form.Item label="正文内容"><RichTextArea rows={10} value={paragraphsToText(paragraphs)} onChange={(value) => onUpdate({ sections: [{ paragraphs: textToParagraphs(value) }] })} placeholder="每段之间请空一行，选中文字后可点击 B 加粗" /></Form.Item>
     </Card>
   );
 }
@@ -66,7 +97,7 @@ function SingleDetailArticleEditor<T extends { sections?: LegalStatementSection[
   return (
     <Card title={title} style={{ marginTop: 16 }}>
       <Typography.Paragraph type="secondary">正文按关于我们页面的富文本格式展示。每段正文之间请空一行。</Typography.Paragraph>
-      <Form.Item label="正文内容"><Input.TextArea rows={10} value={paragraphsToText(paragraphs)} onChange={(event) => onUpdate({ sections: [{ paragraphs: textToParagraphs(event.target.value) }] } as Partial<T>)} placeholder="每段之间请空一行" /></Form.Item>
+      <Form.Item label="正文内容"><RichTextArea rows={10} value={paragraphsToText(paragraphs)} onChange={(value) => onUpdate({ sections: [{ paragraphs: textToParagraphs(value) }] } as Partial<T>)} placeholder="每段之间请空一行，选中文字后可点击 B 加粗" /></Form.Item>
     </Card>
   );
 }

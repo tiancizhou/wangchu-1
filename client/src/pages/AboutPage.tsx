@@ -1,3 +1,4 @@
+import { renderRichText } from '../utils/richText';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getHomeData, type ContentSection, type HomeData } from '../api/publicApi';
@@ -30,7 +31,7 @@ export function AboutPage() {
           <h1>{title}</h1>
           {data?.imageUrl && <img className="about-page-image" src={data.imageUrl} alt={title} />}
           <section className="about-statement-section">
-            {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            {paragraphs.map((paragraph) => <p key={paragraph}>{renderRichText(paragraph)}</p>)}
           </section>
         </article>
       </section>
