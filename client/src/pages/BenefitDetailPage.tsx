@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { benefitDetailTitles, benefitRichTextLayout } from './benefitA4Layout';
 
 export function BenefitDetailPage() {
@@ -7,7 +7,7 @@ export function BenefitDetailPage() {
 
   return (
     <main className="gray-page legal-page about-page">
-      <div className="breadcrumb container">当前位置：首页 › 加盟福利 › {title}</div>
+      <div className="breadcrumb container">当前位置：<Link to="/">首页</Link> › <Link to="/products">加盟福利</Link> › {title}</div>
       <section className={benefitRichTextLayout.containerClassName}>
         <article className={benefitRichTextLayout.articleClassName}>
           <h1>{title}</h1>

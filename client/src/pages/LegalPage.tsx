@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getContentSections, type ContentSection } from '../api/publicApi';
 import { legalStatementContent, type LegalStatementSection } from './legalStatementContent';
 
@@ -26,7 +27,7 @@ export function LegalPage() {
 
   return (
     <main className="gray-page legal-page about-page">
-      <div className="breadcrumb container">当前位置：首页 › 法律声明</div>
+      <div className="breadcrumb container">当前位置：<Link to="/">首页</Link> › 法律声明</div>
       <section className="content-card container legal-content about-content">
         <article className="rich-text-placeholder legal-statement-document about-rich-text">
           <h1>{title}</h1>

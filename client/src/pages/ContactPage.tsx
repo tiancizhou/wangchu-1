@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getContentSections, type ContentSection } from '../api/publicApi';
 
 type ContactInfoItem = { label?: string; value?: string };
@@ -41,7 +42,7 @@ export function ContactPage() {
 
   return (
     <main className="gray-page contact-page">
-      <div className="breadcrumb contact-container">当前位置：首页 › 联系我们</div>
+      <div className="breadcrumb contact-container">当前位置：<Link to="/">首页</Link> › 联系我们</div>
       <section className="contact-container contact-card">
         <div className="contact-info-list">
           {contactItems.map((item, index) => (

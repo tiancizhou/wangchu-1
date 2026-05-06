@@ -39,7 +39,7 @@ export function ProductDetailPage() {
 
   return (
     <main className="gray-page product-center-page product-detail-public-page detail-page">
-      <div className="breadcrumb container">当前位置：首页 › 产品分类 › {product.name}</div>
+      <div className="breadcrumb container">当前位置：<Link to="/">首页</Link> › <Link to="/products">产品分类</Link> › {product.name}</div>
       <div className="product-center-shell container">
         <CategorySide title="产品分类" categories={categories} active={activeCategory} hotline={hotline} onSelect={selectCategory} />
         <section className="detail-section product-panel">

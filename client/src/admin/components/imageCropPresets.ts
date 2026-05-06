@@ -8,7 +8,7 @@ export const IMAGE_CROP_PRESETS = {
   homepageHero: { width: 1920, height: 936, label: '首页轮播图' },
   supportMiddle: { width: 437, height: 400, label: '生产设计中间图' },
   supportThumbnail: { width: 200, height: 200, label: '生产设计底部轮播图' },
-  productCategoryCover: { width: 386, height: 386, label: '产品细项目分类图' },
+  productCategoryCover: { width: 386, height: 386, label: '产品细项分类图' },
   processBackground: { width: 1920, height: 1174, label: '先进制作工艺背景图' },
   processMain: { width: 980, height: 520, label: '先进制作工艺主图' },
   processGallery: { width: 275, height: 160, label: '先进制作工艺底部轮播图' },

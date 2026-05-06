@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getCertificates, getContentSections, getSiteProfile, type Certificate, type ContentSection, type SiteProfile } from '../api/publicApi';
 
 const pageSize = 6;
@@ -31,7 +32,7 @@ export function CertificatesPage() {
 
   return (
     <main className="gray-page certificates-detail-page">
-      <div className="breadcrumb container">当前位置：首页 › 荣誉资质</div>
+      <div className="breadcrumb container">当前位置：<Link to="/">首页</Link> › 荣誉资质</div>
       <div className="content-card container two-column">
         <aside className="cert-side"><h2>荣誉资质</h2><div className="service-photo">{sidebar?.data.imageUrl ? <img src={sidebar.data.imageUrl} alt="荣誉资质客服" /> : '客服中心'}</div><div className="hotline"><span>资讯热线</span><b>{profile?.hotline || profile?.phone || '0519-68288220'}</b></div></aside>
         <section className="list-section certificates-list-section">

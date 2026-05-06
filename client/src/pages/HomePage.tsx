@@ -184,7 +184,7 @@ export function ProductCategoryGrid({ categories }: { categories: ProductCategor
   const items = categories.length > 0 ? categories : fallbackCategories.map((name, index) => ({ id: name, name, slug: encodeURIComponent(name), description: '菜单文案菜单文案', coverImageUrl: '', iconImageUrl: '', sortOrder: index, isPublished: true, seoTitle: '', seoDescription: '' } as ProductCategory));
   return (
     <section className="section container product-category-section">
-      <SectionTitle title="产品细项目分类" />
+      <SectionTitle title="产品细项分类" />
       <div className="product-category-grid">
         {items.map((category) => <ProductCategoryCard category={category} key={category.id} />)}
       </div>

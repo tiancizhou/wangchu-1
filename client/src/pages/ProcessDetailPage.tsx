@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { getContentSections, type ContentSection } from '../api/publicApi';
 
 type ArticleSection = { heading?: string; paragraphs?: string[] };
@@ -33,7 +33,7 @@ export function ProcessDetailPage() {
 
   return (
     <main className="gray-page legal-page about-page">
-      <div className="breadcrumb container">当前位置：首页 › 先进的制作工艺</div>
+      <div className="breadcrumb container">当前位置：<Link to="/">首页</Link> › <Link to="/#process">先进的制作工艺</Link></div>
       <section className="content-card container legal-content about-content">
         <article className="rich-text-placeholder legal-statement-document about-rich-text">
           <h1>{title}</h1>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getHomeData, type ContentSection, type HomeData } from '../api/publicApi';
 
 type AboutData = { imageUrl?: string; body?: string };
@@ -23,7 +24,7 @@ export function AboutPage() {
 
   return (
     <main className="gray-page legal-page about-page">
-      <div className="breadcrumb container">当前位置：首页 › {title}</div>
+      <div className="breadcrumb container">当前位置：<Link to="/">首页</Link> › {title}</div>
       <section className="content-card container legal-content about-content">
         <article className="rich-text-placeholder legal-statement-document about-rich-text">
           <h1>{title}</h1>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { getContentSections, type ContentSection } from '../api/publicApi';
 
 type ArticleSection = { heading?: string; paragraphs?: string[] };
@@ -35,7 +35,7 @@ export function FeatureDetailPage() {
 
   return (
     <main className="gray-page legal-page about-page">
-      <div className="breadcrumb container">当前位置：首页 › 服务优势 › {title}</div>
+      <div className="breadcrumb container">当前位置：<Link to="/">首页</Link> › <Link to="/#support">服务优势</Link> › {title}</div>
       <section className="content-card container legal-content about-content">
         <article className="rich-text-placeholder legal-statement-document about-rich-text">
           <h1>{title}</h1>
