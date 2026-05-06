@@ -120,15 +120,9 @@ export function SiteSettingsPage() {
                     <Col xs={24} md={12}><Form.Item name="hotline" label="客户咨询热线"><Input placeholder="例如：0571-00000000" /></Form.Item></Col>
                   </Row>
                 </SectionCard>
-                <SectionCard title="页脚信息" description="用于网站底部友情链接、法律入口、版权和备案信息。">
+                <SectionCard title="页脚信息" description="用于网站底部友情链接、版权和备案信息。">
                   <Form.Item name="footerText" label="页脚文案"><Input.TextArea rows={4} placeholder="请输入页脚展示文案" /></Form.Item>
                   <Form.Item name="footerLinkTitle" label="友情链接标题"><Input placeholder="例如：友情链接：" /></Form.Item>
-                  <Row gutter={16}>
-                    <Col xs={24} md={12}><Form.Item name="legalLabel" label="法律声明入口文字"><Input placeholder="法律声明" /></Form.Item></Col>
-                    <Col xs={24} md={12}><Form.Item name="legalUrl" label="法律声明链接"><Input placeholder="/legal" /></Form.Item></Col>
-                    <Col xs={24} md={12}><Form.Item name="contactLabel" label="联系我们入口文字"><Input placeholder="联系我们" /></Form.Item></Col>
-                    <Col xs={24} md={12}><Form.Item name="contactUrl" label="联系我们链接"><Input placeholder="/contact" /></Form.Item></Col>
-                  </Row>
                   <Card size="small" title="友情链接" extra={<Button type="primary" onClick={addFooterLink} disabled={footerLinks.length >= maxFooterLinks}>新增友情链接</Button>} style={{ marginBottom: 16 }}>
                     <Space direction="vertical" style={{ width: '100%' }}>
                       {footerLinks.map((link, index) => (
