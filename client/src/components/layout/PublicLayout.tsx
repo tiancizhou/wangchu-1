@@ -32,6 +32,8 @@ const fallbackProfile: SiteProfile = {
   seoDescription: ''
 };
 
+const publicViewport = 'width=1200';
+
 const fallbackNavigation: NavigationItem[] = [
   { id: 'home', label: '首页', url: '/', sortOrder: 1, isVisible: true, openInNewTab: false },
   { id: 'products', label: '产品中心', url: '/products', sortOrder: 2, isVisible: true, openInNewTab: false },
@@ -71,6 +73,8 @@ export function PublicLayout() {
   const visibleFooterLinks = (profile.footerLinks?.length ? profile.footerLinks : fallbackProfile.footerLinks || []).filter((link) => link.label).slice(0, 4);
 
   useEffect(() => {
+    const viewport = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+    if (viewport) viewport.content = publicViewport;
     getSiteProfile().then((data) => data && setProfile(data)).catch(() => {});
     getNavigation().then((items) => items.length > 0 && setNavigation(items.map(normalizeNavigationItem))).catch(() => {});
   }, []);
