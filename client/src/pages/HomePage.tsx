@@ -91,7 +91,7 @@ export function HomePage() {
 }
 
 export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect }: { banners: Banner[]; banner?: Banner; activeBannerIndex: number; onSelect: (index: number) => void }) {
-  const [videoMuted, setVideoMuted] = useState(true);
+  const [videoMuted, setVideoMuted] = useState(false);
   const heroStyle = {
     aspectRatio: '1920 / 936',
     ...(banner?.imageUrl && !isVideoMedia(banner.imageUrl) ? { backgroundImage: `url(${banner.imageUrl})` } : {})
