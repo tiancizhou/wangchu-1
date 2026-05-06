@@ -1,11 +1,8 @@
 import { strict as assert } from 'node:assert';
-import { benefitA4Layout, benefitDetailTitles } from './benefitA4Layout';
+import { benefitRichTextLayout, benefitDetailTitles } from './benefitA4Layout';
 
-assert.deepEqual(benefitA4Layout.pageSize, { width: '210mm', minHeight: '297mm' });
-assert.deepEqual(benefitA4Layout.padding, { top: '37mm', right: '26mm', bottom: '35mm', left: '28mm' });
-assert.equal(benefitA4Layout.body.textIndent, '2em');
-assert.equal(benefitA4Layout.body.textAlign, 'justify');
-assert.equal(benefitA4Layout.body.lineCount, 22);
-assert.equal(benefitA4Layout.body.charactersPerLine, 28);
+assert.equal(benefitRichTextLayout.containerClassName, 'content-card container legal-content about-content');
+assert.equal(benefitRichTextLayout.articleClassName, 'rich-text-placeholder legal-statement-document about-rich-text');
+assert.equal(benefitRichTextLayout.bodyClassName, 'about-statement-section');
 assert.equal(Object.keys(benefitDetailTitles).length, 6);
 assert.equal(benefitDetailTitles['implementation-plan'], '共建实施方案');

@@ -193,7 +193,7 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       description: '编辑联系我们页面左侧联系信息和右侧地图图片。',
       editableKeys: ['contactInfo'],
       moduleHelp: {
-        contactInfo: '显示在联系我们页面的正文、联系信息条和地图图片。建议保持 4 条联系信息。'
+        contactInfo: '显示在联系我们页面的公司名称、地址、电话、邮箱和地图图片。'
       },
       loadingText: '联系我们内容加载中...',
       emptyText: '还没有联系我们内容模块，请先运行初始化数据。',

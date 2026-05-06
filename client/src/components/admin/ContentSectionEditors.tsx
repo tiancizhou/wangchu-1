@@ -201,6 +201,7 @@ export function GenericItemsEditor({ title, help, items, onUpdate, onChange }: {
 }
 
 const defaultContactInfoItems: ContactInfoItem[] = [
+  { label: '公司名称', value: '稼尔润（北京）润滑油有限公司' },
   { label: '公司地址', value: '北京市大兴区科创五街38号院' },
   { label: '联系电话', value: '0519-68288220' },
   { label: '服务热线', value: '0519-68288220' },
@@ -243,7 +244,7 @@ export function LegalStatementEditor({ data, onChange }: { data: LegalStatementD
   const paragraphs = data.sections?.flatMap((section) => section.paragraphs || []) || [];
 
   return (
-    <Card title="正文内容">
+    <Card className="legal-statement-admin-card" title="正文内容">
       <Typography.Paragraph type="secondary">正文按关于我们页面的富文本格式展示。每段正文之间请空一行。</Typography.Paragraph>
       <Form.Item label="正文内容"><Input.TextArea rows={12} value={paragraphsToText(paragraphs)} onChange={(event) => onChange({ sections: [{ paragraphs: textToParagraphs(event.target.value) }] })} placeholder="每段之间请空一行" /></Form.Item>
     </Card>

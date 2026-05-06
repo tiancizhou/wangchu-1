@@ -21,13 +21,31 @@ type Props = {
   cropPreset?: CropPresetKey;
   cropSize?: CropSize;
   disableImageCrop?: boolean;
+  maxVideoDurationSeconds?: number;
 };
 
 function isVideoFile(file: File) {
   return file.type.startsWith('video/') || VIDEO_PATTERN.test(file.name);
 }
 
-export function MediaDropzone({ value, onChange, multiple = false, onMultipleChange, accept = DEFAULT_ACCEPT, maxSize = DEFAULT_MAX_SIZE, hint, cropPreset, cropSize, disableImageCrop = false }: Props) {
+function readVideoDuration(file: File) {
+  return new Promise<number>((resolve, reject) => {
+    const video = document.createElement('video');
+    const url = URL.createObjectURL(file);
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      resolve(video.duration);
+    };
+    video.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('无法读取视频时长'));
+    };
+    video.src = url;
+  });
+}
+
+export function MediaDropzone({ value, onChange, multiple = false, onMultipleChange, accept = DEFAULT_ACCEPT, maxSize = DEFAULT_MAX_SIZE, hint, cropPreset, cropSize, disableImageCrop = false, maxVideoDurationSeconds }: Props) {
   const { message } = App.useApp();
   const [progress, setProgress] = useState<number | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -60,6 +78,13 @@ export function MediaDropzone({ value, onChange, multiple = false, onMultipleCha
   }
 
   async function handleFile(file: File) {
+    if (maxVideoDurationSeconds && isVideoFile(file)) {
+      const duration = await readVideoDuration(file);
+      if (duration > maxVideoDurationSeconds) {
+        message.error(`视频时长不能超过 ${maxVideoDurationSeconds} 秒：${file.name}`);
+        return;
+      }
+    }
     if (targetCropSize && file.type.startsWith('image/') && file.type !== 'image/gif') {
       setCropFile(file);
       return;
@@ -98,9 +123,10 @@ export function MediaDropzone({ value, onChange, multiple = false, onMultipleCha
     if (nextFile) await handleFile(nextFile);
   }
 
+  const videoDurationHint = maxVideoDurationSeconds ? `，视频时长 ≤ ${maxVideoDurationSeconds} 秒` : '';
   const defaultHint = targetCropSize
-    ? `图片上传前裁剪为 ${formatCropSize(targetCropSize)}；视频/GIF 请提前制作成对应比例，单个 ≤ ${Math.round(maxSize / 1024 / 1024)}MB`
-    : `支持图片与 MP4/WebM/MOV 视频，单个 ≤ ${Math.round(maxSize / 1024 / 1024)}MB`;
+    ? `图片上传前裁剪为 ${formatCropSize(targetCropSize)}；视频/GIF 请提前制作成对应比例，单个 ≤ ${Math.round(maxSize / 1024 / 1024)}MB${videoDurationHint}`
+    : `支持图片与 MP4/WebM/MOV 视频，单个 ≤ ${Math.round(maxSize / 1024 / 1024)}MB${videoDurationHint}`;
 
   if (value && !multiple) {
     const isVideo = VIDEO_PATTERN.test(value);

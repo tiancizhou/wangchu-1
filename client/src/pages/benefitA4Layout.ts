@@ -7,21 +7,8 @@ export const benefitDetailTitles: Record<string, string> = {
   'long-term-service': '建立长效机制'
 };
 
-export const benefitA4Layout = {
-  pageSize: {
-    width: '210mm',
-    minHeight: '297mm'
-  },
-  padding: {
-    top: '37mm',
-    right: '26mm',
-    bottom: '35mm',
-    left: '28mm'
-  },
-  body: {
-    lineCount: 22,
-    charactersPerLine: 28,
-    textIndent: '2em',
-    textAlign: 'justify'
-  }
+export const benefitRichTextLayout = {
+  containerClassName: 'content-card container legal-content about-content',
+  articleClassName: 'rich-text-placeholder legal-statement-document about-rich-text',
+  bodyClassName: 'about-statement-section'
 } as const;
