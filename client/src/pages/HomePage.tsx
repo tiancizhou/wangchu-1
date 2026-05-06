@@ -57,6 +57,7 @@ export function HomePage() {
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const [activeSupportIndex, setActiveSupportIndex] = useState(1);
   const [previewImage, setPreviewImage] = useState<ImagePreview | null>(null);
+  const [carouselPaused, setCarouselPaused] = useState(false);
 
   useEffect(() => {
     getHomeData().then(setHomeData).catch(() => {});
@@ -72,13 +73,15 @@ export function HomePage() {
 
   useEffect(() => {
     if (bannerImages.length <= 1) return;
-    const timer = window.setInterval(() => setActiveBannerIndex((index) => (index + 1) % bannerImages.length), 5000);
+    const timer = window.setInterval(() => {
+      if (!carouselPaused) setActiveBannerIndex((index) => (index + 1) % bannerImages.length);
+    }, 16000);
     return () => window.clearInterval(timer);
-  }, [bannerImages.length]);
+  }, [bannerImages.length, carouselPaused]);
 
   return (
     <main>
-      <HeroCarousel banners={bannerImages} banner={banner} activeBannerIndex={activeBannerIndex} onSelect={setActiveBannerIndex} />
+      <HeroCarousel banners={bannerImages} banner={banner} activeBannerIndex={activeBannerIndex} onSelect={setActiveBannerIndex} onHover={setCarouselPaused} />
       <FeatureCards section={homeData?.sections.featureCards} />
       <SupportModule section={homeData?.sections.supportModule} activeIndex={activeSupportIndex} onSelect={setActiveSupportIndex} onPreview={setPreviewImage} />
       <ProductCategoryGrid categories={homeData?.categories || []} />
@@ -90,7 +93,7 @@ export function HomePage() {
   );
 }
 
-export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect }: { banners: Banner[]; banner?: Banner; activeBannerIndex: number; onSelect: (index: number) => void }) {
+export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect, onHover }: { banners: Banner[]; banner?: Banner; activeBannerIndex: number; onSelect: (index: number) => void; onHover?: (paused: boolean) => void }) {
   const [videoMuted, setVideoMuted] = useState(false);
   const heroStyle = {
     aspectRatio: '1920 / 936',
@@ -98,7 +101,7 @@ export function HeroCarousel({ banners, banner, activeBannerIndex, onSelect }: {
   };
 
   return (
-    <section className={isVideoMedia(banner?.imageUrl) ? 'hero hero-video' : 'hero'} style={heroStyle}>
+    <section className={isVideoMedia(banner?.imageUrl) ? 'hero hero-video' : 'hero'} style={heroStyle} onMouseEnter={() => onHover?.(true)} onMouseLeave={() => onHover?.(false)}>
       {banner?.imageUrl && isVideoMedia(banner.imageUrl) && (
         <>
           <video className="hero-video-media" src={banner.imageUrl} autoPlay muted={videoMuted} loop playsInline />
