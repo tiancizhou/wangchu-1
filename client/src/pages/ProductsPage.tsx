@@ -19,7 +19,7 @@ export function ProductsPage() {
   }, []);
 
   useEffect(() => {
-    const query = new URLSearchParams({ page: String(page), pageSize: '12' });
+    const query = new URLSearchParams({ page: String(page), pageSize: '6' });
     if (active) query.set('category', active);
     getProducts(`?${query.toString()}`).then((data) => { setProducts(data.items); setTotal(data.total); });
   }, [active, page]);
@@ -44,7 +44,7 @@ export function ProductsPage() {
             ))}
             {products.length === 0 && <div className="empty-state">暂无产品，请在后台添加。</div>}
           </div>
-          <Pager total={total} page={page} pageSize={12} active={active} />
+          <Pager total={total} page={page} pageSize={6} active={active} />
         </section>
       </div>
       <AdvantageSections advantages={sections.advantages} benefits={sections.benefits} />
