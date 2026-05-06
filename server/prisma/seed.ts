@@ -206,6 +206,13 @@ const contentSections = [
     }
   },
   {
+    pageKey: 'home',
+    sectionKey: 'certificatePreview',
+    title: '荣誉资质',
+    subtitle: '',
+    data: { images: [] }
+  },
+  {
     pageKey: 'products',
     sectionKey: 'advantages',
     title: '加盟优势',

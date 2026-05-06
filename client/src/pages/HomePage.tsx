@@ -84,7 +84,7 @@ export function HomePage() {
       <ProductCategoryGrid categories={homeData?.categories || []} />
       <ProcessModule section={homeData?.sections.processModule} />
       <AboutPreview section={homeData?.sections.aboutPreview} companyName={homeData?.siteProfile?.companyName} />
-      <CertificatePreview images={normalizeHomeCertificateImages(homeData?.sections.certificatePreview?.data?.images)} />
+      <CertificatePreview images={normalizeHomeCertificateImages(homeData?.sections.certificatePreview?.data?.images)} title={homeData?.sections.certificatePreview?.title} />
       {previewImage && <ImagePreviewOverlay image={previewImage} onClose={() => setPreviewImage(null)} />}
     </main>
   );
@@ -265,7 +265,7 @@ export function AboutPreview({ section, companyName }: { section?: ContentSectio
   );
 }
 
-export function CertificatePreview({ images }: { images: HomeCertificateImage[] }) {
+export function CertificatePreview({ images, title }: { images: HomeCertificateImage[]; title?: string }) {
   const allItems = images.filter((image) => image.isPublished);
   const [startIndex, setStartIndex] = useState(0);
   const visibleItems = Array.from({ length: Math.min(4, allItems.length) }, (_, index) => allItems[(startIndex + index) % allItems.length]);
@@ -288,7 +288,7 @@ export function CertificatePreview({ images }: { images: HomeCertificateImage[] 
 
   return (
     <section className="section certificate-showcase-section">
-      <SectionTitle title="荣誉资质" />
+      <SectionTitle title={title || '荣誉资质'} />
       <div className="certificate-stage">
         <button className="certificate-arrow" type="button" aria-label="切换上一组荣誉资质" onClick={previousCertificates}>‹</button>
         <div className="certificate-display">

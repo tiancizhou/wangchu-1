@@ -29,12 +29,13 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       pageKey: 'home',
       title: '首页内容模块',
       description: '选择首页上的一个模块进行文字、图片和显示状态编辑。',
-      editableKeys: ['featureCards', 'supportModule', 'processModule', 'aboutPreview'],
+      editableKeys: ['featureCards', 'supportModule', 'processModule', 'aboutPreview', 'certificatePreview'],
       moduleHelp: {
-        featureCards: '显示在首页顶部服务优势区域，建议保持 4 个卡片。产品细项分类请点击上方“产品细项分类”进入分类管理；荣誉资质请点击上方“荣誉资质”进入证书管理。',
-        supportModule: '显示在“生产设计与制作”区域，用于介绍生产、检测、检验能力。',
+        featureCards: '显示在首页顶部服务优势区域，建议保持 4 个卡片。产品细项分类请点击上方”产品细项分类”进入分类管理；荣誉资质请点击上方”荣誉资质”进入证书管理。',
+        supportModule: '显示在”生产设计与制作”区域，用于介绍生产、检测、检验能力。',
         processModule: '显示在首页深色工艺区域，用于介绍制作工艺和设备能力。',
-        aboutPreview: '显示在首页“关于我们”区域，用于展示公司简介和图片。'
+        aboutPreview: '显示在首页”关于我们”区域，用于展示公司简介和图片。',
+        certificatePreview: '显示在首页”荣誉资质”区域。荣誉资质图片请在”荣誉资质”管理中上传。'
       },
       saveSuccessText: '首页内容已保存',
       saveButtonText: '保存首页内容'
@@ -107,7 +108,7 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       saveButtonText: '保存生产设计与制作',
       hideModuleSelector: true,
       hidePublishSwitch: true,
-      hideBaseSettings: true,
+      hideBaseSettings: false,
       hidePageChrome: true,
       hideEditorHeader: true
     }
@@ -131,7 +132,7 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       saveButtonText: '保存先进的制作工艺',
       hideModuleSelector: true,
       hidePublishSwitch: true,
-      hideBaseSettings: true,
+      hideBaseSettings: false,
       hidePageChrome: true,
       hideEditorHeader: true
     }

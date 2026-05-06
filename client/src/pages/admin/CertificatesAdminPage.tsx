@@ -72,7 +72,7 @@ export function CertificatesAdminPage() {
         ...(homeCertificateSection || {}),
         pageKey: 'home',
         sectionKey: 'certificatePreview',
-        title: '荣誉资质',
+        title: homeCertificateSection?.title || '荣誉资质',
         subtitle: '',
         data: { images: images.map((image, index) => ({ ...image, sortOrder: index + 1 })) },
         sortOrder: 0,

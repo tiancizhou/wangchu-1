@@ -44,7 +44,8 @@ export const sectionNames: Record<string, string> = {
   factoryDirect: '工厂直供',
   productionBlending: '生产调和详情',
   labTesting: '检测详情',
-  qualityInspection: '品质检验详情'
+  qualityInspection: '品质检验详情',
+  certificatePreview: '荣誉资质'
 };
 
 const paragraphsToText = (paragraphs?: string[]) => (paragraphs || []).join('\n\n');
