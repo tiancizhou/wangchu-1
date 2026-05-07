@@ -1,6 +1,7 @@
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import type { SortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { HolderOutlined } from '@ant-design/icons';
 import type { CSSProperties, ReactNode } from 'react';
@@ -16,13 +17,16 @@ type Props<T> = {
   getItemId: (item: T) => string;
   onReorder: (items: T[]) => void;
   renderItem: (item: T, index: number, dragHandle: DragHandleProps) => ReactNode;
+  containerStyle?: CSSProperties;
   rowStyle?: CSSProperties;
+  strategy?: SortingStrategy;
 };
 
-function Row<T>({ item, index, id, renderItem }: { item: T; index: number; id: string; renderItem: Props<T>['renderItem'] }) {
+function Row<T>({ item, index, id, renderItem, rowStyle }: { item: T; index: number; id: string; renderItem: Props<T>['renderItem']; rowStyle?: CSSProperties }) {
   const { setNodeRef, transform, transition, isDragging, setActivatorNodeRef, attributes, listeners } = useSortable({ id });
 
   const style: CSSProperties = {
+    ...rowStyle,
     transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.6 : 1
@@ -35,7 +39,7 @@ function Row<T>({ item, index, id, renderItem }: { item: T; index: number; id: s
   );
 }
 
-export function DraggableList<T>({ items, getItemId, onReorder, renderItem }: Props<T>) {
+export function DraggableList<T>({ items, getItemId, onReorder, renderItem, containerStyle, rowStyle, strategy = verticalListSortingStrategy }: Props<T>) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   function onDragEnd(event: DragEndEvent) {
@@ -51,10 +55,10 @@ export function DraggableList<T>({ items, getItemId, onReorder, renderItem }: Pr
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <SortableContext items={ids} strategy={strategy}>
+        <div style={containerStyle || { display: 'flex', flexDirection: 'column', gap: 8 }}>
           {items.map((item, index) => (
-            <Row key={getItemId(item)} item={item} index={index} id={getItemId(item)} renderItem={renderItem} />
+            <Row key={getItemId(item)} item={item} index={index} id={getItemId(item)} renderItem={renderItem} rowStyle={rowStyle} />
           ))}
         </div>
       </SortableContext>

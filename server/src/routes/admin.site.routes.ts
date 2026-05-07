@@ -6,8 +6,8 @@ import { parseJsonArray, stringifyJson } from '../utils/jsonFields.js';
 const router = Router();
 router.use(requireAdmin);
 
-function mapSiteProfile<T extends { footerLinksJson: string } | null>(profile: T) {
-  return profile ? { ...profile, footerLinks: parseJsonArray(profile.footerLinksJson, []) } : null;
+function mapSiteProfile<T extends { footerLinksJson: string; footerLogoUrl?: string } | null>(profile: T) {
+  return profile ? { ...profile, footerLogoUrl: profile.footerLogoUrl || '', footerLinks: parseJsonArray(profile.footerLinksJson, []) } : null;
 }
 
 router.get('/site-profile', async (_req, res) => {
@@ -20,6 +20,7 @@ router.put('/site-profile', async (req, res) => {
   const data = {
     companyName: body.companyName || '桔尔润（北京）润滑油有限公司',
     logoUrl: body.logoUrl || '',
+    footerLogoUrl: body.footerLogoUrl || '',
     phone: body.phone || '',
     hotline: body.hotline || '',
     address: body.address || '',

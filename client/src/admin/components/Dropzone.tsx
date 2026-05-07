@@ -20,9 +20,11 @@ type Props = {
   cropPreset?: CropPresetKey;
   cropSize?: CropSize;
   disableCrop?: boolean;
+  previewMaxHeight?: number;
+  previewWidth?: number;
 };
 
-export function Dropzone({ value, onChange, multiple = false, onMultipleChange, accept = DEFAULT_ACCEPT, maxSize = DEFAULT_MAX_SIZE, hint, cropPreset, cropSize, disableCrop = false }: Props) {
+export function Dropzone({ value, onChange, multiple = false, onMultipleChange, accept = DEFAULT_ACCEPT, maxSize = DEFAULT_MAX_SIZE, hint, cropPreset, cropSize, disableCrop = false, previewMaxHeight = 180, previewWidth }: Props) {
   const { message } = App.useApp();
   const [progress, setProgress] = useState<number | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -93,7 +95,7 @@ export function Dropzone({ value, onChange, multiple = false, onMultipleChange, 
     <div style={{ width: '100%' }}>
       {value && !multiple ? (
         <div style={{ position: 'relative', display: 'inline-block', borderRadius: 10, overflow: 'hidden', border: '1px solid #eef2f8' }}>
-          <Image src={value} alt="已上传" style={{ maxHeight: 180, objectFit: 'contain' }} />
+          <Image src={value} alt="已上传" style={{ maxHeight: previewMaxHeight, width: previewWidth, objectFit: 'contain' }} />
           <div style={{ position: 'absolute', right: 8, top: 8, display: 'flex', gap: 8 }}>
             <Upload beforeUpload={beforeUpload} customRequest={customRequest} accept={accept} showUploadList={false} multiple={false}>
               <Button size="small">替换</Button>

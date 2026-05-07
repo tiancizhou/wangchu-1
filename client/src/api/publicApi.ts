@@ -9,6 +9,7 @@ export type SiteProfile = {
   id: string;
   companyName: string;
   logoUrl: string;
+  footerLogoUrl: string;
   phone: string;
   hotline: string;
   address: string;

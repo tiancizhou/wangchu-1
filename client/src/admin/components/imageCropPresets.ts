@@ -17,7 +17,10 @@ export const IMAGE_CROP_PRESETS = {
   productDetailTop: { width: 372, height: 372, label: '产品详情页顶图' },
   productDetailMiddle: { width: 824, height: 412, label: '产品详情中间图' },
   productSpecs: { width: 824, height: 412, label: '产品参数和属性图' },
-  productDetailGallery: { width: 387, height: 245, label: '产品细节图' }
+  productDetailGallery: { width: 387, height: 245, label: '产品细节图' },
+  contactAvatar: { width: 110, height: 110, label: '联系顾问头像' },
+  headerLogo: { width: 142, height: 62, label: '顶部 Logo' },
+  footerLogo: { width: 160, height: 72, label: '页脚 Logo' }
 } as const satisfies Record<string, CropSize>;
 
 export type CropPresetKey = keyof typeof IMAGE_CROP_PRESETS;

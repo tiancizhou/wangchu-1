@@ -1,6 +1,9 @@
+import { useEffect, useRef, useState } from 'react';
 import { Button, Card, Col, Form, Input, Row, Space, Tooltip, Typography } from 'antd';
 import { BoldOutlined } from '@ant-design/icons';
+import type { TextAreaRef } from 'antd/es/input/TextArea';
 import { ConfirmButton, Dropzone, DragHandle, DraggableList, SectionCard, SectionCardGroup } from '../../admin/components';
+import { getNativeTextArea, getRichTextDraftValue, wrapTextSelection } from './richTextEditing';
 
 export type FeatureItem = { title?: string; description?: string; icon?: string; linkUrl?: string; sections?: LegalStatementSection[] };
 export type SupportTab = { title?: string; heading?: string; description?: string; imageUrl?: string; thumbnails?: string[]; linkUrl?: string; sections?: LegalStatementSection[] };
@@ -52,31 +55,38 @@ const paragraphsToText = (paragraphs?: string[]) => (paragraphs || []).join('\n\
 const textToParagraphs = (value: string) => value.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
 
 function RichTextArea({ value, onChange, rows = 10, placeholder }: { value: string; onChange: (value: string) => void; rows?: number; placeholder?: string }) {
-  const ref = Input.TextArea;
+  const textareaRef = useRef<TextAreaRef | null>(null);
+  const [focused, setFocused] = useState(false);
+  const [draftValue, setDraftValue] = useState(value);
+  const displayValue = getRichTextDraftValue(value, draftValue, focused);
+
+  useEffect(() => {
+    if (!focused) setDraftValue(value);
+  }, [focused, value]);
+
+  function updateValue(nextValue: string) {
+    setDraftValue(nextValue);
+    onChange(nextValue);
+  }
 
   function wrapSelection(wrapper: string) {
-    const textarea = document.activeElement as HTMLTextAreaElement;
-    if (!textarea || textarea.tagName !== 'TEXTAREA') return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = value.slice(start, end);
-    if (!selected) return;
-    const before = value.slice(0, start);
-    const after = value.slice(end);
-    const newValue = `${before}${wrapper}${selected}${wrapper}${after}`;
-    onChange(newValue);
+    const textarea = getNativeTextArea(textareaRef.current);
+    if (!textarea) return;
+    const wrapped = wrapTextSelection(displayValue, textarea.selectionStart, textarea.selectionEnd, wrapper);
+    if (!wrapped) return;
+    updateValue(wrapped.value);
     requestAnimationFrame(() => {
       textarea.focus();
-      textarea.setSelectionRange(start, end + wrapper.length * 2);
+      textarea.setSelectionRange(wrapped.selectionStart, wrapped.selectionEnd);
     });
   }
 
   return (
     <div>
       <Space style={{ marginBottom: 4 }}>
-        <Tooltip title="加粗选中文字"><Button size="small" icon={<BoldOutlined />} onClick={() => wrapSelection('**')} /></Tooltip>
+        <Tooltip title="加粗选中文字"><Button size="small" icon={<BoldOutlined />} onMouseDown={(event) => event.preventDefault()} onClick={() => wrapSelection('**')} /></Tooltip>
       </Space>
-      <Input.TextArea rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+      <Input.TextArea ref={textareaRef} rows={rows} value={displayValue} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} onChange={(event) => updateValue(event.target.value)} placeholder={placeholder} />
     </div>
   );
 }
@@ -278,7 +288,7 @@ export function LegalStatementEditor({ data, onChange }: { data: LegalStatementD
   return (
     <Card className="legal-statement-admin-card" title="正文内容">
       <Typography.Paragraph type="secondary">正文按关于我们页面的富文本格式展示。每段正文之间请空一行。</Typography.Paragraph>
-      <Form.Item label="正文内容"><Input.TextArea rows={12} value={paragraphsToText(paragraphs)} onChange={(event) => onChange({ sections: [{ paragraphs: textToParagraphs(event.target.value) }] })} placeholder="每段之间请空一行" /></Form.Item>
+      <Form.Item label="正文内容"><RichTextArea rows={12} value={paragraphsToText(paragraphs)} onChange={(value) => onChange({ sections: [{ paragraphs: textToParagraphs(value) }] })} placeholder="每段之间请空一行，选中文字后可点击 B 加粗" /></Form.Item>
     </Card>
   );
 }
@@ -327,7 +337,7 @@ export function ContactPanelEditor({ data, onChange }: { data: ContactPanelData;
               <Col xs={24} md={12}><Form.Item label="顾问姓名"><Input value={data.consultantName || ''} placeholder="例如：王经理" onChange={(e) => onChange({ consultantName: e.target.value })} /></Form.Item></Col>
               <Col xs={24} md={12}><Form.Item label="顾问职位"><Input value={data.consultantTitle || ''} placeholder="例如：渠道合作顾问" onChange={(e) => onChange({ consultantTitle: e.target.value })} /></Form.Item></Col>
             </Row>
-            <Form.Item label="顾问头像"><Dropzone value={data.consultantAvatarUrl} onChange={(consultantAvatarUrl) => onChange({ consultantAvatarUrl })} hint="建议上传正方形头像，前台会裁切为圆形展示。" /></Form.Item>
+            <Form.Item label="顾问头像"><Dropzone value={data.consultantAvatarUrl} cropPreset="contactAvatar" onChange={(consultantAvatarUrl) => onChange({ consultantAvatarUrl })} hint="建议上传正方形头像，前台会裁切为圆形展示。" /></Form.Item>
             <Form.Item label="顾问介绍"><Input.TextArea rows={6} value={data.description || ''} placeholder="请输入展示在渠道合作页面的顾问介绍" onChange={(e) => onChange({ description: e.target.value })} /></Form.Item>
             <Form.Item label="按钮文字"><Input value={data.buttonText || ''} placeholder="例如：提交合作咨询" onChange={(e) => onChange({ buttonText: e.target.value })} /></Form.Item>
           </Form>

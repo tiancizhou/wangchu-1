@@ -9,7 +9,7 @@ type JsonRecord = Record<string, unknown>;
 type FooterLink = { label: string; url: string };
 
 function mapSiteProfile(profile: Awaited<ReturnType<typeof getSiteProfile>>) {
-  return profile ? { ...profile, footerLinks: parseJsonArray<FooterLink>(profile.footerLinksJson, []) } : null;
+  return profile ? { ...profile, footerLogoUrl: profile.footerLogoUrl || '', footerLinks: parseJsonArray<FooterLink>(profile.footerLinksJson, []) } : null;
 }
 
 function mapProduct(product: {

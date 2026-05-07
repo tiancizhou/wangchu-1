@@ -20,6 +20,7 @@ model SiteProfile {
   id             String   @id @default(cuid())
   companyName    String
   logoUrl        String   @default("")
+  footerLogoUrl  String   @default("")
   phone          String   @default("")
   hotline        String   @default("")
   address        String   @default("")

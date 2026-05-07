@@ -6,6 +6,7 @@ const fallbackProfile: SiteProfile = {
   id: '',
   companyName: '桔尔润（北京）润滑油有限公司',
   logoUrl: '',
+  footerLogoUrl: '',
   phone: '0519-68288220',
   hotline: '0519-68288220',
   address: '北京市大兴区科创五街38号院',
@@ -71,6 +72,7 @@ export function PublicLayout() {
   const [profile, setProfile] = useState<SiteProfile>(fallbackProfile);
   const [navigation, setNavigation] = useState<NavigationItem[]>(fallbackNavigation);
   const visibleFooterLinks = (profile.footerLinks?.length ? profile.footerLinks : fallbackProfile.footerLinks || []).filter((link) => link.label).slice(0, 4);
+  const footerLogoUrl = profile.footerLogoUrl || profile.logoUrl;
 
   useEffect(() => {
     const viewport = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
@@ -104,8 +106,8 @@ export function PublicLayout() {
         <section className="footer-profile">
           <div className="footer-profile-inner">
             <div className="brand footer-brand">
-              {profile.logoUrl
-                ? <span className="footer-logo-frame"><img className="brand-logo brand-logo-full" src={profile.logoUrl} alt={profile.companyName} /></span>
+              {footerLogoUrl
+                ? <span className="footer-logo-frame"><img className="brand-logo brand-logo-full" src={footerLogoUrl} alt={profile.companyName} /></span>
                 : <><span className="brand-mark">K</span><span><b>Kronprins</b><small>王储</small></span></>}
             </div>
             <div className="footer-company">

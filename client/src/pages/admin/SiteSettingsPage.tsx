@@ -11,6 +11,7 @@ const defaultFooterLinks: FooterLink[] = Array.from({ length: maxFooterLinks }, 
 const emptyProfile: Partial<SiteProfile> = {
   companyName: '',
   logoUrl: '',
+  footerLogoUrl: '',
   phone: '',
   hotline: '',
   address: '',
@@ -148,9 +149,13 @@ export function SiteSettingsPage() {
             </Col>
             <Col xs={24} xl={8}>
               <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                <Card title="公司 Logo">
-                  <Typography.Paragraph type="secondary">建议使用透明背景 PNG 或 WebP 图片。</Typography.Paragraph>
-                  <Dropzone value={profile.logoUrl} onChange={(url) => setField('logoUrl', url)} />
+                <Card title="顶部 Logo">
+                  <Typography.Paragraph type="secondary">建议使用透明背景 PNG 或 WebP 图片，上传前裁剪为 142 × 62。</Typography.Paragraph>
+                  <Dropzone value={profile.logoUrl} cropPreset="headerLogo" onChange={(url) => setField('logoUrl', url)} />
+                </Card>
+                <Card title="页脚 Logo">
+                  <Typography.Paragraph type="secondary">建议使用透明背景 PNG 或 WebP 图片，上传前裁剪为 160 × 72。</Typography.Paragraph>
+                  <Dropzone value={profile.footerLogoUrl} cropPreset="footerLogo" onChange={(url) => setField('footerLogoUrl', url)} />
                 </Card>
                 <Card title="页面预览">
                   <Typography.Title level={5}>{profile.companyName || '公司名称'}</Typography.Title>

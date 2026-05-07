@@ -1,0 +1,1 @@
+ALTER TABLE "SiteProfile" ADD COLUMN "footerLogoUrl" TEXT NOT NULL DEFAULT '';
