@@ -374,5 +374,28 @@
 .public-site .about-page .about-statement-section{position:static;margin:0}
 .public-site .about-page .about-statement-section p{margin:0 0 18px;text-indent:2em;text-align:justify;text-align-last:auto}
 @media(max-width:900px){.public-site .about-page .about-content{padding:36px 32px 42px}.public-site .about-page .about-rich-text h1{margin:0 0 28px;font-size:26px}.public-site .about-page .about-page-image{width:100%;margin:0 auto 28px}}
+/* technical support page */
+.public-site .technical-support-page{background:linear-gradient(180deg,#f4f5f7 0,#fff 100%);padding:32px 0 82px;color:#111}
+.public-site .technical-support-page .breadcrumb{width:1200px;max-width:calc(100% - 112px);margin:0 auto 24px;font-size:14px;color:#555}
+.public-site .technical-support-sheet{width:1200px;max-width:calc(100% - 112px);background:#fff;box-shadow:0 18px 42px rgba(15,23,42,.08);overflow:hidden}
+.public-site .technical-support-hero{display:block;width:100%;height:340px;object-fit:cover;object-position:center;background:#eef7fb}
+.public-site .technical-support-sheet h1{height:44px;line-height:44px;margin:0;padding:0 26px;font-size:22px;font-weight:700;border-top:1px solid #edf1f7;border-bottom:1px solid #d8e3f5;background:linear-gradient(90deg,#fff,#f7fbff);color:#101828}
+.public-site .support-table{display:grid;border-left:1px solid #d8e3f5;border-top:1px solid #d8e3f5;background:#fff}
+.public-site .support-table article{min-width:0;border-right:1px solid #d8e3f5;border-bottom:1px solid #d8e3f5;background:#fff;text-align:center}
+.public-site .support-table h2,.public-site .support-table h3{height:38px;line-height:38px;margin:0;font-size:15px;font-weight:700;border-bottom:1px solid #d8e3f5;background:#f7fbff;color:#111827}
+.public-site .support-table p{min-height:88px;line-height:1.72;margin:0;padding:16px 18px;font-size:13px;color:#1f2937;text-align:left}
+.public-site .support-table-centers{grid-template-columns:repeat(2,minmax(0,1fr))}
+.public-site .support-table-centers p{min-height:78px}
+.public-site .support-table-technical{grid-template-columns:repeat(3,minmax(0,1fr))}
+.public-site .support-table-technical p{text-align:left}
+.public-site .support-service-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;padding:18px 20px 24px;background:#fff;border-top:1px solid #e5edf8}
+.public-site .support-service-grid article{min-width:0;border:1px solid #d8e3f5;border-radius:8px;background:#fff;overflow:hidden}
+.public-site .support-service-grid h2{height:36px;line-height:36px;margin:0;padding:0 8px;font-size:14px;font-weight:700;background:#f7fbff;border-bottom:1px solid #d8e3f5;color:#111827;text-align:center;white-space:nowrap}
+.public-site .support-service-grid dl{margin:0;padding:10px 8px 12px;font-size:12px;line-height:1.45;color:#1f2937}
+.public-site .support-service-grid dl div{display:block;padding:4px 0;border-bottom:1px dashed #edf1f7}
+.public-site .support-service-grid dl div:last-child{border-bottom:0}
+.public-site .support-service-grid dt{display:block;margin-bottom:2px;color:#667085;font-weight:600}
+.public-site .support-service-grid dd{margin:0;word-break:break-word}
+@media(max-width:900px){.public-site .technical-support-page{padding:24px 0 52px}.public-site .technical-support-page .breadcrumb,.public-site .technical-support-sheet{max-width:calc(100% - 48px)}.public-site .technical-support-hero{height:auto;aspect-ratio:12/5}.public-site .support-table-centers,.public-site .support-table-technical{grid-template-columns:1fr}.public-site .support-service-grid{grid-template-columns:1fr;padding:18px}.public-site .technical-support-sheet h1{padding:0 18px;font-size:20px}}
 /* admin legal statement editor */
 .legal-statement-admin-card .ant-form-item{max-width:1180px}.legal-statement-admin-card textarea{line-height:1.8}

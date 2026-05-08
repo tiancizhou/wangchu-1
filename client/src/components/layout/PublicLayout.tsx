@@ -38,12 +38,13 @@ const publicViewport = 'width=1200';
 const fallbackNavigation: NavigationItem[] = [
   { id: 'home', label: '首页', url: '/', sortOrder: 1, isVisible: true, openInNewTab: false },
   { id: 'products', label: '产品中心', url: '/products', sortOrder: 2, isVisible: true, openInNewTab: false },
-  { id: 'support', label: '技术支持', url: '/#support', sortOrder: 3, isVisible: true, openInNewTab: false },
+  { id: 'support', label: '技术支持', url: '/support', sortOrder: 3, isVisible: true, openInNewTab: false },
   { id: 'consult', label: '渠道合作', url: '/consult', sortOrder: 4, isVisible: true, openInNewTab: false },
   { id: 'about', label: '关于我们', url: '/about', sortOrder: 5, isVisible: true, openInNewTab: false }
 ];
 
 function normalizeNavigationItem(item: NavigationItem): NavigationItem {
+  if (item.label === '技术支持' && item.url === '/#support') return { ...item, url: '/support' };
   return item.label === '关于我们' && item.url === '/#about' ? { ...item, url: '/about' } : item;
 }
 

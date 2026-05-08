@@ -35,6 +35,7 @@ const menuGroups: { key: string; label: string; items: MenuEntry[] }[] = [
       { key: '/admin/banners', label: '轮播图管理', icon: <PictureOutlined /> },
       { key: '/admin/page/enterprise', label: '企业管理模块', icon: <AppstoreOutlined /> },
       { key: '/admin/page/support', label: '生产设计与制作', icon: <ToolOutlined /> },
+      { key: '/admin/page/support-secondary', label: '技术支持二级页面', icon: <ToolOutlined /> },
       { key: '/admin/page/process', label: '先进的制作工艺', icon: <BulbOutlined /> },
       { key: '/admin/page/about', label: '关于我们', icon: <TeamOutlined /> },
       { key: '/admin/page/consult', label: '渠道合作', icon: <MessageOutlined /> },

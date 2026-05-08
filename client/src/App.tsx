@@ -15,6 +15,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage';
 import { ProcessDetailPage } from './pages/ProcessDetailPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { SupportDetailPage } from './pages/SupportDetailPage';
+import { SupportPage } from './pages/SupportPage';
 import { BannersAdminPage } from './pages/admin/BannersAdminPage';
 import { CertificatesAdminPage } from './pages/admin/CertificatesAdminPage';
 import { ConsultationsAdminPage } from './pages/admin/ConsultationsAdminPage';
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: 'about', element: <AboutPage /> },
       { path: 'features/:slug', element: <FeatureDetailPage /> },
       { path: 'benefits/:slug', element: <BenefitDetailPage /> },
+      { path: 'support', element: <SupportPage /> },
       { path: 'support/:slug', element: <SupportDetailPage /> },
       { path: 'process/:slug', element: <ProcessDetailPage /> }
     ]

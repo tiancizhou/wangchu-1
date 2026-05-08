@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { App, Alert, Button, Card, Col, Form, Input, List, Row, Space, Switch, Tag, Typography } from 'antd';
 import { adminContentSections, saveContentSection } from '../../api/adminApi';
-import { AboutEditor, ContactInfoEditor, ContactPanelEditor, FeatureCardsEditor, GenericItemsEditor, LegalStatementEditor, ProcessModuleEditor, sectionNames, SupportModuleEditor, type AboutData, type ContactInfoData, type ContactPanelData, type FeatureItem, type LegalStatementData, type ProcessItem, type SectionData, type SupportTab } from '../../components/admin/ContentSectionEditors';
+import { AboutEditor, ContactInfoEditor, ContactPanelEditor, FeatureCardsEditor, GenericItemsEditor, LegalStatementEditor, ProcessModuleEditor, sectionNames, SupportModuleEditor, SupportPageEditor, type AboutData, type ContactInfoData, type ContactPanelData, type FeatureItem, type LegalStatementData, type ProcessItem, type SectionData, type SupportPageData, type SupportTab } from '../../components/admin/ContentSectionEditors';
 import type { ContentSection } from '../../api/publicApi';
 import { PageHeader } from '../../admin/components';
 
@@ -183,6 +183,7 @@ export function ContentSectionsAdminPage({ config = homeContentConfig }: { confi
                   {!config.hideBaseSettings && <Card title="模块基础设置"><Row gutter={16}><Col xs={24} md={12}><Form.Item label="模块标题"><Input value={editing.title || ''} onChange={(e) => updateEditing({ ...editing, title: e.target.value })} /></Form.Item></Col><Col xs={24} md={12}><Form.Item label="模块副标题"><Input value={editing.subtitle || ''} onChange={(e) => updateEditing({ ...editing, subtitle: e.target.value })} /></Form.Item></Col></Row></Card>}
                   {editing.sectionKey === 'featureCards' && <FeatureCardsEditor items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} mode={config.featureCardsEditorMode} />}
                   {editing.sectionKey === 'supportModule' && <SupportModuleEditor tabs={editing.data.tabs || []} onUpdate={updateSupportTab} onChange={(tabs) => setData({ tabs })} />}
+                  {editing.sectionKey === 'supportPage' && <SupportPageEditor data={editing.data as SupportPageData} onChange={setData} />}
                   {editing.sectionKey === 'processModule' && <ProcessModuleEditor items={(editing.data.items || []) as ProcessItem[]} backgroundImageUrl={editing.data.backgroundImageUrl} onUpdate={updateProcessItem} onChange={(items) => setData({ items })} onBackgroundChange={(backgroundImageUrl) => setData({ backgroundImageUrl })} />}
                   {editing.sectionKey === 'aboutPreview' && <AboutEditor data={editing.data as AboutData} onChange={setData} />}
                   {editing.sectionKey === 'advantages' && <GenericItemsEditor title="加盟优势" help="这些内容显示在产品中心的合作优势区域。" items={(editing.data.items || []) as FeatureItem[]} onUpdate={updateFeature} onChange={(items) => setData({ items })} />}

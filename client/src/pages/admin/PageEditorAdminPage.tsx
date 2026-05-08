@@ -113,6 +113,31 @@ const pageConfigs: Record<string, PageEditorConfig> = {
       hideEditorHeader: true
     }
   },
+  'support-secondary': {
+    title: '技术支持二级页面',
+    publicLocation: '/support',
+    description: '',
+    tools: [],
+    hideHeroDetails: true,
+    contentConfig: {
+      pageKey: 'support',
+      title: '技术支持二级页面',
+      description: '',
+      editableKeys: ['supportPage'],
+      moduleHelp: {
+        supportPage: '显示在前台“技术支持”二级页面，用于维护顶部图、技术支持表格和售后服务站。'
+      },
+      loadingText: '技术支持二级页面加载中...',
+      emptyText: '还没有技术支持二级页面内容，请先运行初始化数据。',
+      saveSuccessText: '技术支持二级页面已保存',
+      saveButtonText: '保存技术支持二级页面',
+      hideModuleSelector: true,
+      hidePublishSwitch: true,
+      hideBaseSettings: false,
+      hidePageChrome: true,
+      hideEditorHeader: true
+    }
+  },
   process: {
     title: '先进的制作工艺',
     publicLocation: '/#process',

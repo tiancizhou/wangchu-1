@@ -3,6 +3,7 @@ import { Button, Card, Col, Form, Input, Row, Space, Tooltip, Typography } from 
 import { BoldOutlined } from '@ant-design/icons';
 import type { TextAreaRef } from 'antd/es/input/TextArea';
 import { ConfirmButton, Dropzone, DragHandle, DraggableList, SectionCard, SectionCardGroup } from '../../admin/components';
+import { getSupportPageContent } from '../../pages/supportPageContent';
 import { getNativeTextArea, getRichTextDraftValue, wrapTextSelection } from './richTextEditing';
 
 export type FeatureItem = { title?: string; description?: string; icon?: string; linkUrl?: string; sections?: LegalStatementSection[] };
@@ -14,6 +15,15 @@ export type ContactInfoItem = { label?: string; value?: string };
 export type ContactInfoData = { body?: string; mapImageUrl?: string; items?: ContactInfoItem[] };
 export type LegalStatementSection = { heading?: string; paragraphs?: string[] };
 export type LegalStatementData = { sections?: LegalStatementSection[] };
+export type SupportPageCenter = { title?: string; description?: string };
+export type SupportPageTechnicalColumn = { title?: string; description?: string };
+export type SupportPageServiceStation = { station?: string; contact?: string; phone?: string; address?: string; areas?: string };
+export type SupportPageData = {
+  heroImageUrl?: string;
+  centers?: SupportPageCenter[];
+  technicalColumns?: SupportPageTechnicalColumn[];
+  serviceStations?: SupportPageServiceStation[];
+};
 export type SectionData = {
   items?: FeatureItem[] | ProcessItem[] | ContactInfoItem[];
   tabs?: SupportTab[];
@@ -29,6 +39,10 @@ export type SectionData = {
   description?: string;
   buttonText?: string;
   industryOptions?: string[];
+  heroImageUrl?: string;
+  centers?: SupportPageCenter[];
+  technicalColumns?: SupportPageTechnicalColumn[];
+  serviceStations?: SupportPageServiceStation[];
 };
 
 export const sectionNames: Record<string, string> = {
@@ -48,7 +62,8 @@ export const sectionNames: Record<string, string> = {
   productionBlending: '生产调和详情',
   labTesting: '检测详情',
   qualityInspection: '品质检验详情',
-  certificatePreview: '荣誉资质'
+  certificatePreview: '荣誉资质',
+  supportPage: '技术支持二级页面'
 };
 
 const paragraphsToText = (paragraphs?: string[]) => (paragraphs || []).join('\n\n');
@@ -171,6 +186,84 @@ export function SupportModuleEditor({ tabs, onUpdate, onChange }: { tabs: Suppor
       </SectionCardGroup>
       {tabs.length === 0 && <Card><Typography.Text type="secondary">还没有生产设计栏目，请点击“新增栏目”。</Typography.Text></Card>}
     </div>
+  );
+}
+
+export function SupportPageEditor({ data, onChange }: { data: SupportPageData; onChange: (patch: Partial<SectionData>) => void }) {
+  const mergedData = getSupportPageContent(data);
+  const centers = mergedData.centers;
+  const technicalColumns = mergedData.technicalColumns;
+  const serviceStations = mergedData.serviceStations;
+
+  function updateCenter(index: number, patch: Partial<SupportPageCenter>) {
+    const next = [...centers];
+    next[index] = { ...next[index], ...patch };
+    onChange({ centers: next });
+  }
+
+  function updateTechnicalColumn(index: number, patch: Partial<SupportPageTechnicalColumn>) {
+    const next = [...technicalColumns];
+    next[index] = { ...next[index], ...patch };
+    onChange({ technicalColumns: next });
+  }
+
+  function updateServiceStation(index: number, patch: Partial<SupportPageServiceStation>) {
+    const next = [...serviceStations];
+    next[index] = { ...next[index], ...patch };
+    onChange({ serviceStations: next });
+  }
+
+  return (
+    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+      <Card title="顶部科技感图片"><Dropzone value={mergedData.heroImageUrl} onChange={(heroImageUrl) => onChange({ heroImageUrl })} /></Card>
+      <Card title="技术支持：研发中心与质量中心">
+        <Row gutter={[16, 16]}>
+          {centers.map((center, index) => (
+            <Col xs={24} lg={12} key={index}>
+              <Card size="small" title={center.title || `中心 ${index + 1}`}>
+                <Form layout="vertical">
+                  <Form.Item label="标题"><Input value={center.title || ''} onChange={(event) => updateCenter(index, { title: event.target.value })} /></Form.Item>
+                  <Form.Item label="说明文字"><Input.TextArea rows={5} value={center.description || ''} onChange={(event) => updateCenter(index, { description: event.target.value })} /></Form.Item>
+                </Form>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Card>
+      <Card title="技术支持：六个栏目">
+        <Row gutter={[16, 16]}>
+          {technicalColumns.map((column, index) => (
+            <Col xs={24} md={12} xl={8} key={index}>
+              <Card size="small" title={column.title || `栏目 ${index + 1}`}>
+                <Form layout="vertical">
+                  <Form.Item label="标题"><Input value={column.title || ''} onChange={(event) => updateTechnicalColumn(index, { title: event.target.value })} /></Form.Item>
+                  <Form.Item label="说明文字"><Input.TextArea rows={4} value={column.description || ''} onChange={(event) => updateTechnicalColumn(index, { description: event.target.value })} /></Form.Item>
+                </Form>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Card>
+      <Card title="售后支持：七个服务站">
+        <Row gutter={[16, 16]}>
+          {serviceStations.map((station, index) => (
+            <Col xs={24} lg={12} xl={8} key={index}>
+              <Card size="small" title={station.station || `服务站 ${index + 1}`}>
+                <Form layout="vertical">
+                  <Form.Item label="服务站名称"><Input value={station.station || ''} onChange={(event) => updateServiceStation(index, { station: event.target.value })} /></Form.Item>
+                  <Row gutter={12}>
+                    <Col span={12}><Form.Item label="联系人"><Input value={station.contact || ''} onChange={(event) => updateServiceStation(index, { contact: event.target.value })} /></Form.Item></Col>
+                    <Col span={12}><Form.Item label="电话"><Input value={station.phone || ''} onChange={(event) => updateServiceStation(index, { phone: event.target.value })} /></Form.Item></Col>
+                  </Row>
+                  <Form.Item label="地址"><Input value={station.address || ''} onChange={(event) => updateServiceStation(index, { address: event.target.value })} /></Form.Item>
+                  <Form.Item label="覆盖区域"><Input.TextArea rows={2} value={station.areas || ''} onChange={(event) => updateServiceStation(index, { areas: event.target.value })} /></Form.Item>
+                </Form>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Card>
+    </Space>
   );
 }
 

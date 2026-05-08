@@ -21,6 +21,7 @@ const contentEntries: Entry[] = [
   { to: '/admin/banners', title: '轮播图管理', description: '上传和排序首页顶部展示的图片、动图或视频。', icon: <PictureOutlined /> },
   { to: '/admin/page/enterprise', title: '企业管理模块', description: '编辑首页企业管理模块中的卡片、图标、说明和跳转入口。', icon: <AppstoreOutlined /> },
   { to: '/admin/page/support', title: '生产设计与制作', description: '编辑生产设计与制作区域的栏目、主图、说明和轮播图片。', icon: <ToolOutlined /> },
+  { to: '/admin/page/support-secondary', title: '技术支持二级页面', description: '编辑技术支持二级页面的顶部图片、技术支持表格和售后服务站信息。', icon: <ToolOutlined /> },
   { to: '/admin/page/process', title: '先进的制作工艺', description: '编辑先进的制作工艺区域的背景图、项目图片和说明。', icon: <BulbOutlined /> },
   { to: '/admin/page/about', title: '关于我们', description: '编辑首页关于我们区域的公司简介和展示图片。', icon: <TeamOutlined /> },
   { to: '/admin/page/consult', title: '渠道合作', description: '编辑渠道合作咨询页的顾问信息、行业选项和引导文案。', icon: <MessageOutlined /> },
