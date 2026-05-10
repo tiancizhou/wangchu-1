@@ -7,7 +7,8 @@ const fallbackCategories = ['汽油机油', '柴油机油', '工业油品', '导
 
 type FeatureCard = { title?: string; description?: string; icon?: string; linkUrl?: string };
 type SupportTab = { title?: string; imageUrl?: string; heading?: string; description?: string; thumbnails?: string[]; linkUrl?: string };
-type ProcessItem = { title?: string; description?: string; imageUrl?: string; galleryImages?: string[]; linkUrl?: string };
+type ProcessGalleryImage = string | { imageUrl?: string; title?: string };
+type ProcessItem = { title?: string; description?: string; imageUrl?: string; galleryImages?: ProcessGalleryImage[]; linkUrl?: string };
 type ImagePreview = { url: string; title: string };
 
 const featureDetailLinks: Record<string, string> = {
@@ -225,6 +226,15 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
   const activeDetailLink = processDetailLink(active, activeIndex);
   const activeGalleryImages = active?.galleryImages?.length ? active.galleryImages : active?.imageUrl ? [active.imageUrl] : [];
 
+  function getGalleryImageUrl(image: ProcessGalleryImage) {
+    return typeof image === 'string' ? image : image.imageUrl || '';
+  }
+
+  function getGalleryImageTitle(image: ProcessGalleryImage, fallbackTitle: string) {
+    if (typeof image === 'string') return fallbackTitle;
+    return image.title || fallbackTitle;
+  }
+
   useEffect(() => {
     setActiveIndex(0);
   }, [items.length]);
@@ -243,8 +253,10 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
         <div className="factory-gallery-title"><span>{active?.title}</span></div>
         <div className="factory-thumb-grid">
           {Array.from({ length: 4 }).map((_, index) => {
-            const imageUrl = activeGalleryImages[index];
-            const title = active?.title || '先进的制作工艺';
+            const galleryImage = activeGalleryImages[index];
+            const fallbackTitle = active?.title || '先进的制作工艺';
+            const imageUrl = galleryImage ? getGalleryImageUrl(galleryImage) : '';
+            const title = galleryImage ? getGalleryImageTitle(galleryImage, fallbackTitle) : fallbackTitle;
             return (
               imageUrl ? (
                 <Link className={index === 0 ? 'active' : ''} to={activeDetailLink} key={`${title}-gallery-${index}-${imageUrl}`}>
@@ -252,9 +264,9 @@ export function ProcessModule({ section }: { section?: ContentSection }) {
                   <span>{title}</span>
                 </Link>
               ) : (
-                <button className={index === 0 ? 'active' : ''} type="button" disabled key={`${title}-gallery-${index}-empty`}>
+                <button className={index === 0 ? 'active' : ''} type="button" disabled key={`${fallbackTitle}-gallery-${index}-empty`}>
                   <div className={`factory-thumb-fallback factory-thumb-${index + 1}`} />
-                  <span>{title}</span>
+                  <span>{fallbackTitle}</span>
                 </button>
               )
             );

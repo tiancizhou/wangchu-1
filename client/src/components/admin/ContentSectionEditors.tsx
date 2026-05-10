@@ -8,7 +8,8 @@ import { getNativeTextArea, getRichTextDraftValue, wrapTextSelection } from './r
 
 export type FeatureItem = { title?: string; description?: string; icon?: string; linkUrl?: string; sections?: LegalStatementSection[] };
 export type SupportTab = { title?: string; heading?: string; description?: string; imageUrl?: string; thumbnails?: string[]; linkUrl?: string; sections?: LegalStatementSection[] };
-export type ProcessItem = { title?: string; description?: string; imageUrl?: string; galleryImages?: string[]; linkUrl?: string; sections?: LegalStatementSection[] };
+export type ProcessGalleryImage = string | { imageUrl?: string; title?: string };
+export type ProcessItem = { title?: string; description?: string; imageUrl?: string; galleryImages?: ProcessGalleryImage[]; linkUrl?: string; sections?: LegalStatementSection[] };
 export type AboutData = { imageUrl?: string; body?: string; linkUrl?: string };
 export type ContactPanelData = { consultantName?: string; consultantTitle?: string; consultantAvatarUrl?: string; description?: string; buttonText?: string; industryOptions?: string[] };
 export type ContactInfoItem = { label?: string; value?: string };
@@ -270,6 +271,19 @@ export function SupportPageEditor({ data, onChange }: { data: SupportPageData; o
 export function ProcessModuleEditor({ items, backgroundImageUrl, onUpdate, onChange, onBackgroundChange }: { items: ProcessItem[]; backgroundImageUrl?: string; onUpdate: (index: number, patch: Partial<ProcessItem>) => void; onChange: (items: ProcessItem[]) => void; onBackgroundChange: (url: string) => void }) {
   const canAddItem = items.length < 4;
 
+  function getGalleryImageUrl(image: ProcessGalleryImage) {
+    return typeof image === 'string' ? image : image.imageUrl || '';
+  }
+
+  function getGalleryImageTitle(image: ProcessGalleryImage) {
+    return typeof image === 'string' ? '' : image.title || '';
+  }
+
+  function updateGalleryImage(itemIndex: number, galleryIndex: number, patch: Partial<Exclude<ProcessGalleryImage, string>>) {
+    const galleryImages = items[itemIndex]?.galleryImages || [];
+    onUpdate(itemIndex, { galleryImages: galleryImages.map((image, imageIndex) => imageIndex === galleryIndex ? { imageUrl: getGalleryImageUrl(image), title: getGalleryImageTitle(image), ...patch } : image) });
+  }
+
   function addItem() {
     if (!canAddItem) return;
     const defaultLinks = ['/process/filling-line', '/process/equipment-management', '/process/equipment', '/process/warehouse'];
@@ -289,8 +303,11 @@ export function ProcessModuleEditor({ items, backgroundImageUrl, onUpdate, onCha
                 <Space direction="vertical" style={{ width: '100%' }} size={16}>
                   <Card title="主图"><Dropzone value={item.imageUrl} cropPreset="processMain" onChange={(url) => onUpdate(index, { imageUrl: url })} /></Card>
                   <Card title="底部轮播图">
-                    <Dropzone value="" multiple cropPreset="processGallery" onChange={() => {}} onMultipleChange={(urls) => onUpdate(index, { galleryImages: [...(item.galleryImages || []), ...urls].slice(0, 4) })} hint="每个项目最多设置 4 张底部轮播图，上传前裁剪为 275 × 160" />
-                    <Row gutter={[8, 8]} style={{ marginTop: 12 }}>{(item.galleryImages || []).map((url, galleryIndex) => <Col span={12} key={`${url}-${galleryIndex}`}><Card size="small" cover={<img src={url} alt="底部轮播图" style={{ width: '100%', aspectRatio: '275 / 160', objectFit: 'cover' }} />} actions={[<Button type="link" danger onClick={() => onUpdate(index, { galleryImages: (item.galleryImages || []).filter((_, imageIndex) => imageIndex !== galleryIndex) })}>移除图片</Button>]} /></Col>)}</Row>
+                    <Dropzone value="" multiple cropPreset="processGallery" onChange={() => {}} onMultipleChange={(urls) => onUpdate(index, { galleryImages: [...(item.galleryImages || []), ...urls.map((imageUrl) => ({ imageUrl, title: item.title || '' }))].slice(0, 4) })} hint="每个项目最多设置 4 张底部轮播图，上传前裁剪为 275 × 160" />
+                    <Row gutter={[8, 8]} style={{ marginTop: 12 }}>{(item.galleryImages || []).map((image, galleryIndex) => {
+                      const imageUrl = getGalleryImageUrl(image);
+                      return <Col span={12} key={`${imageUrl}-${galleryIndex}`}><Card size="small" cover={<img src={imageUrl} alt="底部轮播图" style={{ width: '100%', aspectRatio: '275 / 160', objectFit: 'cover' }} />} actions={[<Button type="link" danger onClick={() => onUpdate(index, { galleryImages: (item.galleryImages || []).filter((_, imageIndex) => imageIndex !== galleryIndex) })}>移除图片</Button>]}><Form.Item label="小标题"><Input value={getGalleryImageTitle(image)} placeholder={item.title || '请输入小标题'} onChange={(event) => updateGalleryImage(index, galleryIndex, { title: event.target.value })} /></Form.Item></Card></Col>;
+                    })}</Row>
                     <Typography.Text type="secondary">已设置 {(item.galleryImages || []).length}/4 张底部轮播图。</Typography.Text>
                   </Card>
                 </Space>
